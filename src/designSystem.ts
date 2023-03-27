@@ -5,7 +5,8 @@ import { Molecules } from "./molecules/molecules";
 import { Organisms } from "./organisms/organisms";
 import { Code } from "./code/code";
 import { Shade } from "./common/shade";
-import { IThemeBuilder, IDesignSystem, INode, IVarGroup } from "./interfaces";
+import { Property } from "./common/props";
+import { IThemeBuilder, IDesignSystem, INode, IVarGroup, IProperty } from "./interfaces";
 import { Logger } from "./util/logger";
 
 const log = new Logger("ds");
@@ -70,6 +71,12 @@ export class DesignSystem extends Node implements IDesignSystem {
 
     public getCSSVarGroup(node: INode): IVarGroup {
         return this.code.cssGenerator.getVarGroup(node.key);
+    }
+
+    public listProperties(): IProperty[] {
+        const props: IProperty[] = [];
+        this._addProperties(props);
+        return props;
     }
 
     public async store() {

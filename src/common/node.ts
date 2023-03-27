@@ -229,6 +229,12 @@ export class Node implements INode {
         }
     }
 
+    protected _addProperties(props: IProperty[]) {
+        for (const child of this.children) {
+            child._addProperties(props);
+        }
+    }
+
     public serialize(): any { return {}; }
 
     public deserialize(obj: any) {}

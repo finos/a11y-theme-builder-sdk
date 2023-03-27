@@ -217,7 +217,7 @@ export class Color extends Node implements IColor {
 
     constructor(name: string, hex: string, palette: ColorPalette ) {
         super(name, palette);
-        this.hex = new PropertyString("hex", false, palette);
+        this.hex = new PropertyString("hex", false, this);
         this.hex.setValue(hex);
         this.hex.setListener("_tb.colorListener", this.buildShades.bind(this));
         log.debug(this.toString());

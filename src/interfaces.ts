@@ -26,7 +26,10 @@ export interface INode {
 export interface IListenerSubscription {
     cancel(): void;  // Same as calling removeListener above
 }
+
 export interface IProperty extends INode {
+    required: boolean;
+    getDefaultValue(): any;
     isInitialized(): boolean;
 }
 
@@ -111,6 +114,7 @@ export interface IDesignSystem extends INode {
     getShade(key: string): Shade | undefined;
     findShade(key: string): Shade;
     getCSSVarGroup(node: INode): IVarGroup;
+    listProperties(): IProperty[];
 }
 
 export interface IThemeBuilder {

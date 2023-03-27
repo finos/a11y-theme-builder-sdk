@@ -10,7 +10,7 @@
     "build": "npm run build-lib && npm run build-docs",
     "build-lib": "npm install && tsc && npm pack ./",
     "build-docs": "typedoc --excludeNotDocumented ./src/index.ts",
-    "mytest": "ts-node test/dotest.ts",
+    "dotest": "ts-node test/dotest.ts",
     "test": "jest",
     "prepare": "tsc"
   },

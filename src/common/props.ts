@@ -1,5 +1,5 @@
 import { Node, ListenerSubscription } from "./node";
-import { Event, EventType, EventValueChange, EventCallback, EventValueChangeCallback } from "../interfaces";
+import { Event, EventType, EventValueChange, EventCallback, EventValueChangeCallback, IProperty } from "../interfaces";
 import { Shade } from "./shade";
 import { Logger } from "../util/logger";
 
@@ -14,7 +14,7 @@ export interface PropertyOpts<T> {
  * A property of a generic type.
  * @category Utilities
  */
-export class Property<T> extends Node {
+export class Property<T> extends Node implements IProperty {
 
     public readonly required: boolean;
     protected value?: T;
@@ -128,6 +128,10 @@ export class Property<T> extends Node {
             return shade;
         }
         throw new Error(`Invalid shade reference: ${JSON.stringify(ref)}`);
+    }
+
+    protected _addProperties(props: IProperty[]) {
+        props.push(this);
     }
 
 }

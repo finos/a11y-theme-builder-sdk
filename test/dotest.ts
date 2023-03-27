@@ -99,6 +99,14 @@ async function test() {
     ds.molecules.avatars.mediumBorder.setValue(8);
     assert(ds.molecules.avatars.mediumBorder.getValue() === 8, "Avatar medium border is not 8");
 
+    // list all properties
+    console.log("TEST: BEGIN properties");
+    const props = ds.listProperties();
+    for (const prop of props) {
+        console.log(`TEST: prop key=${prop.key}, required=${prop.required}, defaultValue=${prop.getDefaultValue()}`);
+    }
+    console.log("TEST: END properties");
+
     // test var groups
     console.log(`TEST: VarGroupKeys: ${JSON.stringify(ds.code.getCSSVarGroupKeys())}`);
     const bsg = ds.code.getCSSVarGroup(ds.atoms.borderSettings);
