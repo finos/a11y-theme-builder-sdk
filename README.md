@@ -32,11 +32,11 @@ For more in-depth information about the APIs, see the [SDK API documentation](./
 Strategically, Discover Financial Services intends for this repository to be promoted into a community driven project such as [FINOS](https://www.finos.org), [The A11y Project](https://www.a11yproject.com), or [OpenJS](https://openjsf.org). If and when such a transfer occurs, normal `pull request` based contributions will be possible. 
 
 For the tactical timeframe, `pull request` will not be accepted. For those willing to 
-answer our [call for contributions](https://discoverfinancial.github.io/a11y-theme-builder-sdk/contribute/) can do so by:
+answer our [call for contributions](https://discoverfinancial.github.io/a11y-theme-builder/contribute/) can do so by:
 
 1. `forking` the repository
 2. Developing a contribution
-3. Opening an issue against our  [contributions documentation](https://discoverfinancial.github.io/a11y-theme-builder-sdk/contribute/) where a redirect to the new contribution is captured. 
+3. Opening an issue against our  [contributions documentation](https://discoverfinancial.github.io/a11y-theme-builder/contribute/) where a redirect to the new contribution is captured. 
 
 ### Code
 
