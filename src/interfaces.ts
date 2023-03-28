@@ -104,6 +104,14 @@ export interface IVarGroup {
     setListener(name: string, listener: IVarGroupListener): void;
 }
 
+export interface IDesignSystemMetadata {
+    time: {
+        created: number;
+        updated: number;
+    };
+    isSample: boolean;
+}
+
 export interface IDesignSystem extends INode {
     atoms: IAtoms;
     molecules: IMolecules;

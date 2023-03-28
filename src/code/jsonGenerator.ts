@@ -26,7 +26,7 @@ export class JSONGenerator {
         this.organisms = ds.organisms as Organisms;
     }
 
-    public getJSON(): any {
+    public getJSON(lm: boolean): any {
         log.debug("getJSON enter");
         const theme = this.atoms.colorThemes.getDefaultTheme();
         if (!theme) {
@@ -34,20 +34,21 @@ export class JSONGenerator {
             return undefined;
         }
         const json: any = {};
-        this.setThemeAndThemeColors(json, theme);
+        this.setThemeAndThemeColors(json, lm, theme);
         log.debug(`getJSON exit - ${JSON.stringify(json,null,4)}`);
         return json;
     }
 
-    private setThemeAndThemeColors(json: any, ct: ColorTheme) {
-        this.setThemeAndThemeColors2(json, ct.primary, "Primary");
-        this.setThemeAndThemeColors2(json, ct.secondary, "Secondary");
-        this.setThemeAndThemeColors2(json, ct.tertiary, "Tertiary");
+    private setThemeAndThemeColors(json: any, lm: boolean, ct: ColorTheme) {
+        this.setThemeAndThemeColors2(json, lm, ct.primary, "Primary");
+        this.setThemeAndThemeColors2(json, lm, ct.secondary, "Secondary");
+        this.setThemeAndThemeColors2(json, lm, ct.tertiary, "Tertiary");
     }
 
-    private setThemeAndThemeColors2(json: any, prop: PropertyColorShade, name: string) {
-        const shade = prop.getValue();
+    private setThemeAndThemeColors2(json: any, lm: boolean, prop: PropertyColorShade, name: string) {
+        let shade = prop.getValue();
         if (!shade) return;
+        if (!lm) shade = shade.getDarkModeShade();
         const theme = this.set(json, "Theme");
         const themeColors = this.set(json, "Theme-Colors");
         const onShade = shade.getOnShade();

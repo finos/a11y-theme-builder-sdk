@@ -52,10 +52,11 @@ export class ThemeBuilder implements IThemeBuilder {
     /**
      * Add a new design system to the theme builder.
      * @param name The name of the design system to add.
+     * @param opts Optional arguments.  opts.sample=true if this is a sample design system.
      * @returns The new design system
      */
-    public async addDesignSystem(name: string): Promise<DesignSystem> {
-        const ds = new DesignSystem(name, this);
+    public async addDesignSystem(name: string, opts?: { sample?: boolean}): Promise<DesignSystem> {
+        const ds = new DesignSystem(name, this, opts);
         await this.store(ds);
         return ds;
     }

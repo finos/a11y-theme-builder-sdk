@@ -10,7 +10,10 @@ async function test() {
     const themeBuilder = await ThemeBuilder.create();
 
     console.log("TEST: Add a new design system");
-    let ds = await themeBuilder.addDesignSystem("ds1");
+    let ds = await themeBuilder.addDesignSystem("ds1", {sample: true});
+    assert(ds.isSample(), "Should be a sample");
+    console.log(`TEST: created: ${ds.getTimeOfCreationInMs()}, last update: ${ds.getTimeOfLastUpdateInMs()}`);
+
     let dsObj = ds.serialize();
     console.log("TEST: EMPTY DESIGN SYSTEM: ", dsObj);
     console.log("TEST: EMPTY DESIGN SYSTEM JSON: ", JSON.stringify(dsObj,null,4));
@@ -37,6 +40,8 @@ async function test() {
     assert(colorPalette.isEnabled(), "ColorPalette atom is not editable");
     assert(!colorThemes.isEnabled(), "ColorTheme atom is editable");
     assert(!states.isEnabled(), "States atom is editable");
+    assert(!ds.molecules.isEnabled(), "Molecules is editable");
+    assert(!ds.organisms.isEnabled(), "Organisms is editable");
     
     let colorThemesAtomEnabled  = colorThemes.isEnabled();
     assert(!colorThemesAtomEnabled , "ColorThemes atom should not be enabled before adding a color");
@@ -147,7 +152,8 @@ async function test() {
     ds2.code.setCSSVarListener("test", cssVar);
     console.log("TEST: END CSS VARIABLES")
 
-    console.log(`TEST: JSON: ${JSON.stringify(ds.code.jsonGenerator.getJSON(),null,4)}`);
+    console.log(`TEST: JSON lightmode: ${JSON.stringify(ds.code.jsonGenerator.getJSON(true),null,4)}`);
+    console.log(`TEST: JSON darkmode: ${JSON.stringify(ds.code.jsonGenerator.getJSON(false),null,4)}`);
 
     console.log("TEST: delete design system ds1")
     await themeBuilder.deleteDesignSystem("ds1");

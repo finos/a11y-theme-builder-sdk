@@ -610,7 +610,7 @@ export class CSSGenerator {
             const dmPrefix = args.dmPrefix || "dm-";
             this.setShadeVars(name, "", args, shade, vk);
             if (args.dm) {
-                const dmShade = shade.getMode().color.dark.shades[shade.index];
+                const dmShade = shade.getDarkModeShade();
                 this.setShadeVars(name, dmPrefix, args, dmShade, vk);
             }
             if (args.palette) {

@@ -235,6 +235,22 @@ export class Shade {
         return this.getOnShade2().clone().setMode(this.mode as ColorMode).setId(this.id);
     }
 
+    /**
+     * Get the light mode shade for this shade.
+     * @returns The corresponding light mode shade for this shade
+     */
+    public getLightModeShade(): Shade {
+        return this.getMode().color.light.shades[this.index];
+    }
+
+    /**
+     * Get the dark mode shade for this shade.
+     * @returns The corresponding dark mode shade for this shade.
+     */
+    public getDarkModeShade(): Shade {
+        return this.getMode().color.dark.shades[this.index];
+    }
+
     private getOnShade2(): Shade {
         if (this.hex === Shade.BLACK.hex) return Shade.WHITE;
         if (this.hex === Shade.HALF_BLACK.hex) return Shade.HALF_WHITE;
