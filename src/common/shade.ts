@@ -193,6 +193,16 @@ export class Shade {
     }
 
     /**
+     * Set the id of the shade
+     * @param id The id of the shade
+     * @returns The shade
+     */
+    public setId(id: string): Shade {
+        this.id = id;
+        return this;
+    }
+
+    /**
      * Get the half shade for this shade.
      * @returns The half shade (opacity 0.5) of this shade
      */
@@ -222,7 +232,7 @@ export class Shade {
      * @returns The on shade
      */
     public getOnShade(): Shade {
-        return this.getOnShade2().clone().setMode(this.mode as ColorMode);
+        return this.getOnShade2().clone().setMode(this.mode as ColorMode).setId(this.id);
     }
 
     private getOnShade2(): Shade {
@@ -350,9 +360,10 @@ export class Shade {
         log.debug(`Getting lightmode shade for ${JSON.stringify(this)} on ${JSON.stringify(bgShade)}`);
         const curRatio = this.getContrastRatio(bgShade);
         if (curRatio >= ratio) {
-            log.debug(`No searching required; shade ${JSON.stringify(this)} on ${JSON.stringify(bgShade)} is ${curRatio}`);
+            log.debug(`No searching required; shade ${JSON.stringify(this)} on ${JSON.stringify(bgShade)} (${curRatio} >= ${ratio})`);
             return this;
         }
+        log.debug(`Searching required; shade ${JSON.stringify(this)} on ${JSON.stringify(bgShade)} (${curRatio} < ${ratio})`);
         const lmShades = this.getDarkerShades(true);
         // Search forwards for the first one of these built shades which has a contrast ratio to the selected shade >=
         // the required ratio.
@@ -409,9 +420,10 @@ export class Shade {
         log.debug(`Getting darkmode shade on ${JSON.stringify(bgShade)} for ${JSON.stringify(this)}`);
         const curRatio = this.getContrastRatio(bgShade);
         if (curRatio >= ratio) {
-            log.debug(`No searching required; shade ${JSON.stringify(this)} on ${JSON.stringify(bgShade)} is ${curRatio}`);
+            log.debug(`No searching required; shade ${JSON.stringify(this)} on ${JSON.stringify(bgShade)} (${curRatio} >= ${ratio})`);
             return this;
         }
+        log.debug(`Searching required; shade ${JSON.stringify(this)} on ${JSON.stringify(bgShade)} (${curRatio} < ${ratio})`);
         const shades = this.getLighterShades(false);
         // Search backwards for the first one of these built shades which has a contrast ratio to the selected shade >=
         // the required ratio.
@@ -749,6 +761,10 @@ export class Shade {
         } else {
             return `rgba(${this.R},${this.G},${this.B},${this.opacity})`;
         }
+    }
+
+    public getRGB(): string {
+        return `rgb(${this.R},${this.G},${this.B})`;
     }
 
     /**

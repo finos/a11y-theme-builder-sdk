@@ -147,6 +147,8 @@ async function test() {
     ds2.code.setCSSVarListener("test", cssVar);
     console.log("TEST: END CSS VARIABLES")
 
+    console.log(`TEST: JSON: ${JSON.stringify(ds.code.jsonGenerator.getJSON(),null,4)}`);
+
     console.log("TEST: delete design system ds1")
     await themeBuilder.deleteDesignSystem("ds1");
 

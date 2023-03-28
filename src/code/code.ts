@@ -1,5 +1,6 @@
 import { Node } from "../common/node";
 import { CSSGenerator, CSSVarGroup } from "./cssGenerator";
+import { JSONGenerator } from "./jsonGenerator";
 import { IDesignSystem, VarListener, INode } from "../interfaces";
 
 /**
@@ -10,10 +11,12 @@ export class Code extends Node {
 
     /** The CSS code generator */
     public cssGenerator: CSSGenerator;
+    public jsonGenerator: JSONGenerator;
 
     constructor(ds: IDesignSystem) {
         super("code", ds);
         this.cssGenerator = new CSSGenerator(ds);
+        this.jsonGenerator = new JSONGenerator(ds);
     }
 
     public generate() {
