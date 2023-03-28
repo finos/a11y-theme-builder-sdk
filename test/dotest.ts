@@ -1,4 +1,4 @@
-import { ThemeBuilder, EventType, Event, PropertyColorShade, PropertyColorPair, PropertyTitledShade, VarGroup } from "../index";
+import { ThemeBuilder, EventType, Event, PropertyColorShade, PropertyColorPair, PropertyTitledShade, CSSVarGroup } from "../index";
 
 let errCnt = 0;
 let buttonSelectablesChangedCount = 0;
@@ -111,7 +111,7 @@ async function test() {
     console.log(`TEST: VarGroupKeys: ${JSON.stringify(ds.code.getCSSVarGroupKeys())}`);
     const bsg = ds.code.getCSSVarGroup(ds.atoms.borderSettings);
     let bsCount = 0;
-    bsg.setListener("test", function(vg: VarGroup) {
+    bsg.setListener("test", function(vg: CSSVarGroup) {
         console.log("TEST: BSG listener")
         bsCount++; 
     });

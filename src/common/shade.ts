@@ -340,14 +340,20 @@ export class Shade {
     }
 
     /**
-     * Get a light mode shade which meets the contrast ratio on this background shade
+     * Get a light mode shade which meets the contrast ratio on this background shade.
+     * Find the shade closest to this shade which meets the contrast ratio requirement against the background shade.    
      * @param bgShade The background shade
      * @param ratio The required contrast ratio
      * @returns A light mode shade meeting the contrast ratio requirement, or undefined if not found
      */
     public getLMShade(bgShade: Shade, ratio: number): Shade | undefined {
         log.debug(`Getting lightmode shade for ${JSON.stringify(this)} on ${JSON.stringify(bgShade)}`);
-        const lmShades = this.buildLMShades();
+        const curRatio = this.getContrastRatio(bgShade);
+        if (curRatio >= ratio) {
+            log.debug(`No searching required; shade ${JSON.stringify(this)} on ${JSON.stringify(bgShade)} is ${curRatio}`);
+            return this;
+        }
+        const lmShades = this.getDarkerShades(true);
         // Search forwards for the first one of these built shades which has a contrast ratio to the selected shade >=
         // the required ratio.
         for (let i = 0; i < lmShades.length; i++) {
@@ -373,11 +379,9 @@ export class Shade {
         for (let i = 0; i < shades.length; i++) {
             let shade = shades[i];
             const id = (i * 100).toString();
-            shade = shade.buildLMShade();
-            log.debug(`buildLMShade: adjusted i=${i} to ${shade.hex}`);
+            log.debug(`buildLMShades: adjusted i=${i} to ${shade.hex}`);
             shade.id = id;
             shade.index = i;
-            shades[i] = shade;
         }
         log.debug(`buildLMShades: exit shade=${JSON.stringify(this)}`);
         return shades;
@@ -403,7 +407,12 @@ export class Shade {
      */
     public getDMShade(bgShade: Shade, ratio: number): Shade | undefined {
         log.debug(`Getting darkmode shade on ${JSON.stringify(bgShade)} for ${JSON.stringify(this)}`);
-        const shades = this.buildDMShades();
+        const curRatio = this.getContrastRatio(bgShade);
+        if (curRatio >= ratio) {
+            log.debug(`No searching required; shade ${JSON.stringify(this)} on ${JSON.stringify(bgShade)} is ${curRatio}`);
+            return this;
+        }
+        const shades = this.getLighterShades(false);
         // Search backwards for the first one of these built shades which has a contrast ratio to the selected shade >=
         // the required ratio.
         for (let i = shades.length - 1; i >= 0; i--) {
@@ -428,27 +437,10 @@ export class Shade {
         const shades = this.getLighterAndDarkerShades(false);
         for (let i = 0; i < shades.length; i++) {
             let shade = shades[i];
-            log.debug(`buildDMShades: for i=${i}, shade=${shade.hex}`);
-            const id = (i * 100).toString();
-            let saturation = shade.getSaturation();
-            // Step 1: Darken it until the saturation is < 1
-            while (saturation >= 1) {
-                shade = shade.darken();
-                saturation = shade.getSaturation();
-                log.debug(`buildDMShades: darkened i=${i} to ${shade.hex} with saturation ${saturation}`);
-            }
-            // Step 2: Desaturate the shade until the saturation is <= .60
-            while (saturation > .60) {
-                shade = shade.getDesaturatedShade();
-                saturation = shade.getSaturation();
-                log.debug(`buildDMShades: desaturated i=${i} to ${shade.hex} with saturation ${saturation}`);
-            }
-            // Step 3: Adjust the shade by contrast ratio
-            shade = shade.getAdjustedShadeByContrastRatio();
             log.debug(`buildDMShades: adjusted i=${i} to ${shade.hex}`);
+            const id = (i * 100).toString();
             shade.id = id;
             shade.index = i;
-            shades[i] = shade;
         }
         log.debug(`buildDMShades: exit shade=${JSON.stringify(this)}`);
         return shades;
@@ -461,9 +453,23 @@ export class Shade {
      * @returns 
      */
     private getLighterAndDarkerShades(lm: boolean): Shade[] {
+        const lighterShades = this.getLighterShades(lm);
+        const darkerShades = this.getDarkerShades(lm);
+        const shades = [...lighterShades,...darkerShades];
+        log.debug(`lighter and darker shades: ${JSON.stringify(shades)}`);
+        return shades;
+    }
+
+    /**
+     * Build 10 shades from this shade, some of which may be lighter and some of which may be darker.
+     * The number of lighter and darker depends on where in the spectrum this shade falls.
+     * @param lm True if this is for light mode; else false if for dark mode.
+     * @returns 
+     */
+    private getLighterShades(lm: boolean): Shade[] {
         // Build the lighter shades
-        const numLighterShades = this.numLighterShades();
         const shades: Shade[] = [];
+        const numLighterShades = this.numLighterShades();
         if (numLighterShades > 0) {
             const startScale  = chroma.scale(['#FFFFFF',this.hex]).correctLightness(true).colors(lm ? numLighterShades + 2 : numLighterShades);
             /// since padding is not working I will create a scale and get the first 2nd value and then create another scale ///
@@ -471,7 +477,15 @@ export class Shade {
             scale.forEach((hex: string) => shades.push(Shade.fromHex(hex)));
             if (shades.length > 0) shades.splice(-1);
         }
+        for (let i = 0; i < shades.length; i++) {
+            shades[i] = shades[i].buildShade(lm);
+        }
+        return shades;
+    }
+
+    private getDarkerShades(lm: boolean): Shade[] {
         // Build the darker shades
+        const shades: Shade[] = [];
         const numDarkerShades = this.numDarkerShades();
         if (numDarkerShades > 0) {
             const rgbArray = this.rgbArray;
@@ -482,6 +496,9 @@ export class Shade {
             scale.forEach((hex: string) => shades.push(Shade.fromHex(hex)));
         } else {
             shades.push(this);
+        }
+        for (let i = 0; i < shades.length; i++) {
+            shades[i] = shades[i].buildShade(lm);
         }
         log.debug(`lighter and darker shades: ${JSON.stringify(shades)}`);
         return shades;
@@ -509,6 +526,16 @@ export class Shade {
         return shade.getAdjustedShadeByContrastRatio(minRatio);
     }
  
+    /**
+     * Build a shade
+     * @param lm True for light mode; false for dark mode
+     * @param minRatio Optional minRatio for the contrast ratio comparison for the on text
+     */
+    public buildShade(lm: boolean, minRatio?: number): Shade {
+        if (lm) return this.buildLMShade(minRatio);
+        return this.buildDMShade(minRatio);
+    }
+
     /**
      * Build a light mode shade for this shade which meets the min contrast ratio requirements
      * @param minRatio The minimum contrast ratio

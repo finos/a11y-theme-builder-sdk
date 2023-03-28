@@ -1,5 +1,5 @@
 import { Node } from "../common/node";
-import { CSSGenerator, VarGroup } from "./cssGenerator";
+import { CSSGenerator, CSSVarGroup } from "./cssGenerator";
 import { IDesignSystem, VarListener, INode } from "../interfaces";
 
 /**
@@ -42,7 +42,7 @@ export class Code extends Node {
      * @param node The node for which we are getting the group of variables.
      * @returns The variable group
      */
-    public getCSSVarGroup(node: INode): VarGroup {
+    public getCSSVarGroup(node: INode): CSSVarGroup {
         return this.cssGenerator.getVarGroup(node.key);
     }
 
