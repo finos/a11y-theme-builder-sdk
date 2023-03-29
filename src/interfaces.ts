@@ -105,11 +105,26 @@ export interface IVarGroup {
 }
 
 export interface IDesignSystemMetadata {
+    /** Denotes whether or not this is a sample design system */
+    sample: boolean;
+    /** Time stamps */
     time: {
-        created: number;
-        updated: number;
+        /** The created time in milliseconds */
+        createdInMs: number;
+        /** The last update time in milliseconds */
+        lastUpdateInMs: number;
     };
-    isSample: boolean;
+    /** Colors */
+    colors: {
+        /** The hex or RGBA string for the primary color */
+        primary: string;
+        /** The hex or RGBA string for the secondary color */
+        secondary: string;
+        /** The hex or RGBA string for the tertiary color */
+        tertiary: string;
+        /** The hex or RGBA string for the background color */
+        background: string;
+    };
 }
 
 export interface IDesignSystem extends INode {

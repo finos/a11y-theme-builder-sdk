@@ -1,4 +1,4 @@
-import { IThemeBuilder } from "./interfaces";
+import { IThemeBuilder, IDesignSystemMetadata } from "./interfaces";
 import { MyMap } from "./util/myMap";
 import { DesignSystem } from "./designSystem";
 import { Storage, MemStorage } from "./storage/index";
@@ -69,11 +69,11 @@ export class ThemeBuilder implements IThemeBuilder {
     public async getDesignSystem(name: string): Promise<DesignSystem> {
         let ds = this.designSystems.get(name);
         if (!ds) {
-            const str = await this.storage.get(name);
-            if (!str) {
+            const obj = await this.storage.get(name);
+            if (!obj) {
                 throw new Error(`Design system '${name}' does not exist`);
             }
-            ds = this.designSystemFromString(name, str);
+            ds = this.newDesignSystemFromObject(name, obj);
             this.designSystems.set(name,ds);
         }
         return ds;
@@ -97,9 +97,9 @@ export class ThemeBuilder implements IThemeBuilder {
         await this.storage.delete(name);
     }
 
-    public designSystemFromString(name: string, str: string): DesignSystem {
+    public newDesignSystemFromObject(name: string, obj: Object): DesignSystem {
         const ds = new DesignSystem(name, this);
-        ds.deserialize(JSON.parse(str));
+        ds.deserialize(obj);
         return ds;
     }
 
@@ -111,8 +111,12 @@ export class ThemeBuilder implements IThemeBuilder {
         return await this.storage.listKeys();
     }
 
+    public async listMetadata(): Promise<IDesignSystemMetadata[]> {
+        return await this.storage.listMetadata() as any;
+    }
+
     public async store(ds: DesignSystem) {
-        await this.storage.set(ds.name, JSON.stringify((ds.serialize())));
+        await this.storage.set(ds.name, ds.serialize());
     }
 
 }

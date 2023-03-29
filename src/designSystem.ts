@@ -27,10 +27,8 @@ export class DesignSystem extends Node implements IDesignSystem {
     public readonly layers: Layers;
     /** All code generators for this design system. */
     public readonly code: Code;
-    
-    private createdInMs: number;
-    private updatedInMs: number;
-    private sample: boolean;
+
+    private metadata: IDesignSystemMetadata;
     private readonly dsShades: {[key: string]: Shade} = {};
 
     public constructor( name: string, themeBuilder: IThemeBuilder, opts?: { sample?: boolean} ) {
@@ -43,9 +41,19 @@ export class DesignSystem extends Node implements IDesignSystem {
         this.layers = new Layers(this);
         this.code = new Code(this);
         const now = Date.now();
-        this.createdInMs = now;
-        this.updatedInMs = now;
-        this.sample = opts.sample || false;
+        this.metadata = {
+            sample: opts.sample || false,
+            time: {
+                createdInMs: now,
+                lastUpdateInMs: now,
+            },
+            colors: {
+                primary: "",
+                secondary: "",
+                tertiary: "",
+                background: "",
+            },
+        };
     }
 
     public clone(): DesignSystem {
@@ -88,24 +96,39 @@ export class DesignSystem extends Node implements IDesignSystem {
     }
 
     public getTimeOfCreationInMs(): number {
-        return this.createdInMs;
+        return this.metadata.time.createdInMs;
     }
 
     public getTimeOfLastUpdateInMs(): number {
-        return this.updatedInMs;
+        return this.metadata.time.lastUpdateInMs;
     }
 
     public isSample(): boolean {
-        return this.sample;
+        return this.metadata.sample;
     }
 
     public setIsSample(sample: boolean) {
-        this.sample = sample;
+        this.metadata.sample = sample;
+    }
+
+    private updateMetadata() {
+        const theme = this.atoms.colorThemes.getDefaultTheme();
+        if (theme) {
+            const primary = theme.primary.getValue();
+            if (primary) this.metadata.colors.primary = primary.getHexOrRGBA();
+            const secondary = theme.secondary.getValue();
+            if (secondary) this.metadata.colors.secondary = secondary.getHexOrRGBA();
+            const tertiary = theme.tertiary.getValue();
+            if (tertiary) this.metadata.colors.tertiary = tertiary.getHexOrRGBA();
+            const background = theme.lightModeBackground.getValue();
+            if (background) this.metadata.colors.background = background.primary.getHexOrRGBA();
+        }
+        this.metadata.time.lastUpdateInMs = Date.now();
     }
 
     public async store() {
-        this.updatedInMs = Date.now();
-        await this.themeBuilder.storage.set(this.name, JSON.stringify(this.serialize()));
+        this.updateMetadata();
+        await this.themeBuilder.storage.set(this.name, this.serialize());
     }
 
     public serialize(): any {
@@ -114,9 +137,7 @@ export class DesignSystem extends Node implements IDesignSystem {
         obj.molecules = this.molecules.serialize();
         obj.organisms = this.organisms.serialize();
         obj.layers = this.layers.serialize();
-        obj.created = this.createdInMs;
-        obj.updated = this.updatedInMs;
-        obj.sample = this.sample;
+        obj.metadata = this.metadata;
         return obj;
     }
 
@@ -127,9 +148,7 @@ export class DesignSystem extends Node implements IDesignSystem {
         this.molecules.deserialize(obj.molecules);
         this.organisms.deserialize(obj.organisms);
         this.layers.deserialize(obj.layers);
-        this.createdInMs = obj.created;
-        this.updatedInMs = obj.updated;
-        this.sample = obj.sample;
+        this.metadata = obj.metadata;
         this.code.generate();
     }
 

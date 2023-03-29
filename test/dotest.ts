@@ -125,11 +125,10 @@ async function test() {
     console.log(`TEST: Border settings: ${JSON.stringify(bsg)}`);
 
     dsObj = ds.serialize();
-    let dsStr = JSON.stringify(dsObj,null,4);
-    console.log(`TEST: create design system from string: ${dsStr}`);
-    const ds2 = themeBuilder.designSystemFromString("ds1", dsStr);
+    console.log(`TEST: create design system from string: ${JSON.stringify(dsObj,null,4)}`);
+    const ds2 = themeBuilder.newDesignSystemFromObject("ds1", dsObj);
     console.log(`TEST: deserializing design system 2`);
-    dsStr = JSON.stringify(ds2.serialize(),null,4);
+    const dsStr = JSON.stringify(ds2.serialize(),null,4);
     console.log(`TEST: finished deserializing design system 2: ${dsStr}`);
     assert(ds2.molecules.avatars.mediumBorder.getValue() !== undefined, "Deserialized avatar border");
     const num: any = ds2.molecules.avatars.mediumBorder.getValue();
@@ -154,6 +153,10 @@ async function test() {
 
     console.log(`TEST: JSON lightmode: ${JSON.stringify(ds.code.jsonGenerator.getJSON(true),null,4)}`);
     console.log(`TEST: JSON darkmode: ${JSON.stringify(ds.code.jsonGenerator.getJSON(false),null,4)}`);
+
+    await ds.store();
+    const md = await themeBuilder.listMetadata();
+    console.log(`TEST: metadata: ${JSON.stringify(md,null,4)}`);
 
     console.log("TEST: delete design system ds1")
     await themeBuilder.deleteDesignSystem("ds1");

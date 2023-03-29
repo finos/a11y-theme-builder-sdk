@@ -1,4 +1,4 @@
-import { Storage } from "./interface";
+import { Storage, StorageElement } from "./interface";
 
 /**
  * The memory storage implementation.
@@ -6,13 +6,13 @@ import { Storage } from "./interface";
  */
 export class MemStorage implements Storage {
 
-    private readonly mem: {[key: string]: string} = {};
+    private readonly mem: {[key: string]: StorageElement} = {};
 
-    public async get(key: string): Promise<string> {
+    public async get(key: string): Promise<StorageElement> {
         return this.mem[key];
     }
 
-    public async set(key: string, value: string) {
+    public async set(key: string, value: StorageElement) {
         this.mem[key] = value;;
     }
 
@@ -22,6 +22,12 @@ export class MemStorage implements Storage {
 
     public async listKeys(): Promise<string[]> {
         return Object.keys(this.mem);
+    }
+
+    public async listMetadata(): Promise<StorageElement[]> {
+        return Object.values(this.mem).map(ele => {
+            return {metadata: ele.metadata};
+        });
     }
 
 }
