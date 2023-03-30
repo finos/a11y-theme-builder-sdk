@@ -1,8 +1,6 @@
 import { Atom } from "./atom";
 import { IAtoms } from "../interfaces";
-import { PropertyString, PropertyNumber } from "../common/props";
-
-const defaultFont = "Discover Sans";
+import { PropertyString, PropertyNumber, defaultPrimaryFont, defaultSecondaryFont } from "../common/props";
 
 /**
  * The focus settings atom.
@@ -28,11 +26,11 @@ export class FontsSettings extends Atom {
     constructor(atoms: IAtoms) {
         super("Fonts Settings", false, atoms);
         this.addDependency(atoms.colorThemes);
-        this.primaryFont = new PropertyString("Primary font", false, this, {defaultValue: defaultFont});
-        this.secondaryFont = new PropertyString("Secondary font", false, this, {defaultValue: defaultFont});
+        this.primaryFont = new PropertyString("Primary font", false, this, {defaultValue: defaultPrimaryFont});
+        this.secondaryFont = new PropertyString("Secondary font", false, this, {defaultValue: defaultSecondaryFont});
         this.baseFontSize = new PropertyNumber("Base font size", false, this, {defaultValue: 16});
-        this.fontWeights.push(new PropertyNumber(`Font weight 0`, false, this, {defaultValue: 100}))
-        this.fontWeights.push(new PropertyNumber(`Font weight 1`, false, this, {defaultValue: 300}))
+        this.fontWeights.push(new PropertyNumber(`Font weight 0`, false, this, {defaultValue: 300}))
+        this.fontWeights.push(new PropertyNumber(`Font weight 1`, false, this, {defaultValue: 400}))
         this.fontWeights.push(new PropertyNumber(`Font weight 2`, false, this, {defaultValue: 500}))
         this.fontWeights.push(new PropertyNumber(`Font weight 3`, false, this, {defaultValue: 600}))
         this.fontWeights.push(new PropertyNumber(`Font weight 4`, false, this, {defaultValue: 700}))

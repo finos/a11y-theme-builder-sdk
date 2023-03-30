@@ -41,7 +41,8 @@ interface ColorMode {
  */
 export class Shade {
 
-    private static shadeMapByKey: {[key:string]: Shade} = {};
+    private static coreShadeMap: {[key:string]: Shade} = {};
+
     /** The black shade */
     public static BLACK = Shade.fromHex("#121212", "BLACK");
     /** The half-black shade */
@@ -64,7 +65,11 @@ export class Shade {
     public static LIGHTEN_MULTIPLIER = 1.01;
     
     public static byKey(key: string): Shade | undefined {
-        return Shade.shadeMapByKey[key];
+        return Shade.coreShadeMap[key];
+    }
+
+    public static coreShades(): Shade[] {
+        return Object.values(Shade.coreShadeMap);
     }
 
     /**
@@ -77,7 +82,7 @@ export class Shade {
         const shade = new Shade({hex});
         if (key) {
             shade.key = key;
-            Shade.shadeMapByKey[key] = shade;
+            Shade.coreShadeMap[key] = shade;
         }
         return shade;
     }
@@ -308,6 +313,22 @@ export class Shade {
             this.contrastShade = this.clone().calculateContrastShade();
         }
         return this.contrastShade;
+    }
+
+    /**
+     * Return either this shade or the onShade based on contrast requirements to 'shade'.
+     * @param shade The shade to compare to this one
+     * @param multiplier Optional multiplier
+     * @returns This shade or the onShade
+     */
+    public getShadeOrOnShadeBasedOnContrast(shade: Shade, multiplier?: number): Shade {
+        multiplier = multiplier || 1;
+        const contrast = this.getContrastRatio(shade) * multiplier;
+        if (contrast >= 3.1) {
+            return this;
+        } else {
+            return this.getOnShade();
+        }
     }
 
     /**
@@ -814,6 +835,10 @@ export class Shade {
 
     public toString() {
         return `key=${this.key}, index=${this.index}, hex=${this.hex}, opacity=${this.opacity}, onHex=${this.onHex}, id=${this.id}`;
+    }
+
+    public equals(shade: Shade): boolean {
+        return this.R === shade.R && this.G === shade.G && this.B === shade.B && this.opacity === shade.opacity;
     }
 
 }

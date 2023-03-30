@@ -155,88 +155,95 @@ The following is a tutorial of how to use this SDK in order to generate code whi
 
 6. Managing properties of other atoms, molecules, and organisms
 
-Now that the default color theme has been initialized, everything else should now be enabled including:
+   Now that the default color theme has been initialized, everything else should now be enabled including:
 
-* All other atoms (e.g. `myTheme.atoms.gridSettings.isEnabled() is true`)
-* All molecules (i.e. `myTheme.molecules.isEnabled() is true`)
-* All organisms (i.e. `myTheme.organisms.isEnabled() is true`)
-* Code generation (i.e. `myTheme.code.isEnabled() is true`)
+   * All other atoms (e.g. `myTheme.atoms.gridSettings.isEnabled() is true`)
+   * All molecules (i.e. `myTheme.molecules.isEnabled() is true`)
+   * All organisms (i.e. `myTheme.organisms.isEnabled() is true`)
+   * Code generation (i.e. `myTheme.code.isEnabled() is true`)
 
-All of these remaining properties are either optional (i.e. are not required to have a value) or have a default value.  The `listProperties` method of a design system may be used as shown below to list all properties of a design system, along with it's key, whether or not it is required, and the default value (or undefined if it has no default value).
+   All of these remaining properties are either optional (i.e. are not required to have a value) or have a default value.  The `listProperties` method of a design system may be used as shown below to list all properties of a design system, along with it's key, whether or not it is required, and the default value (or undefined if it has no default value).
 
-```
-const props: IProperty = myTheme.listProperties();
-for (const prop of props) {
-   console.log(`Property key=${prop.key}, required=${prop.required}, defaultValue=${prop.getDefaultValue()};
-}
-```
+   ```
+   const props: IProperty = myTheme.listProperties();
+   for (const prop of props) {
+      console.log(`Property key=${prop.key}, required=${prop.required}, defaultValue=${prop.getDefaultValue()};
+   }
+   ```
 
 7. Listening for events
 
-There are several types of events as defined by the `EventType` enumerated type in the [src/interface.ts file](./src/interfaces.ts).
+   There are several types of events as defined by the `EventType` enumerated type in the [src/interface.ts file](./src/interfaces.ts).
 
-* Node enabled, disabled, and deleted events
+   * Node enabled, disabled, and deleted events
 
-  The `setListener` method may be called on any node or property in order to notified when that node's status changes.  For example, the following notification occurs when molecules are enabled:
+     The `setListener` method may be called on any node or property in order to notified when that node's status changes.  For example, the following notification occurs when molecules are enabled:
   
-  ```
-  myDesignSystem.molecules.setListener("some name", function(event: Event) {
-      // Called for event.type.NodeEnabled and event.type.NodeDisabled
-      // events.  The event.node will always be equal to
-      // myDesignSystem.molecules in this case.
-  });
-  ```
+     ```
+     myDesignSystem.molecules.setListener("some name", function(event: Event) {
+         // Called for event.type.NodeEnabled and event.type.NodeDisabled
+         // events.  The event.node will always be equal to
+         // myDesignSystem.molecules in this case.
+     });
+     ```
   
-  Or you can set a single listener on the
-  design system itself and be notified of a status change
-  for any node or property in the design system, as shown below.
+     Or you can set a single listener on the
+     design system itself and be notified of a status change
+     for any node or property in the design system, as shown below.
 
-  ```
-  myDesignSystem.setListener("some name", function(event: Event) {
-      // Called for event.type.NodeEnabled and event.type.NodeDisabled
-      // events for all nodes and properties.
-      // The "event.node" identifies the node.
-  });
-  ```
+     ```
+     myDesignSystem.setListener("some name", function(event: Event) {
+         // Called for event.type.NodeEnabled and event.type.NodeDisabled
+         // events for all nodes and properties.
+         // The "event.node" identifies the node.
+     });
+     ```
 
-* Property value change events
+   * Property value change events
   
-  In order to be notified when a property value change
-  occurs, call the `setListener` method on the property
-  itself.  For example, the following notification will
-  occur when the button shade of a theme changes:
+     In order to be notified when a property value change
+     occurs, call the `setListener` method on the property
+     itself.  For example, the following notification will
+     occur when the button shade of a theme changes:
 
-  ```
-  myTheme.button.setListener("some name", function(event: Event) {
-      if (event.type === EventType.ValueChanged) {
-         const vc = event as EventValueChange;
-         // vc.oldValue is the old value (if any)
-         // vc.newValue is the new value (if any)
-      }
-  });
-  ```
+     ```
+     myTheme.button.setListener("some name", function(event: Event) {
+         if (event.type === EventType.ValueChanged) {
+            const vc = event as EventValueChange;
+            // vc.oldValue is the old value (if any)
+            // vc.newValue is the new value (if any)
+         }
+     });
+     ```
 
-* Selectable values changed
+   * Selectable values changed
 
-  The selectable values available for a property may change
-  as other dependent property values are changed.  In order to be notified of such a change, 
+     The selectable values available for a property may change
+     as other dependent property values are changed.  In order to be notified of such a change, 
+   
+     ```
+     myTheme.button.setListener("some name", function(event: Event) {
+         if (event.type === EventType.SelectablesChanged) {
+            // Get the new selectable values
+            const sels = myTheme.button.getSelectableValues();
+            ...
+         }
+     });
+     ```
 
-  ```
-  myTheme.button.setListener("some name", function(event: Event) {
-      if (event.type === EventType.SelectablesChanged) {
-         // Get the new selectable values
-         const sels = myTheme.button.getSelectableValues();
-         ...
-      }
-  });
-  ```
+   * Listening for CSS variable changes
 
-  * Listening for CSS variable changes
+     Listen for CSS variable changes as follows:
 
-    Listen for CSS variable changes as follows:
+     ```
+     myDesignSystem.code.setCSSVarListener("some name", function(name: string, value?: string) {
+        console.log(`CSS variable: name=${name}, value=${value});
+     });
+     ```
 
-    ```
-    myDesignSystem.code.setCSSVarListener("some name", function(name: string, value?: string) {
-       console.log(`CSS variable: name=${name}, value=${value});
-    });
-    ```
+7. Generating code
+
+   The following returns the generated CSS root variables:
+
+   ```
+   

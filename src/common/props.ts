@@ -430,12 +430,13 @@ export class PropertyBackgroundColorStyle extends PropertyStringSelectable {
 
 }
 
-const defaultFont = "Discover Sans";
+export const defaultPrimaryFont = "Open Sans";
+export const defaultSecondaryFont = "Open Sans";
 
 export class PropertyFontFamily extends PropertyStringSelectable {
 
     constructor(name: string, required: boolean, node: Node) {
-        super(name, required, node, { selectables: [defaultFont], defaultValue: defaultFont});
+        super(name, required, node, { selectables: [defaultPrimaryFont, defaultSecondaryFont], defaultValue: defaultPrimaryFont});
     }
 
 }
