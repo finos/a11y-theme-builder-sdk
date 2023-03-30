@@ -550,7 +550,7 @@ export class CSSGenerator {
         this.setVar(`input-disabled`, "", vk, vars.inputDisabled.getHexOrRGBA());
         this.setVar(`on-input-default`, "", vk, vars.onInputDefault.getHexOrRGBA());
         this.setVar(`on-input-disabled`, "", vk, vars.onInputDisabled.getHexOrRGBA());
-        this.setVar(`dm-input-default`, "", vk, vars.dmInputDefault.getHexOrRGBA());
+        this.setVar(`dm-input`, "", vk, vars.dmInputDefault.getHexOrRGBA());
         this.setVar(`dm-input-disabled`, "", vk, vars.dmInputDisabled.getHexOrRGBA());
     }
 
