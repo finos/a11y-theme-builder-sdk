@@ -546,9 +546,9 @@ export class CSSGenerator {
     private generateInputBackgroundVariables(vk: CSSVariableKind) {
         const vars = this.atoms.inputBackground.getVariables();
         if (!vars) return;
-        this.setVar(`input-default`, "", vk, vars.inputDefault.getHexOrRGBA());
+        this.setVar(`input`, "", vk, vars.inputDefault.getHexOrRGBA());
         this.setVar(`input-disabled`, "", vk, vars.inputDisabled.getHexOrRGBA());
-        this.setVar(`on-input-default`, "", vk, vars.onInputDefault.getHexOrRGBA());
+        this.setVar(`on-input`, "", vk, vars.onInputDefault.getHexOrRGBA());
         this.setVar(`on-input-disabled`, "", vk, vars.onInputDisabled.getHexOrRGBA());
         this.setVar(`dm-input`, "", vk, vars.dmInputDefault.getHexOrRGBA());
         this.setVar(`dm-input-disabled`, "", vk, vars.dmInputDisabled.getHexOrRGBA());
