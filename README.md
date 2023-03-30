@@ -1,8 +1,9 @@
+[![DFS - Incubating](./_images/discover-incubating.svg)](https://technology.discover.com/technologies/open_source) [![Maintainers-Invited](https://img.shields.io/badge/Maintainers-Wanted-blueviolet)](./CONTRIBUTE.md) [![Contributors-Invited](https://img.shields.io/badge/Contributors-Wanted-blue)](./CONTRIBUTE.md)
 # Accessibility Theme Builder SDK
 
 Accessibility compliance is a difficult and a cost intensive task.  This is true not only when creating an initially compliant application, but also when maintaining that compliance.
 
-The purpose of this SDK is to simplify this task by performing the necessary calcuations and generating output (e.g. CSS, JSON tokens, or other) to be imported into your application.  
+The purpose of this SDK is to simplify this task by performing the necessary calculations and generating output (e.g. CSS, JSON tokens, or other) to be imported into your application.  
 
 This SDK is designed to be extensible with regard to each of the following:
 
@@ -25,23 +26,11 @@ If you want to learn more about how to use this SDK directly, see the [SDK Tutor
 For more in-depth information about the APIs, see the [SDK API documentation](./docs/index.html).
 
 ## Contributing 
+### Join us
+[Get involved](https://github.com/discoverfinancial/a11y-theme-builder/blob/main/CONTRIBUTE.md) and learn how our project is managed. Our project welcomes passionate contributors. 
 
-### Get Involved
->ToDo: Update GitHub Pages Link for Docs/Contribute.
-
-Strategically, Discover Financial Services intends for this repository to be promoted for maturation upstream within a *yet-to-be-identified* community  such as [FINOS](https://www.finos.org), [The A11y Project](https://www.a11yproject.com), or [OpenJS](https://openjsf.org). If and when such a transfer occurs, normal `pull request` based contributions will be possible. 
-
-For the tactical timeframe, `pull request` will not be accepted. For those willing to 
-answer our [call for contributions](https://discoverfinancial.github.io/a11y-theme-builder/contribute/), please proceed by:
-
-1. 'forking` this repository
-2. Developing a contribution within your forked repo
-3. Opening an issue against our [contributions documentation](https://discoverfinancial.github.io/a11y-theme-builder/contribute/) where a redirect to the new contribution (forked repo) is captured. 
-
-### Code
-
+### Developers
 See the [Developer's Guide](./DEV-GUIDE.md) for information on building, developing, and testing code contributions.
-
 ## License
 
 Copyright 2023 Discover Financial Services 
