@@ -23,7 +23,7 @@ export class TypographyStyling extends Node {
     /** The line height property */
     public lineHeight: PropertyPercentageSelectable;
     /** The character spacing property */
-    public characterSpacing: PropertyPixelRange;
+    public letterSpacing: PropertyPixelRange;
 
     constructor(
         name: string, 
@@ -31,7 +31,7 @@ export class TypographyStyling extends Node {
         defaultFontSize: number, 
         defaultFontWeight: number,
         defaultLineHeight: number,
-        defaultCharacterSpacing: number,
+        defaultLetterSpacing: number,
     ) {
         super(name, parent);
         this.fontFamily = new PropertyFontFamily("Font Family", false, this);
@@ -41,7 +41,7 @@ export class TypographyStyling extends Node {
             defaultValue: defaultFontWeight,
         });
         this.lineHeight = new PropertyPercentageSelectable("Line Height", false, this, [130, 160], defaultLineHeight);
-        this.characterSpacing = new PropertyPixelRange("Character Spacing", false, this, -1, 10, defaultCharacterSpacing);
+        this.letterSpacing = new PropertyPixelRange("Character Spacing", false, this, -2, 10, defaultLetterSpacing);
     }
 
     public deserialize(obj: any) {
@@ -51,7 +51,7 @@ export class TypographyStyling extends Node {
         this.fontSize.deserialize(obj.fontSize);
         this.fontWeight.deserialize(obj.fontWeight);
         this.lineHeight.deserialize(obj.lineHeight);
-        this.characterSpacing.deserialize(obj.characterSpacing);
+        this.letterSpacing.deserialize(obj.letterSpacing);
     }
 
     public serialize(): any {
@@ -60,7 +60,7 @@ export class TypographyStyling extends Node {
         obj.fontSize = this.fontSize.serialize();
         obj.fontWeight = this.fontWeight.serialize();
         obj.lineHeight = this.lineHeight.serialize();
-        obj.characterSpacing = this.characterSpacing.serialize();
+        obj.letterSpacing = this.letterSpacing.serialize();
         return obj;
     }
 }

@@ -42,7 +42,7 @@ export class SmallTextStyles extends Atom {
     public smallSemibold: TypographyStyling;
 
     constructor(atoms: IAtoms) {
-        super("Small Tests Styles", false, atoms);
+        super("Small Text Styles", false, atoms);
         this.addDependency(atoms.colorThemes);
         this.subtitle1 = new TypographyStyling("Subtitle 1", this, 16, 600, 110, 2);
         this.subtitle2 = new TypographyStyling("Subtitle 2", this, 14, 700, 110, 1.75);

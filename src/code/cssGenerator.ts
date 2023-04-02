@@ -1,4 +1,4 @@
-import { Atoms, Shade, ColorTheme, ShadeGroup, ButtonModeShadeGroups, StateSetting, BevelSettingsProps, HotlinkModeVariables, OnHotlink, OnHotlinkWithDecoration} from "../atoms/index";
+import { Atoms, Shade, ColorTheme, ShadeGroup, ButtonModeShadeGroups, StateSetting, BevelSettingsProps, HotlinkModeVariables, OnHotlink, OnHotlinkWithDecoration, TypographyStyling} from "../atoms/index";
 import { Molecules } from "../molecules/index";
 import { Organisms } from "../organisms/index";
 import { PropertyColorShade, PropertyPercentage, PropertyGroupListener, PropertyColorPair, Property, ListenerSubscription, ColorPair } from "../common/index";
@@ -154,8 +154,59 @@ export class CSSGenerator {
         for (let i = 0; i < fw.length; i++) {
             this.addPropVar(`font-weight-${i}`, "", fw[i]);
         }
-        this.addPropVar("standard-line-height", "%", fs.standardLineHeight);
-        this.addPropVar("header-line-height", "%", fs.headerLineHeight);
+        this.addPropVar("standard-LineHeight", "%", fs.standardLineHeight);
+        this.addPropVar("header-LineHeight", "%", fs.headerLineHeight);
+        this.addPropVar("sm-LineHeight", "%", fs.smallLineHeight);
+
+        // Display and header styles
+        const dhs = atoms.displayAndHeaderStyles;
+        this.addPropVar("headerChange", "", dhs.percentChangeInHeaderDisplaySizes); //, function(vk) {
+        this.addPropVar("headerWeight", "", dhs.headingDisplayFontWeight);
+        for (var i=0; i<dhs.displayStyles.length; i++) {
+            this.generateTypographyVars(dhs.displayStyles[i], "Display"+(i+1));
+        }
+        for (var i=0; i<dhs.headerStyles.length; i++) {
+            this.generateTypographyVars(dhs.headerStyles[i], "h"+(i+1));
+        }
+
+        // Body styles
+        const bds = atoms.bodyStyles;
+        this.generateTypographyVars(bds.body1, "body1");
+        this.generateTypographyVars(bds.body1Bold, "body1-bold");
+        this.generateTypographyVars(bds.body2, "body2");
+        this.generateTypographyVars(bds.body2Bold, "body2-bold");
+        this.generateTypographyVars(bds.body3, "body3");
+        this.generateTypographyVars(bds.body3Bold, "body3-bold");
+
+        // Small text styles
+        const sts = atoms.smallTextStyles;
+        this.generateTypographyVars(sts.subtitle1, "subtitle1");
+        this.generateTypographyVars(sts.subtitle2, "subtitle2");
+        this.generateTypographyVars(sts.caption, "caption");
+        this.generateTypographyVars(sts.captionBold, "caption-bold");
+        this.generateTypographyVars(sts.overline, "overline");
+        this.generateTypographyVars(sts.overlineLarge, "overline-large");
+        this.generateTypographyVars(sts.overlineExtraLarge, "overline-XL");
+        this.generateTypographyVars(sts.label1, "label-1");
+        this.generateTypographyVars(sts.label1AllCaps, "label-1-allCaps");
+        this.generateTypographyVars(sts.label2, "label-2");
+        this.generateTypographyVars(sts.label2AllCaps, "label-2-allCaps");
+        this.generateTypographyVars(sts.labelSmall, "label-small");
+        this.generateTypographyVars(sts.callToAction, "CTA");
+        this.generateTypographyVars(sts.callToActionSmall, "CTA-Small");
+        this.generateTypographyVars(sts.small, "small");
+        this.generateTypographyVars(sts.smallSemibold, "small-semibold");
+
+        // Stat styles
+        this.generateTypographyVars(atoms.statStyles.stat, "stat");
+
+    }
+
+    private generateTypographyVars(typography: TypographyStyling, prefix: string) {
+        this.addPropVar(prefix+"FontSize", "px", typography.fontSize);
+        this.addPropVar(prefix+"FontWeight", "", typography.fontWeight);
+        this.addPropVar(prefix+"FontFamily", "", typography.fontFamily);
+        this.addPropVar(prefix+"LetterSpacing", "%", typography.letterSpacing);
     }
 
     private setMoleculeVars() {
@@ -187,7 +238,7 @@ export class CSSGenerator {
                 "buttonTypography": `var(--${ctaSize}FontWeight) var(--${ctaSize}FontSize) / var(--${ctaSize}LineHeight) var(--${ctaSize}FontFamily)`,
                 "buttonTextDecoration": `var(--${ctaSize}TextDecoration)`,
                 "buttonTextTransform": `var(--${ctaSize}TextTransform)`,
-                "buttonCharacterSpacing": `var(--${ctaSize}CharacterSpacing)`,
+                "buttonLetterSpacing": `var(--${ctaSize}LetterSpacing)`,
             });    
         })
         this.addPropVar("button-padding", "", stb.horizontalPadding);
@@ -216,7 +267,7 @@ export class CSSGenerator {
                 "sm-buttonTypography": `var(--${ctaSize}FontWeight) var(--${ctaSize}FontSize) / var(--${ctaSize}LineHeight) var(--${ctaSize}FontFamily)`,
                 "sm-buttonTextDecoration": `var(--${ctaSize}TextDecoration)`,
                 "sm-buttonTextTransform": `var(--${ctaSize}TextTransform)`,
-                "sm-buttonCharacterSpacing": `var(--${ctaSize}CharacterSpacing)`,
+                "sm-buttonLetterSpacing": `var(--${ctaSize}LetterSpacing)`,
             });    
         })
         vk.setVars({ // TODO: static?
@@ -239,7 +290,7 @@ export class CSSGenerator {
             vk.setVars({
                 "chipTypography": `var(--${typography}FontWeight) var(--${typography}FontSize) / var(--${typography}LineHeight) var(--${typography}FontFamily)`,
                 "chipTextTransform": `var(--${typography}TextTransform)`,
-                "chipCharacterSpacing": `var(--${typography}CharacterSpacing)`,
+                "chipLetterSpacing": `var(--${typography}LetterSpacing)`,
             });    
         });
         // switch - TODO - part of charts?
@@ -362,20 +413,20 @@ export class CSSGenerator {
             "hero-padding": "var(--spacing-3)",
             "hero-heroTitleTopography": "var(--Display1FontWeight) var(--Dislay1FontSize) / var(--Display1LineHeight) var(--Display1FontFamily)",
             "hero-heroTitleTransform": "var(--Display1TextTransform)",
-            "hero-heroTitleSpacing": "var(--Dislay1CharacterSpacing)",
+            "hero-heroTitleSpacing": "var(--Dislay1LetterSpacing)",
             "hero-heroBodyTypography": "var(--body1FontWeight) var(--body1FontSize) / var(--body1LineHeight) var(--body1FontFamily)",
             "hero-heroBodyTransform": "var(--body1TextTransform)",
-            "hero-heroBodySpacing": "var(--body1CharacterSpacing)",
+            "hero-heroBodySpacing": "var(--body1LetterSpacing)",
             "hero-title-gap": "16px",
             "hero-justify-content": "flex-start",
         });
         // tables
         vk.setVars({ // TODO: static?
             "tableheaderTopography": "var(--label-1FontWeight) var(--label-1FontSize) / var(--label-1LineHeight) var(--label-1FontFamily)",
-            "tableheaderSpacing": "var(--label-1CharacterSpacing)",
+            "tableheaderSpacing": "var(--label-1LetterSpacing)",
             "tableheaderTransform": "var(--label-1TextTransform)",
             "tablebodyTopography": "var(--body1FontWeight) var(--body1FontSize) / var(--body1LineHeight) var(--body1FontFamily)",
-            "tablebodySpacing": "var(--body1CharacterSpacing)",
+            "tablebodySpacing": "var(--body1LetterSpacing)",
             "tablebodyTransform": "var(--body1TextTransform)",
             "tableheaderPadding": "1",
             "tablebodyPadding": "1",
@@ -919,7 +970,15 @@ export class CSSVariableKind {
 
     private addProp(prop: Property<any>) {
         this.props.push(prop);
-        const p = prop.getParent();
+        let p = prop.getParent();
+        let b = true;
+        while (b && p) {
+            const parent = p?.getParent();
+            if (parent?.name == "atoms") b = false;
+            else if (parent?.name == "molecules") b = false;
+            else if (parent?.name == "organisms") b = false;
+            else p = parent;
+        }
         if (!p) throw new Error(`Property ${prop.name} has no parent`);
         if (this.componentKeys.indexOf(p.key) < 0) {
             this.componentKeys.push(p.key);
