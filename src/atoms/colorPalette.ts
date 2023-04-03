@@ -183,6 +183,15 @@ export class ColorPalette extends Atom implements IColorPalette {
         return shades;
     }
 
+    /**
+     * Return a 1-based index for this color in the palette.
+     * @param color A color
+     * @returns A 1-based index for this color
+     */
+    public getColorIndex(color: Color): number {
+        return Object.values(this.colors).indexOf(color);
+    }
+
     public serialize(): any {
         const obj = super.serialize();
         obj.colors = [];
@@ -215,12 +224,19 @@ export class Color extends Node implements IColor {
     /** The generated dark mode shades for the color */
     public dark!: ColorMode;
 
+    private palette: ColorPalette;
+
     constructor(name: string, hex: string, palette: ColorPalette ) {
         super(name, palette);
+        this.palette = palette;
         this.hex = new PropertyString("hex", false, this);
         this.hex.setValue(hex);
         this.hex.setListener("_tb.colorListener", this.buildShades.bind(this));
         log.debug(this.toString());
+    }
+
+    public getIndex(): number {
+        return this.palette.getColorIndex(this);
     }
 
     private buildShades(vc: EventValueChange<string>) {

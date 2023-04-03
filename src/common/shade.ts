@@ -41,33 +41,46 @@ interface ColorMode {
  */
 export class Shade {
 
-    private static coreShadeMap: {[key:string]: Shade} = {};
+    private static coreShadeMap: {[coreShadeName:string]: Shade} = {};
 
     /** The black shade */
-    public static BLACK = Shade.fromHex("#121212", "BLACK");
+    public static BLACK = Shade.fromHex("#121212", "Black");
+    /** The near black shade */
+    public static NEAR_BLACK = Shade.fromHex("#181818", "Near-Black");
     /** The half-black shade */
-    public static HALF_BLACK = Shade.fromHex("#000000", "HALF_BLACK").setOpacity(0.5);
+    public static HALF_BLACK = Shade.fromHex("#000000", "Half-Black").setOpacity(0.5);
     /** The off-black shade */
-    public static OFF_BLACK = Shade.fromHex("#343231", "OFF_BLACK");
+    public static OFF_BLACK = Shade.fromHex("#343231", "Off-Black");
     /** The white shade */
-    public static WHITE = Shade.fromHex("#FFFFFF", "WHITE");
+    public static WHITE = Shade.fromHex("#FFFFFF", "White");
     /** The half-white shade */
-    public static HALF_WHITE = Shade.fromHex("#FFFFFF", "HALF_WHITE").setOpacity(0.5);
+    public static HALF_WHITE = Shade.fromHex("#FFFFFF", "Half-White").setOpacity(0.5);
     /** The off-white shade */
-    public static OFF_WHITE = Shade.fromHex("#FAF9F6", "OFF_WHITE");
+    public static OFF_WHITE = Shade.fromHex("#FAF9F6", "Off-White");
+    /** The gray shade */
+    public static GRAY = Shade.fromHex("#FAFAFA", "Gray");
     /** The white dark mode shade */
-    public static WHITE_DM = Shade.fromHex("#FFFFFF", "WHITE_DM").setOpacity(0.6);
+    public static WHITE_DM = Shade.fromHex("#FFFFFF", "White-DM").setOpacity(0.6);
     /** The half-white dark mode shade */
-    public static HALF_WHITE_DM = Shade.fromHex("#FFFFFF", "HALF_WHITE_DM").setOpacity(0.4);
+    public static HALF_WHITE_DM = Shade.fromHex("#FFFFFF", "Half-White-DM").setOpacity(0.4);
     /** The dark blue shade */
-    public static DARK_BLUE = Shade.fromHex("#1D1D1F", "DARK_BLUE");
+    public static DARK_BLUE = Shade.fromHex("#1D1D1F", "Dark-Blue");
     public static DARKEN_MULTIPLIER = 0.99;
     public static LIGHTEN_MULTIPLIER = 1.01;
     
-    public static byKey(key: string): Shade | undefined {
-        return Shade.coreShadeMap[key];
+    /**
+     * Get a core shade given the core shade name.
+     * @param coreShadeName The core shade name.
+     * @returns The core shade, or undefined if none found by this name.
+     */
+    public static getCoreShade(coreShadeName: string): Shade | undefined {
+        return Shade.coreShadeMap[coreShadeName];
     }
 
+    /**
+     * Get all core shades.
+     * @returns All core shades.
+     */
     public static coreShades(): Shade[] {
         return Object.values(Shade.coreShadeMap);
     }
@@ -75,14 +88,17 @@ export class Shade {
     /**
      * Create a shade object from it's hex value.
      * @param hex The hex value for the color shade.
-     * @param key An optional unique key for this object.
+     * @param coreShadeName An optional core shade name for this object.
      * @returns The shade object
      */
-    public static fromHex(hex: string, key?: string): Shade {
+    public static fromHex(hex: string, coreShadeName?: string): Shade {
         const shade = new Shade({hex});
-        if (key) {
-            shade.key = key;
-            Shade.coreShadeMap[key] = shade;
+        if (coreShadeName) {
+            if (Shade.getCoreShade(coreShadeName)) {
+                throw new Error(`Core shade '${coreShadeName}' already exists`);
+            }
+            shade.coreShadeName = coreShadeName;
+            Shade.coreShadeMap[coreShadeName] = shade;
         }
         return shade;
     }
@@ -136,6 +152,7 @@ export class Shade {
     /** The onHex value for this shade */
     public onHex: string = "";
     public key?: string;
+    public coreShadeName?: string;
     private luminance?: number;
     private contrastShade?: Shade;
     private lightness?: number;
@@ -195,6 +212,14 @@ export class Shade {
     public setMode(mode: ColorMode): Shade {
         this.mode = mode;
         return this;
+    }
+
+    /**
+     * Determine if this shade is a core shade.
+     * @returns True if this is a core shade; false, otherwise.
+     */
+    public isCore(): boolean {
+        return this.coreShadeName !== undefined;
     }
 
     /**
@@ -796,12 +821,16 @@ export class Shade {
         if (this.opacity === 1) {
             return this.hex;
         } else {
-            return `rgba(${this.R},${this.G},${this.B},${this.opacity})`;
+            return this.getRGBA();
         }
     }
 
     public getRGB(): string {
         return `rgb(${this.R},${this.G},${this.B})`;
+    }
+
+    public getRGBA(): string {
+        return `rgba(${this.R},${this.G},${this.B},${this.opacity})`;
     }
 
     /**
@@ -813,6 +842,24 @@ export class Shade {
         c.mode = this.mode;
         c.index = this.index;
         return c;
+    }
+
+    public equals(shade: Shade): boolean {
+        return this.R === shade.R && this.G === shade.G && this.B === shade.B && this.opacity === shade.opacity;
+    }
+
+    public isSameColor(shade: Shade): boolean {
+        return this.getMode().color.name === shade.getMode().color.name;
+    }
+
+    public toJSON(): Object {
+        return this.hex;
+    }
+
+    public toString() {
+        let str = `index=${this.index}, hex=${this.hex}, opacity=${this.opacity}, onHex=${this.onHex}, id=${this.id}`;
+        if (this.isCore()) str = `core=${this.coreShadeName}, ${str}`;
+        return str;
     }
 
     public deserialize(obj: any) {
@@ -827,18 +874,6 @@ export class Shade {
 
     public serialize(): any {
         return { hex: this.hex, opacity: this.opacity };
-    }
-
-    public toJSON(): Object {
-        return this.hex;
-    }
-
-    public toString() {
-        return `key=${this.key}, index=${this.index}, hex=${this.hex}, opacity=${this.opacity}, onHex=${this.onHex}, id=${this.id}`;
-    }
-
-    public equals(shade: Shade): boolean {
-        return this.R === shade.R && this.G === shade.G && this.B === shade.B && this.opacity === shade.opacity;
     }
 
 }
