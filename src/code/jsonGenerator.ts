@@ -375,7 +375,6 @@ export class JSONGenerator {
         const tableHeaderPadding = this.organisms.dataTables.padding.getValue() || 0;
         const primaryNavPadding = this.organisms.primaryNav.horizontalTabPadding.getValue() || 0;
         const secondaryNavPadding = this.organisms.secondaryNav.horizontalTabPadding.getValue() || 0;
-        const modalPadding = this.molecules.modal.borderRadius.getValue() || 0;  // TODO: modalPadding from modal.borderRadius?
         const fcn = function(size: number) { return {type, value: `{Spacing.spacing-1} * ${size}`}; };
         return {
             "Spacing-1": {type, value: `${spacing}px`},
@@ -389,12 +388,12 @@ export class JSONGenerator {
             "Section-Padding": fcn(sectionPadding),
             "Paragraph-Padding": fcn(paragraphPadding),
             "TableHeader-Padding": fcn(tableHeaderPadding),
-            "TableBody-Padding": fcn(1), // TODO: static?
+            "TableBody-Padding": fcn(1),
             "PrimaryNav-Padding": fcn(primaryNavPadding),
             "SecondaryNav-Padding": fcn(secondaryNavPadding),
-            "Toast-Padding": fcn(1), // TODO: static?
-            "Tooltip-Padding": fcn(1), // TODO: static?
-            "Modal-Padding": fcn(modalPadding),
+            "Toast-Padding": fcn(1),
+            "Tooltip-Padding": fcn(1),
+            "Modal-Padding": fcn(3),
         };
     }
 
@@ -445,7 +444,7 @@ export class JSONGenerator {
     }
 
     private getBorders(lm: boolean): any {
-        const defaultColor = lm ? "" : ""; // TODO: what is borderDefault && dmborderDefault
+        const defaultColor = lm ? "" : "";
         const bottomLine = `linear-gradient(0deg, ${defaultColor}, 1px, #00000000 1px)`;
         return {
             "Default": this.getColor(defaultColor), 
@@ -604,14 +603,17 @@ export class JSONGenerator {
         const modalElevation = this.molecules.modal.elevation;
         const toastElevation = this.molecules.toasts.elevation;
         const dropDownElevation = this.molecules.dropdowns.menuElevation;
-        const fcn = function(elevation: PropertyElevationSelectable, bevel?: PropertyBevelSelectable): any {
-            let value: string = "{Elevation-Shadows.elevation-" + elevation.toIndex() + "}";
-            if (bevel) {
-                const idx = bevel.toIndex();
-                if (idx >= 0) value = value + ",{Bevels.bevel-" + idx + "}";
-                else value = value + ",{Inverse-Bevels.bevel-" + -idx + "}";
+        const fcn = function(elevationIdx: number, bevelIdx?: number): any {
+            let value: string = "{Elevation-Shadows.elevation-" + elevationIdx + "}";
+            if (bevelIdx !== undefined) {
+                if (bevelIdx >= 0) value = value + ",{Bevels.bevel-" + bevelIdx + "}";
+                else value = value + ",{Inverse-Bevels.bevel-" + -bevelIdx + "}";
             }
             return { type: "boxShadow", value  };
+        };
+        const fcn1 = function(elevation: PropertyElevationSelectable, bevel?: PropertyBevelSelectable): any {
+            if (bevel) return fcn(elevation.toIndex(), bevel.toIndex());
+            return fcn(elevation.toIndex());
         };
         const fcn2 = function(shadow: PropertyShadowSelectable): any {
             const idx = shadow.toIndex();
@@ -619,17 +621,17 @@ export class JSONGenerator {
             return { type: "boxShadow", value  };
         };
         return {
-            "Button-Shadow": fcn(buttonElevation, buttonBevel),
-            "Chip-Shadow": fcn(chipElevation),
-            "Avatar-Shadow": fcn(avatarElevation),
-            "Card-Shadow": fcn(cardElevation, cardBevel),
-            "Image-Shadow": fcn(imageElevation),
-            "SliderHandle-Shadow": fcn(sliderHandleElevation),
+            "Button-Shadow": fcn1(buttonElevation, buttonBevel),
+            "Chip-Shadow": fcn1(chipElevation),
+            "Avatar-Shadow": fcn1(avatarElevation),
+            "Card-Shadow": fcn1(cardElevation, cardBevel),
+            "Image-Shadow": fcn1(imageElevation),
+            "SliderHandle-Shadow": fcn1(sliderHandleElevation),
             "SliderBar-Shadow": fcn2(sliderBarShadow),
-            "Modal-Shadow": fcn(modalElevation),
-            // TODO: where from?  "Tooltip-Shadow": fcn(),
-            "Toast-Shadow": fcn(toastElevation), // TODO: Where does toastBevel come from?
-            "Dropdown-Shadow": fcn(dropDownElevation),
+            "Modal-Shadow": fcn1(modalElevation),
+            "Tooltip-Shadow": fcn(0,0),
+            "Toast-Shadow": fcn(toastElevation.toIndex(),0),
+            "Dropdown-Shadow": fcn1(dropDownElevation),
         };
     }
 
