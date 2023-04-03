@@ -252,13 +252,7 @@ export class CSSGenerator {
         this.addPropVar("button-height", "", stb.height);
         this.addPropVar("button-elevation", "", stb.buttonElevation, elevationToCSS);
         this.addPropVar("button-bevel", "", stb.buttonBevel, bevelToCSS);
-        vk.setVars({ // TODO: static?
-            "button": "TODO",
-            "on-button": "TODO",
-            "button-half": "TODO",
-            "dm-on-button": "TODO",
-            "dm-button": "TODO",
-            "dm-button-half": "TODO",
+        vk.setVars({
             "button-shadow": "var(--button-elevation), var(--button-bevel)",
         });
         // small button
@@ -956,19 +950,25 @@ export class CSSVariableKind {
     }
 
     private setButtonGroupVars(name: string, lm: boolean, sg: ShadeGroup) {
-        const prefix = lm ? "" : "dm";
-        this.setButtonVarRef(`buttonOn${name}`, prefix, sg.shade);
-        this.setButtonVarRef(`buttonHalfOn${name}`, prefix, sg.halfShade);
-        this.setButtonVarRef(`onbuttonOn${name}`, prefix, sg.onShade);
+        if (name === "Default") {
+            const prefix = lm ? "" : "dm-";
+            this.setButtonVarRef(`${prefix}button`, sg.shade);
+            this.setButtonVarRef(`${prefix}on-button`, sg.onShade);
+            this.setButtonVarRef(`${prefix}button-half`, sg.halfShade);
+        } else {
+            const prefix = lm ? "" : "dm";
+            this.setButtonVarRef(`${prefix}buttonOn${name}`, sg.shade);
+            this.setButtonVarRef(`${prefix}onbuttonOn${name}`, sg.onShade);
+            this.setButtonVarRef(`${prefix}buttonHalfOn${name}`, sg.halfShade);
+        }
     }
 
-    private setButtonVarRef(name: string, prefix: string, shade: Shade) {
-        const fullName = `${prefix}${name}`;
+    private setButtonVarRef(name: string, shade: Shade) {
         const varName = getShadeVarName(shade);
         if (varName) {
-            this.cssGenerator.setVar(fullName, "", this, `var(--${varName})`);
+            this.cssGenerator.setVar(name, "", this, `var(--${varName})`);
         } else {
-            this.setShadeVar(fullName, shade);
+            this.setShadeVar(name, shade);
         }
     }
 
