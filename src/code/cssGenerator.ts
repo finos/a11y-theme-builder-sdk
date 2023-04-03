@@ -152,7 +152,7 @@ export class CSSGenerator {
         this.addPropVar("baseFont", "px", fs.baseFontSize);
         const fw = fs.fontWeights;
         for (let i = 0; i < fw.length; i++) {
-            this.addPropVar(`font-weight-${i}`, "", fw[i]);
+            this.addPropVar(`fontWeight-${i}`, "", fw[i]);
         }
         this.addPropVar("standard-LineHeight", "%", fs.standardLineHeight);
         this.addPropVar("header-LineHeight", "%", fs.headerLineHeight);
