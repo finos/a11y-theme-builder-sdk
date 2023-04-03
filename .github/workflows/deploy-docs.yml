@@ -20,7 +20,16 @@ jobs:
         with:
           node-version: '16'
       - run: npm ci
-      - run: npm run build-docs     
+      - run: npm run build-docs   
+
+      - name: Init new repo in dist folder and commit generated files
+        run: |
+          cd docs
+          git init
+          git add -A
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git commit -m 'deploy'
 
       - name: Force push to destination branch
         uses: ad-m/github-push-action@v0.5.0
