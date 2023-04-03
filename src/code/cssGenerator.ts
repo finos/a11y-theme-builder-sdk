@@ -222,7 +222,7 @@ export class CSSGenerator {
         this.addPropVar("dropdown-focus-theme", "", mfs, dropDownToCSS);
         this.addPropVar("dropdown-elevation", "", dd.menuElevation, elevationToCSS);
         this.addPropVar("dropdown-radius", "", dd.borderRadius);
-        vk.setVars({ // TODO: static
+        vk.setVars({
             "dropdown-focus-bg": "linear-gradient(90deg, var(--button) var(--dropdown-focus-theme), var(--transparent) var(--dropdown-focus-theme))",
             "on-dropdown-focus-bg": "#ffffff",
             "dm-dropdown-focus-bg": "linear-gradient(90deg, var(--dm-button) var(--dropdown-focus-theme), var(--transparent) var(--dropdown-focus-theme))",
@@ -268,9 +268,9 @@ export class CSSGenerator {
                 "sm-buttonLetterSpacing": `var(--${ctaSize}LetterSpacing)`,
             });    
         })
-        vk.setVars({ // TODO: static?
+        vk.setVars({
             "groupButton-radius": "calc(var(--radius-1) * var(--button-radius) * 1.6)",
-            "groupButtonBG": "#ffffff", // TODO?
+            "groupButtonBG": "#ffffff", // TODO: This should be dynamic
             "on-groupButtonBG": "var(--textDark)",
             "dm-groupButtonBG": "rgba(0,0,0,.6)",
             "dm-on-groupButtonBG": "var(--dm-dmwhite)",
@@ -293,10 +293,10 @@ export class CSSGenerator {
         });
         // switch - TODO - part of charts?
         vk.setVars({
-           "switch-height": "var(--spacing-3)",
-           "switch-radius": "3",
-           "switch-bar-height": "var(--spacing-1)", // I see bar width and radius, but not height
-           "switch-bar-radius": "1",
+           "switch-height": "var(--spacing-3)",  // TODO: should be dynamic
+           "switch-radius": "3", // TODO: should be dynamic
+           "switch-bar-height": "0.5", // TODO: should be dynamic
+           "switch-bar-radius": "0.5", // TODO: should be dynamic
         });
         // cards
         const card = ms.standardCards;
@@ -305,12 +305,12 @@ export class CSSGenerator {
         this.addPropVar("card-radius", "", card.borderRadius);
         this.addPropVar("card-elevation", "", card.elevation, elevationToCSS);
         this.addPropVar("card-bevel", "", card.bevel, bevelToCSS);
-        vk.setVars({ // TODO: static?
-            "card-border": "1",
+        vk.setVars({
+            "card-border": "var(--border-1)",
             "card-border-color": "var(--border)",
             "card-shadow": "var(--card-elevation), var(--card-bevel)",
         });
-        // modals - TODO: How should modal.color be used?
+        // modals - TODO: modal-overlay comes modal molecule
         const modal = ms.modal;
         this.addPropVar("modal-radius", "px", modal.borderRadius);
         this.addPropVar("modal-elevation", "", modal.elevation, elevationToCSS);
@@ -320,14 +320,14 @@ export class CSSGenerator {
             "modal-shadow": "var(--spacing-2)",
             "modal-overlay": "var(--spacing-2)",
         });
-        // tooltips - TODO: where do these come from?
         vk.setVars({
-            "dmtooltip": "",
+            // TODO: Need to set tooltip-color & tooltip-oncolor for lm & dm 
+            // The tooltip on-color should always the opposite of the background (dark vs white)
+            "dmtooltip": "", // TODO: There should be a tooltip color and on-color for both lm and dm
             "tooltip-padding": "var(--spacing-2)",
-            "tooltip-border": "var(--spacing-1)",
+            "tooltip-border": "var(--border-1)",
             "tooltip-elevation": "0",
         });
-        // toasts - TODO: How is gap used?
         const toast = ms.toasts;
         this.addPropVar("toast-radius", "", toast.handleBorderRadius);
         this.addPropVar("toast-elevation", "", toast.elevation, elevationToCSS);
@@ -350,9 +350,11 @@ export class CSSGenerator {
         vk.setVar("avatar-shadow", "var(--avatar-elevation)");
         // sliders
         const slider = ms.sliders;
-        this.addPropVar("sliderhandleHeight", "px", slider.barHeight);
+        this.addPropVar("sliderhandleHeight", "px", slider.visibleHeight);
         this.addPropVar("sliderhandleRadius", "px", slider.handleBorderRadius);
-        vk.setVar("barInBevel", "1"); // TODO: where from?
+        this.addPropVar("sliderhandleElevation", "px", slider.handleElevation);
+        this.addPropVar("sliderBarHeight", "px", slider.barHeight);
+        this.addPropVar("barInBevel", "", slider.barInsetShadow);
         // popover
         const popover = ms.popovers;
         this.addPropVar("popoverRadius", "", popover.borderRadius);
@@ -364,13 +366,11 @@ export class CSSGenerator {
     private setOrganismVars() {
         const org = this.organisms;
         const vk = new CSSVariableKind("organism","",[], this);
-        // leftNav - TODO - listed under molecules?
         vk.setVars({
           "leftNav": "var(--gray-100)",
           "on-leftNav": "var(--on-gray-100)",
           "leftNavPadding": "var(--spacing-2)",
         });
-        // footer - TODO - listed under molecules?
         const fc = org.footerAndCopyright;
         this.addPropVar("footer-padding", "px", fc.footerVerticalPadding);
         vk.setVars({
@@ -379,7 +379,6 @@ export class CSSGenerator {
             "dm-footer": "var(--dm-gray-900)",
             "dm-on-footer": "var(--dm-on-gray-900)",
         });
-        // copyright - TODO - listed under molecules?
         vk.setVars({
             "copyright": "var(--nearblack)",
             "on-copyright": "var(--on-nearblack)",
@@ -387,27 +386,25 @@ export class CSSGenerator {
             "dm-copyright": "var(--nearblack)",
             "dm-on-copyright": "var(--dm-on-nearblack)",
         });
-        // paragraph - TODO: static? - listed under molecules?
         vk.setVar("p-padding", "1");
-        // sections - TODO static? listed under molecules?
         vk.setVar("section-padding", "3");
         // navbar primary
         const pnav = org.primaryNav;
         this.addPropVar("navbarPrimary-padding", "px", pnav.verticalPadding);
         this.addPropVar("navbarPrimary-position", "", pnav.fixed, function(vk: CSSVariableKind) {
-            vk.setVar(vk.name, pnav.fixed.getValue() ? "fixed" : "relative"); // TODO: Is "relative" correct?
+            vk.setVar(vk.name, pnav.fixed.getValue() ? "fixed" : "relative");
         });
         // navbar secondary /
         const snav = org.secondaryNav;
         this.addPropVar("navbarSecondary-padding", "px", snav.verticalPadding);
         this.addPropVar("navbarSecondary-position", "", snav.sticky, function(vk: CSSVariableKind) {
-            vk.setVar(vk.name, snav.sticky.getValue() ? "sticky" : "fixed"); // TODO: Is "fixed" correct?
+            vk.setVar(vk.name, snav.sticky.getValue() ? "sticky" : "fixed");
         });
-        vk.setVar("navbarSecondary-stickyTop", "48px"); // TODO: static?
+        vk.setVar("navbarSecondary-stickyTop", "0"); // TODO: should be dynamic
         // hero
         const hero = org.hero;
         this.addPropVar("hero-gap", "px", hero.verticalGap);
-        vk.setVars({ // TODO: Static?  
+        vk.setVars({
             "hero-padding": "var(--spacing-3)",
             "hero-heroTitleTopography": "var(--Display1FontWeight) var(--Dislay1FontSize) / var(--Display1LineHeight) var(--Display1FontFamily)",
             "hero-heroTitleTransform": "var(--Display1TextTransform)",
@@ -419,7 +416,7 @@ export class CSSGenerator {
             "hero-justify-content": "flex-start",
         });
         // tables
-        vk.setVars({ // TODO: static?
+        vk.setVars({
             "tableheaderTopography": "var(--label-1FontWeight) var(--label-1FontSize) / var(--label-1LineHeight) var(--label-1FontFamily)",
             "tableheaderSpacing": "var(--label-1LetterSpacing)",
             "tableheaderTransform": "var(--label-1TextTransform)",
@@ -952,19 +949,19 @@ export class CSSVariableKind {
     private setButtonGroupVars(name: string, lm: boolean, sg: ShadeGroup) {
         if (name === "Default") {
             const prefix = lm ? "" : "dm-";
-            this.setButtonVarRef(`${prefix}button`, sg.shade);
-            this.setButtonVarRef(`${prefix}on-button`, sg.onShade);
-            this.setButtonVarRef(`${prefix}button-half`, sg.halfShade);
+            this.setButtonVarRef(`${prefix}button`, sg.shade, false);
+            this.setButtonVarRef(`${prefix}on-button`, sg.onShade, true);
+            this.setButtonVarRef(`${prefix}button-half`, sg.halfShade, false);
         } else {
             const prefix = lm ? "" : "dm";
-            this.setButtonVarRef(`${prefix}buttonOn${name}`, sg.shade);
-            this.setButtonVarRef(`${prefix}onbuttonOn${name}`, sg.onShade);
-            this.setButtonVarRef(`${prefix}buttonHalfOn${name}`, sg.halfShade);
+            this.setButtonVarRef(`${prefix}buttonOn${name}`, sg.shade, false);
+            this.setButtonVarRef(`${prefix}onbuttonOn${name}`, sg.onShade, true);
+            this.setButtonVarRef(`${prefix}buttonHalfOn${name}`, sg.halfShade, false);
         }
     }
 
-    private setButtonVarRef(name: string, shade: Shade) {
-        const varName = getShadeVarName(shade);
+    private setButtonVarRef(name: string, shade: Shade, core: boolean) {
+        const varName = core ? getCoreShadeVarName(shade) : getShadeVarName(shade);
         if (varName) {
             this.cssGenerator.setVar(name, "", this, `var(--${varName})`);
         } else {
@@ -1102,10 +1099,13 @@ function getShadeVarName(shade: Shade): string | undefined {
         const color = mode.color;
         return `${prefix}color-${color.name}-${shade.index}`;
     }
+    return getCoreShadeVarName(shade);
+}
+
+function getCoreShadeVarName(shade: Shade): string | undefined {
     if (shade.coreShadeName) {
         return `color-${shade.coreShadeName}`;
     }
-    log.debug(`There is no shade variable name for ${shade.toString()}`);
     return undefined;
 }
 
