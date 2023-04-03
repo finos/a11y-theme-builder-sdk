@@ -71,7 +71,7 @@ export class DesignSystem extends Node implements IDesignSystem {
     public getShade(key: string): Shade | undefined {
         const shade = this.dsShades[key];
         if (shade) return shade;
-        return Shade.byKey(key);
+        return Shade.getCoreShade(key);
     }
 
     public findShade(key: string): Shade {

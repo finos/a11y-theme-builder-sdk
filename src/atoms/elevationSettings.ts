@@ -32,17 +32,17 @@ export class ElevationSettings extends Atom {
     constructor(atoms: IAtoms) {
         super("Elevation Settings", false, atoms);
         this.addDependency(atoms.colorThemes);
-        this.shadowColor = new PropertyString("Color", false, this);
+        this.shadowColor = new PropertyString("Color", false, this, {defaultValue: "#000000"});
         // TODO: What are the numeric ranges for the radius, opacity, and shadow length?
-        this.baseBlurRadius = new PropertyNumberRange("Base Blur Radius", false, this, 0, 10, 0);
-        this.baseSpreadRadius = new PropertyNumberRange("Base Spread Radius", false, this, 0, 10, 0);
-        this.baseColorOpacity = new PropertyNumberRange("Base Color Opacity", false, this, 0, 10, 0);
-        this.horizontalShadowLength = new PropertyNumberRange("Horizontal Shadow Length", false, this, 0, 10, 0);
-        this.verticalShadowLength = new PropertyNumberRange("Vertical Shadow Length", false, this, 0, 10, 0);
-        this.blurRadius = new PropertyNumberRange("Blur Radius", false, this, 0, 10, 0);
-        this.spreadRadius = new PropertyNumberRange("Spread Radius", false, this, 0, 10, 0);
-        this.colorOpacity = new PropertyNumberRange("Color Opacity", false, this, 0, 10, 0);
-        this.percentageChange = new PropertyPercentage("Percentage Change", false, this, 0);
+        this.baseBlurRadius = new PropertyNumberRange("Base Blur Radius", false, this, 0, 10, 2);
+        this.baseSpreadRadius = new PropertyNumberRange("Base Spread Radius", false, this, 0, 10, 2);
+        this.baseColorOpacity = new PropertyNumberRange("Base Color Opacity", false, this, 0, 100, 4);
+        this.horizontalShadowLength = new PropertyNumberRange("Horizontal Shadow Length", false, this, 0, 10, 2);
+        this.verticalShadowLength = new PropertyNumberRange("Vertical Shadow Length", false, this, 0, 10, 2);
+        this.blurRadius = new PropertyNumberRange("Blur Radius", false, this, 0, 10, 2);
+        this.spreadRadius = new PropertyNumberRange("Spread Radius", false, this, 0, 10, 2);
+        this.colorOpacity = new PropertyNumberRange("Color Opacity", false, this, 0, 100, 4);
+        this.percentageChange = new PropertyPercentage("Percentage Change", false, this, 20);
     }
 
     public deserialize(obj: any) {

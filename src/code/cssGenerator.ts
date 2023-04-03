@@ -617,7 +617,7 @@ export class CSSGenerator {
 
     private generateHotlinkVariables(vk: CSSVariableKind) {
         log.debug(`Generating hotlinks variables`);
-        const vars = this.atoms.hotlinks.getHotlinkVars();
+        const vars = this.atoms.hotlinks.getHotlinkVariables();
         if (vars) {
             this.generateHotlinkModeVariables(vars.lm, "", vk);
             this.generateHotlinkModeVariables(vars.dm, "dm-", vk);
@@ -1098,8 +1098,8 @@ function getShadeVarName(shade: Shade): string | undefined {
         const color = mode.color;
         return `${prefix}color-${color.name}-${shade.index}`;
     }
-    if (shade.key) {
-        return `color-${shade.key}`;
+    if (shade.coreShadeName) {
+        return `color-${shade.coreShadeName}`;
     }
     log.debug(`There is no shade variable name for ${shade.toString()}`);
     return undefined;
