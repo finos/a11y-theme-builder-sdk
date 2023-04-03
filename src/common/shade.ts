@@ -262,14 +262,6 @@ export class Shade {
     }
 
     /**
-     * Get the on shade for this shade.
-     * @returns The on shade
-     */
-    public getOnShade(): Shade {
-        return this.getOnShade2().clone().setMode(this.mode as ColorMode).setId(this.id);
-    }
-
-    /**
      * Get the light mode shade for this shade.
      * @returns The corresponding light mode shade for this shade
      */
@@ -285,21 +277,23 @@ export class Shade {
         return this.getMode().color.dark.shades[this.index];
     }
 
-    private getOnShade2(): Shade {
-        if (this.hex === Shade.BLACK.hex) return Shade.WHITE;
-        if (this.hex === Shade.HALF_BLACK.hex) return Shade.HALF_WHITE;
-        if (this.hex === Shade.OFF_BLACK.hex) return Shade.OFF_WHITE;
-        if (this.hex === Shade.WHITE.hex) return Shade.BLACK;
-        if (this.hex === Shade.HALF_WHITE.hex) return Shade.HALF_BLACK;
-        if (this.hex === Shade.OFF_WHITE.hex) return Shade.OFF_BLACK;
-        if (this.hex === Shade.OFF_BLACK.hex) return Shade.OFF_WHITE;
-        if (this.hex === Shade.WHITE_DM.hex) return Shade.BLACK;
-        if (this.hex === Shade.HALF_WHITE_DM.hex) return Shade.HALF_BLACK;
-        if (this.hex === Shade.DARK_BLUE.hex) return Shade.WHITE;
-        if (this.onHex !== "") {
-            return this.clone().setHex(this.onHex);
-        }
-        return this.getContrastShade().setOpacity(this.opacity);
+    /**
+     * Get the on shade for this shade.
+     * @returns The on shade
+     */
+    public getOnShade(): Shade {
+        if (this.equals(Shade.BLACK)) return Shade.WHITE;
+        if (this.equals(Shade.HALF_BLACK)) return Shade.HALF_WHITE;
+        if (this.equals(Shade.OFF_BLACK)) return Shade.OFF_WHITE;
+        if (this.equals(Shade.WHITE)) return Shade.BLACK;
+        if (this.equals(Shade.HALF_WHITE)) return Shade.HALF_BLACK;
+        if (this.equals(Shade.OFF_WHITE)) return Shade.OFF_BLACK;
+        if (this.equals(Shade.OFF_BLACK)) return Shade.OFF_WHITE;
+        if (this.equals(Shade.WHITE_DM)) return Shade.BLACK;
+        if (this.equals(Shade.HALF_WHITE_DM)) return Shade.HALF_BLACK;
+        if (this.equals(Shade.DARK_BLUE)) return Shade.WHITE;
+        if (this.onHex !== "") return Shade.fromHex(this.onHex);
+        return this.calculateContrastShade();
     }
 
     public getShadeGroup(): ShadeGroup {
