@@ -43,7 +43,7 @@ export class ColorPalette extends Atom implements IColorPalette {
         if (this.colors.get(name)) {
             throw Error(`Color ${name} already exists`);
         }
-        const color = new Color(name, hex, this);
+        const color = new Color(name, this.colors.size, hex, this);
         this.colors.set(name,color);
         if (!this.defaultColorName.isInitialized()) {
             this.defaultColorName.setValue(name);
@@ -221,6 +221,8 @@ export class ColorPalette extends Atom implements IColorPalette {
  */
 export class Color extends Node implements IColor {
 
+    /** The 0-based index of the color, in the order in which it was added */
+    public index: number;
     /** The hex value for the color */
     public hex: PropertyString;
     /** The generated light mode shades for the color */
@@ -230,9 +232,10 @@ export class Color extends Node implements IColor {
 
     private palette: ColorPalette;
 
-    constructor(name: string, hex: string, palette: ColorPalette ) {
+    constructor(name: string, index: number, hex: string, palette: ColorPalette ) {
         super(name, palette);
         this.palette = palette;
+        this.index = index;
         this.hex = new PropertyString("hex", false, this);
         this.hex.setValue(hex);
         this.hex.setListener("_tb.colorListener", this.buildShades.bind(this));

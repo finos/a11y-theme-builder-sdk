@@ -2,7 +2,7 @@
  * Copyright (c) 2023 Discover Financial Services
  * Licensed under MIT License. See License.txt in the project root for license information
  */
-import { Atoms, Shade, ColorTheme, GradientColors, StateSetting, BevelSettingsProps } from "../atoms/index";
+import { Atoms, Shade, Color, ColorTheme, GradientColors, StateSetting, BevelSettingsProps } from "../atoms/index";
 import { Molecules } from "../molecules/index";
 import { Organisms } from "../organisms/index";
 import { PropertyColorShade, PropertyElevationSelectable, PropertyBevelSelectable, PropertyShadowSelectable} from "../common/index";
@@ -38,6 +38,7 @@ export class JSONGenerator {
             return undefined;
         }
         const json: any = {};
+        json["All-Colors"] = this.getAllColors(lm);
         json["Theme-Colors"] = this.getThemeColors(theme, lm);
         json["Theme"] = this.getTheme(theme, lm);
         json["Solid-Backgrounds"] = this.getSolidBackgrounds(theme, lm);
@@ -71,6 +72,22 @@ export class JSONGenerator {
         return json;
     }
 
+    private getAllColors(lm: boolean): any {
+        const rtn: any = {};
+        this.atoms.colorPalette.getColors().forEach( color => {
+            const colorObj: any = {};
+            const onColorObj: any = {};
+            rtn[this.getColorId(color)] = { "Color": colorObj, "On-Color": onColorObj };
+            const shades = lm ? color.light.shades : color.dark.shades;
+            shades.forEach( shade => {
+                const id = this.getShadeId(shade);
+                colorObj[id] = this.getColor(shade.getRGB());
+                onColorObj[id] = this.getColor(shade.getOnShade().getRGB());
+            });
+        });
+        return rtn;
+    }
+
     private getThemeColors(theme: ColorTheme, lm: boolean): any {
         const self = this;
         const fcn = function(prop: PropertyColorShade, lm: boolean) {
@@ -82,9 +99,10 @@ export class JSONGenerator {
             const color: any = {};
             const onColor: any = {};
             shade.getMode().shades.forEach(shade => {
-                const id = self.getShadeId(shade);
-                color[id] = { value: shade.getRGB(), type: "color" };
-                onColor[id] = { value: shade.getOnShade().getRGB(), type: "color" };
+                const colorId = self.getColorIdForShade(shade);
+                const shadeId = self.getShadeId(shade);
+                color[shadeId] = self.getColor(`{All-Colors.${colorId}.Color.${shadeId}}`);
+                onColor[shadeId] = self.getColor(`{All-Colors.${colorId}.On-Color.${shadeId}}`);
             });
             return {
                 "Color": color,
@@ -103,16 +121,15 @@ export class JSONGenerator {
         const fcn = function(prop: PropertyColorShade, lm: boolean, name: string): any {
             let shade = prop.getValue();
             if (!shade) return;
-            if (!lm) shade = shade.getDarkModeShade();
-            const onShade = shade.getOnShade();
+            const id = self.getShadeId(shade);
             // Set theme
             return {
                 "Color": {
-                    value: `{Theme-Colors.${name}.Color.${self.getShadeId(shade)}}`,
+                    value: `{Theme-Colors.${name}.Color.${id}}`,
                     type: "color",
                 },
                 "On-Color": {
-                    value: `{Theme-Colors.${name}.On-Color.${self.getShadeId(onShade)}}`,
+                    value: `{Theme-Colors.${name}.On-Color.${id}}`,
                     type: "color",
                 },
             };
@@ -800,11 +817,6 @@ export class JSONGenerator {
         if (tertiary && shade.isSameColor(tertiary)) return "Tertiary";
     }
 
-    private getShadeId(shade: Shade): string {
-        if (shade.id === "0") return "050";
-        return shade.id;
-    }
-
     private getColorPair(value: string, onValue: string) {
         return {
             "Color": this.getColor(value),
@@ -822,6 +834,19 @@ export class JSONGenerator {
         const other: any = {type: "other"};
         if (value) other.value = value;
         return other;
+    }
+
+    private getColorIdForShade(shade: Shade): string {
+        return this.getColorId(shade.getMode().color as Color);
+    }
+
+    private getColorId(color: Color): string {
+        return `Color-${color.index+1}`;
+    }
+
+    private getShadeId(shade: Shade): string {
+        if (shade.id === "0") return "050";
+        return shade.id;
     }
 
 }
