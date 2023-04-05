@@ -21,8 +21,8 @@ export class SmallButtons extends Molecule {
 
     constructor(molecules: IMolecules) {
         super("Small Buttons", molecules);
-        this.visibleHeight = new PropertyNumberSelectable("Visible Height", false, this, {selectables: [24/8, 32/8, 40/8, 44/8], defaultValue: 32/8});
-        this.horizontalPadding = new PropertyNumberSelectable("Horizontal Padding", false, this, {selectables: [16/8, 24/8, 32/8, 48/8], defaultValue: 16/8});
+        this.visibleHeight = new PropertyNumberSelectable("Visible Height", false, this, [24/8, 32/8, 40/8, 44/8], 32/8);
+        this.horizontalPadding = new PropertyNumberSelectable("Horizontal Padding", false, this, [16/8, 24/8, 32/8, 48/8], 16/8);
         this.buttonText = new PropertyStringSelectable("Button Text", false, this, {
             selectables: ["CTA LARGE", "CTA Small"],
             defaultValue: "CTA Small",

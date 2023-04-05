@@ -21,7 +21,7 @@ export class Popovers extends Molecule {
 
     constructor(molecules: IMolecules) {
         super("Popovers", molecules);
-        this.borderRadius = new PropertyNumberSelectable("Border Radius", false, this, {selectables: [0, 1, 2, 3], defaultValue: 1});
+        this.borderRadius = new PropertyNumberSelectable("Border Radius", false, this, [0, 1, 2, 3], 1);
         this.elevation = new PropertyElevationSelectable("Popover Elevation", false, this, 0, 9, 0);
         this.bevel = new PropertyBevelSelectable("Popover Bevel", false, this, 0, 9);
     }

@@ -18,10 +18,7 @@ export class GridSettings extends Atom {
     constructor(atoms: IAtoms) {
         super("Grid Settings", false, atoms);
         this.addDependency(atoms.colorThemes);
-        this.grid = new PropertyNumberSelectable("grid", false, this, {
-            selectables: [8, 10],
-            defaultValue: 8,
-        });
+        this.grid = new PropertyNumberSelectable("grid", false, this, [8, 10], 8);
     }
 
     public deserialize(obj: any) {

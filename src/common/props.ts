@@ -324,15 +324,16 @@ export interface PropertySelectableOpts<S,T> extends PropertyOpts<T> {
 
 export class PropertyNumberSelectable extends PropertySelectable<number[],number> {
 
+    constructor(name: string, required: boolean, parent: Node, numbers: number[], defaultValue?: number) {
+        super(name, required, parent, { selectables: numbers, defaultValue });
+    }
+
 }
 
 export class PropertyPercentageSelectable extends PropertyNumberSelectable {
 
     constructor(name: string, required: boolean, parent: Node, percentages: number[], defaultPercentage: number) {
-        super(name, required, parent, {
-            selectables: percentages,
-            defaultValue: defaultPercentage,
-        });
+        super(name, required, parent, percentages, defaultPercentage);
     }
 
 }
