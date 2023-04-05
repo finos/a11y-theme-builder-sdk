@@ -4,7 +4,7 @@
  */
 import { IOrganisms } from "../interfaces";
 import { Organism } from "./organism";
-import { PropertyStringSelectable, PropertyPixelSelectable } from "../common/props";
+import { PropertyStringSelectable, PropertyNumberSelectable } from "../common/props";
 
 /**
  * The footer and copyright organism.
@@ -15,17 +15,17 @@ export class FooterAndCopyright extends Organism {
     /** The footer background property */
     public footerBackground: PropertyStringSelectable;
     /** The footer vertical padding property */
-    public footerVerticalPadding: PropertyPixelSelectable;
+    public footerVerticalPadding: PropertyNumberSelectable;
     /** The copyright vertical padding property */
-    public copyrightVerticalPadding: PropertyPixelSelectable;
+    public copyrightVerticalPadding: PropertyNumberSelectable;
 
     constructor(organisms: IOrganisms) {
         super("Footer And Copyright", organisms);
         this.footerBackground = new PropertyStringSelectable("Footer background", false, this, {
             selectables: ["Primary 800/Primary 900", "Primary 800/Primary 900"] // TODO: Shouldn't be duplicate selectable values
         });
-        this.footerVerticalPadding = new PropertyPixelSelectable("Footer vertical padding", false, this, [4, 8, 16, 24, 32, 40, 48]);
-        this.copyrightVerticalPadding = new PropertyPixelSelectable("Copyright vertical padding", false, this, [4, 8, 16, 24]);
+        this.footerVerticalPadding = new PropertyNumberSelectable("Footer vertical padding", false, this, [0.5, 1, 2, 3, 4, 5, 6], 5);
+        this.copyrightVerticalPadding = new PropertyNumberSelectable("Copyright vertical padding", false, this, [0.5, 1, 2, 3], 2);
     }
 
     public deserialize(obj: any) {

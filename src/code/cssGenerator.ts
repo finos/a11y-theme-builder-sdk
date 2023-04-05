@@ -318,7 +318,7 @@ export class CSSGenerator {
         this.addPropVar("modal-radius", "px", modal.borderRadius);
         this.addPropVar("modal-elevation", "", modal.elevation, elevationToCSS);
         vk.setVars({
-            "modal-padding": "var(--spacing-2)",
+            "modal-padding": "2",
             "modal-border": "var(--spacing-2)",
             "modal-shadow": "var(--spacing-2)",
             "modal-overlay": "var(--spacing-2)",
@@ -327,15 +327,15 @@ export class CSSGenerator {
             // TODO: Need to set tooltip-color & tooltip-oncolor for lm & dm 
             // The tooltip on-color should always the opposite of the background (dark vs white)
             "dmtooltip": "", // TODO: There should be a tooltip color and on-color for both lm and dm
-            "tooltip-padding": "var(--spacing-2)",
+            "tooltip-padding": "2",
             "tooltip-border": "var(--border-1)",
             "tooltip-elevation": "0",
         });
         const toast = ms.toasts;
         this.addPropVar("toast-radius", "", toast.handleBorderRadius);
         this.addPropVar("toast-elevation", "", toast.elevation, elevationToCSS);
-        this.addPropVar("toast-padding", "px", toast.gap);
         vk.setVars({
+            "toast-padding": "2",
             "toast-bevel": "var(--bevel-0)",
             "toast-boxshadow": "var(--toast-elevation), var(--toast-bevel)",
         });
@@ -375,7 +375,8 @@ export class CSSGenerator {
           "leftNavPadding": "var(--spacing-2)",
         });
         const fc = org.footerAndCopyright;
-        this.addPropVar("footer-padding", "px", fc.footerVerticalPadding);
+        this.addPropVar("footer-padding", "", fc.footerVerticalPadding);
+        this.addPropVar("copyright-padding", "", fc.copyrightVerticalPadding);
         vk.setVars({
             "footer": "var(--gray-900)",
             "on-footer": "var(--on-gray-900)",
@@ -385,7 +386,6 @@ export class CSSGenerator {
         vk.setVars({
             "copyright": "var(--nearblack)",
             "on-copyright": "var(--on-nearblack)",
-            "copyright-padding":  "var(--spacing-1)",
             "dm-copyright": "var(--nearblack)",
             "dm-on-copyright": "var(--dm-on-nearblack)",
         });
@@ -393,13 +393,13 @@ export class CSSGenerator {
         vk.setVar("section-padding", "3");
         // navbar primary
         const pnav = org.primaryNav;
-        this.addPropVar("navbarPrimary-padding", "px", pnav.verticalPadding);
+        this.addPropVar("navbarPrimary-padding", "", pnav.verticalPadding);
         this.addPropVar("navbarPrimary-position", "", pnav.fixed, function(vk: CSSVariableKind) {
             vk.setVar(vk.name, pnav.fixed.getValue() ? "fixed" : "relative");
         });
         // navbar secondary /
         const snav = org.secondaryNav;
-        this.addPropVar("navbarSecondary-padding", "px", snav.verticalPadding);
+        this.addPropVar("navbarSecondary-padding", "", snav.verticalPadding);
         this.addPropVar("navbarSecondary-position", "", snav.sticky, function(vk: CSSVariableKind) {
             vk.setVar(vk.name, snav.sticky.getValue() ? "sticky" : "fixed");
         });
@@ -408,7 +408,7 @@ export class CSSGenerator {
         const hero = org.hero;
         this.addPropVar("hero-gap", "px", hero.verticalGap);
         vk.setVars({
-            "hero-padding": "var(--spacing-3)",
+            "hero-padding": "3",
             "hero-heroTitleTopography": "var(--Display1FontWeight) var(--Dislay1FontSize) / var(--Display1LineHeight) var(--Display1FontFamily)",
             "hero-heroTitleTransform": "var(--Display1TextTransform)",
             "hero-heroTitleSpacing": "var(--Dislay1LetterSpacing)",

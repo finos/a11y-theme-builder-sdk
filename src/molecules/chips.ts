@@ -37,9 +37,9 @@ export class Chips extends Molecule {
    constructor(molecules: IMolecules) {
         super("Chips", molecules);
         this.minWidth = new PropertyPixel("Chip Min Width", false, this, {defaultValue: 80});
-        this.visibleHeight = new PropertyNumberSelectable("Visible Height", false, this, {selectables: [4, 5, 6, 7, 8], defaultValue: 5});
-        this.radius = new PropertyNumberSelectable("Chip Radius", false, this, {selectables: [0, 1, 2, 3, 4, 5, 6, 7, 8], defaultValue: 2});
-        this.horizontalPadding = new PropertyNumberSelectable("Horizontal Padding", false, this, {selectables: [1, 2, 3, 4, 5], defaultValue: 2});
+        this.visibleHeight = new PropertyNumberSelectable("Visible Height", false, this, [4, 5, 6, 7, 8], 5);
+        this.radius = new PropertyNumberSelectable("Chip Radius", false, this, [0, 1, 2, 3, 4, 5, 6, 7, 8], 2);
+        this.horizontalPadding = new PropertyNumberSelectable("Horizontal Padding", false, this, [1, 2, 3, 4, 5], 2);
         this.text = new PropertyStringSelectable("Chip Text", false, this, {
             selectables: ["Caption", "Caption Bold"],
             defaultValue: "Caption",

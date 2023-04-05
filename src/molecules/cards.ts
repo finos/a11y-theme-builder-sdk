@@ -35,9 +35,9 @@ export class Cards extends Molecule {
         super("Cards", molecules);
         this.minWidth = new PropertyPixel("Min Width", false, this, {defaultValue: 80});
         this.minHeight = new PropertyPixel("Min Height", false, this, {defaultValue: 80});
-        this.borderRadius = new PropertyNumberSelectable("Border Radius", false, this, {selectables: [4/8, 1, 2, 3, 4, 5, 6, 7], defaultValue: 3});
-        this.padding = new PropertyNumberSelectable("Padding", false, this, {selectables: [2, 3, 4, 5], defaultValue: 2});
-        this.contentGap = new PropertyNumberSelectable("Content Gap", false, this, {selectables: [1, 2, 3, 4, 5], defaultValue: 2});
+        this.borderRadius = new PropertyNumberSelectable("Border Radius", false, this, [4/8, 1, 2, 3, 4, 5, 6, 7], 3);
+        this.padding = new PropertyNumberSelectable("Padding", false, this, [2, 3, 4, 5], 2);
+        this.contentGap = new PropertyNumberSelectable("Content Gap", false, this, [1, 2, 3, 4, 5], 2);
         this.elevation = new PropertyElevationSelectable("Card Elevation", false, this, 0, 9, 2);
         this.bevel = new PropertyBevelSelectable("Card Bevel", false, this, 3, 9);
     }

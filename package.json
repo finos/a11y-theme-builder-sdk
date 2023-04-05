@@ -6,6 +6,10 @@
   "license": "ISC",
   "main": "build/index.js",
   "types": "build/index.d.ts",
+  "keywords": [
+    "accessibility",
+    "theme"
+  ],
   "scripts": {
     "build": "npm run build-lib && npm run build-docs",
     "build-lib": "npm install && tsc && npm pack ./",
