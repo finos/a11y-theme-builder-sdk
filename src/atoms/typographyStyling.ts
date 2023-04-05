@@ -40,7 +40,7 @@ export class TypographyStyling extends Node {
         super(name, parent);
         this.fontFamily = new PropertyFontFamily("Font Family", false, this);
         this.fontSize = new PropertyFontRange("Font Size", false, this, 0, 128, defaultFontSize);
-        this.fontWeight = new PropertyNumberSelectable("Font Weight", false, this, [100, 300, 400, 500, 600, 700], defaultFontWeight);
+        this.fontWeight = new PropertyNumberSelectable("Font Weight", false, this, [100, 300, 400, 500, 600, 700, 800, 900, 1000], defaultFontWeight);
         this.lineHeight = new PropertyPercentageSelectable("Line Height", false, this, [130, 160], defaultLineHeight);
         this.letterSpacing = new PropertyPixelRange("Character Spacing", false, this, -2, 10, defaultLetterSpacing);
     }

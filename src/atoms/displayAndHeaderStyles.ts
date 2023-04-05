@@ -27,14 +27,14 @@ export class DisplayAndHeaderStyles extends Atom {
         this.addDependency(atoms.colorThemes);
         this.headingDisplayFontWeight = new PropertyNumber("Heading/Display Font Weight", false, this, {defaultValue: 700});
         this.percentChangeInHeaderDisplaySizes = new PropertyRange("Percent Change in Header/Display Sizes", 0, 100, false, this);
-        this.displayStyles.push(new TypographyStyling(`Display 1`, this, 76.48, 400, 130, -1.5));
-        this.displayStyles.push(new TypographyStyling(`Display 2`, this, 69.76, 400, 130, -0.5));
-        this.headerStyles.push(new TypographyStyling(`Header 1`, this, 56.32, 400, 130, -0.5));
-        this.headerStyles.push(new TypographyStyling(`Header 2`, this, 49.6, 400, 130, -0.5));
-        this.headerStyles.push(new TypographyStyling(`Header 3`, this, 42.88, 400, 130, -0.5));
-        this.headerStyles.push(new TypographyStyling(`Header 4`, this, 36.16, 400, 130, -0.5));
-        this.headerStyles.push(new TypographyStyling(`Header 5`, this, 29.44, 400, 130, -0.5));
-        this.headerStyles.push(new TypographyStyling(`Header 6`, this, 25.72, 400, 130, -0.5));
+        this.displayStyles.push(new TypographyStyling(`Display 1`, this, 76.48, 400, 110, -1.5));
+        this.displayStyles.push(new TypographyStyling(`Display 2`, this, 69.76, 400, 110, -0.5));
+        this.headerStyles.push(new TypographyStyling(`Header 1`, this, 56.32, 400, 110, -0.5));
+        this.headerStyles.push(new TypographyStyling(`Header 2`, this, 49.6, 400, 110, -0.5));
+        this.headerStyles.push(new TypographyStyling(`Header 3`, this, 42.88, 400, 110, -0.5));
+        this.headerStyles.push(new TypographyStyling(`Header 4`, this, 36.16, 400, 110, -0.5));
+        this.headerStyles.push(new TypographyStyling(`Header 5`, this, 29.44, 400, 110, -0.5));
+        this.headerStyles.push(new TypographyStyling(`Header 6`, this, 25.72, 400, 110, -0.5));
     }
 
     public deserialize(obj: any) {
