@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2023 Discover Financial Services
+ * Licensed under MIT License. See License.txt in the project root for license information
+ */
 import * as chroma from "chroma-js";
 import { Node } from "../common/node";
 import { Atom } from "./atom";
@@ -39,7 +43,7 @@ export class ColorPalette extends Atom implements IColorPalette {
         if (this.colors.get(name)) {
             throw Error(`Color ${name} already exists`);
         }
-        const color = new Color(name, hex, this);
+        const color = new Color(name, this.colors.size, hex, this);
         this.colors.set(name,color);
         if (!this.defaultColorName.isInitialized()) {
             this.defaultColorName.setValue(name);
@@ -183,6 +187,15 @@ export class ColorPalette extends Atom implements IColorPalette {
         return shades;
     }
 
+    /**
+     * Return a 1-based index for this color in the palette.
+     * @param color A color
+     * @returns A 1-based index for this color
+     */
+    public getColorIndex(color: Color): number {
+        return Object.values(this.colors).indexOf(color);
+    }
+
     public serialize(): any {
         const obj = super.serialize();
         obj.colors = [];
@@ -208,6 +221,8 @@ export class ColorPalette extends Atom implements IColorPalette {
  */
 export class Color extends Node implements IColor {
 
+    /** The 0-based index of the color, in the order in which it was added */
+    public index: number;
     /** The hex value for the color */
     public hex: PropertyString;
     /** The generated light mode shades for the color */
@@ -215,12 +230,20 @@ export class Color extends Node implements IColor {
     /** The generated dark mode shades for the color */
     public dark!: ColorMode;
 
-    constructor(name: string, hex: string, palette: ColorPalette ) {
+    private palette: ColorPalette;
+
+    constructor(name: string, index: number, hex: string, palette: ColorPalette ) {
         super(name, palette);
+        this.palette = palette;
+        this.index = index;
         this.hex = new PropertyString("hex", false, this);
         this.hex.setValue(hex);
         this.hex.setListener("_tb.colorListener", this.buildShades.bind(this));
         log.debug(this.toString());
+    }
+
+    public getIndex(): number {
+        return this.palette.getColorIndex(this);
     }
 
     private buildShades(vc: EventValueChange<string>) {

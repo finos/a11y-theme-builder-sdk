@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2023 Discover Financial Services
+ * Licensed under MIT License. See License.txt in the project root for license information
+ */
 import { Node, ListenerSubscription } from "./node";
 import { Event, EventType, EventValueChange, EventCallback, EventValueChangeCallback, IProperty } from "../interfaces";
 import { Shade } from "./shade";
@@ -110,12 +114,14 @@ export class Property<T> extends Node implements IProperty {
 
     protected getShadeRef(shade?: Shade): any {
         if (!shade) return undefined;
+        if (shade.coreShadeName) return {coreShadeName: shade.coreShadeName};
         if (shade.key) return {key: shade.key};
         return {hex: shade.hex, opacity: shade.opacity, mode: shade.hasMode() ? shade.getMode().key : undefined}
     }
 
     protected getShadeFromRef(ref: any): Shade | undefined {
         if (!ref) return undefined;
+        if (ref.coreShadeName) return Shade.getCoreShade(ref.coreShadeName);
         if (ref.key) return this.getDesignSystem().findShade(ref.key);
         if (ref.hex) {
             const shade = Shade.fromHex(ref.hex);
@@ -318,15 +324,16 @@ export interface PropertySelectableOpts<S,T> extends PropertyOpts<T> {
 
 export class PropertyNumberSelectable extends PropertySelectable<number[],number> {
 
+    constructor(name: string, required: boolean, parent: Node, numbers: number[], defaultValue?: number) {
+        super(name, required, parent, { selectables: numbers, defaultValue });
+    }
+
 }
 
 export class PropertyPercentageSelectable extends PropertyNumberSelectable {
 
     constructor(name: string, required: boolean, parent: Node, percentages: number[], defaultPercentage: number) {
-        super(name, required, parent, {
-            selectables: percentages,
-            defaultValue: defaultPercentage,
-        });
+        super(name, required, parent, percentages, defaultPercentage);
     }
 
 }
@@ -347,6 +354,14 @@ export class PropertyElevationSelectable extends PropertyStringSelectable {
             selectables: PropertyElevationSelectable.toStrings(min, max),
             defaultValue: def ? `Elevation-${def}`: "No Elevation",
         });
+    }
+
+    public toIndex(): number {
+        const val = this.getValue() || "No Elevation";
+        if (val === "No Elevation") return 0;
+        if (val.startsWith("Elevation-")) return parseInt(val.substring("Elevation-".length));
+        if (val.startsWith("Reverse-Elevation-")) return parseInt(val.substring("Reverse-Elevation-".length));
+        throw new Error(`Invalid elevation: '${val}'`);
     }
 
     private static toStrings(min: number, max: number): string[] {
@@ -372,11 +387,11 @@ export class PropertyBevelSelectable extends PropertyStringSelectable {
     }
 
     public toIndex(): number {
-        const val = this.getValue();
-        if (!val || val === "No Bevel") return 0;
-        if (val.startsWith("Bevel-")) return parseInt(val.slice(6));
-        if (val.startsWith("Reverse-Bevel-")) return parseInt(val.slice(14));
-        throw new Error(`Invalid bevel value: ${val}`);
+        const val = this.getValue() || "No Bevel";
+        if (val === "No Bevel") return 0;
+        if (val.startsWith("Bevel-")) return parseInt(val.substring("Bevel-".length));
+        if (val.startsWith("Reverse-Bevel-")) return parseInt(val.substring("Reverse-Bevel-".length));
+        throw new Error(`Invalid bevel: '${val}'`);
     }
 
     private static toStrings(min: number, max: number): string[] {
@@ -399,6 +414,14 @@ export class PropertyShadowSelectable extends PropertyStringSelectable {
             selectables: PropertyShadowSelectable.toStrings(min, max),
             defaultValue: "None",
         });
+    }
+
+    public toIndex(): number {
+        const val = this.getValue() || "No Bevel";
+        if (val === "None") return 0;
+        if (val.startsWith("Shadow-")) return parseInt(val.substring("Shadow-".length));
+        if (val.startsWith("Inverse-Shadow-")) return parseInt(val.substring("Inverse-Shadow-".length));
+        throw new Error(`Invalid shadow: '${val}'`);
     }
 
     private static toStrings(min: number, max: number): string[] {

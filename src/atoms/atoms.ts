@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2023 Discover Financial Services
+ * Licensed under MIT License. See License.txt in the project root for license information
+ */
 import { ColorPalette } from "./colorPalette";
 import { ColorThemes } from "./colorThemes";
 import { FontsSettings } from "./fontsSettings";

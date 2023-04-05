@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2023 Discover Financial Services
+ * Licensed under MIT License. See License.txt in the project root for license information
+ */
 import { Molecule } from "./molecule";
 import { IMolecules } from "../interfaces";
 import { PropertyPixelSelectable, PropertyNumberSelectable, PropertyElevationSelectable, PropertyShadowSelectable } from "../common/props";
@@ -17,7 +21,7 @@ export class Toasts extends Molecule {
 
     constructor(molecules: IMolecules) {
         super("Toasts", molecules);
-        this.handleBorderRadius = new PropertyNumberSelectable("Handle Border Radius", false, this, {selectables: [0,8/8,16/8,24/8,32/8,40/8,48/8,56/8,64/8], defaultValue: 1});
+        this.handleBorderRadius = new PropertyNumberSelectable("Handle Border Radius", false, this, [0,1,2,3,4,5,6,7,8], 1);
         this.gap = new PropertyPixelSelectable("Gap", false, this, [8,16,24,32,40,44], 24);
         this.elevation = new PropertyElevationSelectable("Toast Elevation", false, this, 0, 9);
     }

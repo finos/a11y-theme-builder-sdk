@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2023 Discover Financial Services
+ * Licensed under MIT License. See License.txt in the project root for license information
+ */
 import { Color } from "./colorPalette";
 import { ColorTheme } from "./colorThemes";
 import { Atom } from "./atom";
@@ -53,15 +57,15 @@ export class Hotlinks extends Atom {
         this.underlineHotlinksInLightMode = new PropertyBoolean("Underline hotlinks in light mode", false, this, {defaultValue: true});
     }
 
-    public getHotlinkVariables(): HotlinkVariables {
-        const vars = this.getHotlinkVars();
+    public findHotlinkVariables(): HotlinkVariables {
+        const vars = this.getHotlinkVariables();
         if (!vars) {
             throw new Error("Failed to get hotlink variables");
         }
         return vars;
     }
 
-    public getHotlinkVars(): HotlinkVariables | undefined {
+    public getHotlinkVariables(): HotlinkVariables | undefined {
         log.debug(`Hotlinks.getHotlinkVariables enter`)
         const underline = this.underlineHotlinksInLightMode.getValue();
         if (underline === undefined) {

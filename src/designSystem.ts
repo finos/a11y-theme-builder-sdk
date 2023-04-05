@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2023 Discover Financial Services
+ * Licensed under MIT License. See License.txt in the project root for license information
+ */
 import { Node } from "./common/node";
 import { Layers } from "./layers/layers";
 import { Atoms } from "./atoms/atoms";
@@ -71,7 +75,7 @@ export class DesignSystem extends Node implements IDesignSystem {
     public getShade(key: string): Shade | undefined {
         const shade = this.dsShades[key];
         if (shade) return shade;
-        return Shade.byKey(key);
+        return Shade.getCoreShade(key);
     }
 
     public findShade(key: string): Shade {

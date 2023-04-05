@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2023 Discover Financial Services
+ * Licensed under MIT License. See License.txt in the project root for license information
+ */
 import { Storage } from "./storage/index";
 import { Shade } from "./common/shade";
 import { PropertyTitledShade, PropertyStringSelectable } from "./common";

@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2023 Discover Financial Services
+ * Licensed under MIT License. See License.txt in the project root for license information
+ */
 import { Molecule } from "./molecule";
 import { IMolecules } from "../interfaces";
 import { PropertyNumberSelectable, PropertyElevationSelectable } from "../common/props";
@@ -19,9 +23,9 @@ export class Images extends Molecule {
 
     constructor(molecules: IMolecules) {
         super("Images And Videos", molecules);
-        this.listImageHeight = new PropertyNumberSelectable("List Image Height", false, this, {selectables: [48/8, 56/8, 64/8, 72/8], defaultValue: 56/8});
-        this.listImageBorderRadius = new PropertyNumberSelectable("List Image Border Radius", false, this, {selectables: [0, 4/8, 8/8, 16/8], defaultValue: 1});
-        this.generalImageBorderRadius = new PropertyNumberSelectable("General Image Border Radius", false, this, {selectables: [0, 4/8, 8/8, 16/8, 24/8, 32/8], defaultValue: 2});
+        this.listImageHeight = new PropertyNumberSelectable("List Image Height", false, this, [48/8, 56/8, 64/8, 72/8], 56/8);
+        this.listImageBorderRadius = new PropertyNumberSelectable("List Image Border Radius", false, this, [0, 4/8, 8/8, 16/8], 1);
+        this.generalImageBorderRadius = new PropertyNumberSelectable("General Image Border Radius", false, this, [0, 4/8, 8/8, 16/8, 24/8, 32/8], 2);
         this.imageElevation = new PropertyElevationSelectable("Image Elevation", false, this, 0, 9, 0);
     }
 

@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2023 Discover Financial Services
+ * Licensed under MIT License. See License.txt in the project root for license information
+ */
 import { Molecule } from "./molecule";
 import { IMolecules } from "../interfaces";
 import { PropertyStringSelectable, PropertyNumberSelectable, PropertyElevationSelectable } from "../common/props";
@@ -22,7 +26,7 @@ export class Dropdowns extends Molecule {
             defaultValue: "Left border only",
         });
         this.menuElevation = new PropertyElevationSelectable("Open Dropdown Menu Elevation", true, this, 0, 9, 2);
-        this.borderRadius = new PropertyNumberSelectable("Dropdown Border Radius", true, this, {selectables: [0, 0.5, 1, 2], defaultValue: 1});
+        this.borderRadius = new PropertyNumberSelectable("Dropdown Border Radius", true, this, [0, 0.5, 1, 2], 1);
     }
 
     public deserialize(obj: any) {

@@ -1,6 +1,10 @@
+/*
+ * Copyright (c) 2023 Discover Financial Services
+ * Licensed under MIT License. See License.txt in the project root for license information
+ */
 import { IOrganisms } from "../interfaces";
 import { Organism } from "./organism";
-import { PropertyBoolean, PropertyPixelSelectable, PropertyButtonText } from "../common/props";
+import { PropertyBoolean, PropertyNumberSelectable, PropertyButtonText } from "../common/props";
 
 /**
  * The secondary nav organism.
@@ -11,17 +15,17 @@ export class SecondaryNav extends Organism {
     /** The sticky property */
     public sticky: PropertyBoolean;
     /** The vertical padding property */
-    public verticalPadding: PropertyPixelSelectable;
+    public verticalPadding: PropertyNumberSelectable;
     /** The horizontal tab padding property */
-    public horizontalTabPadding: PropertyPixelSelectable;
+    public horizontalTabPadding: PropertyNumberSelectable;
     /** The nav text property */
     public navText: PropertyButtonText;
 
     constructor(organisms: IOrganisms) {
         super("Secondary Nav", organisms);
         this.sticky = new PropertyBoolean("Sticky", false, this);
-        this.verticalPadding = new PropertyPixelSelectable("Vertical Padding", false, this, [4, 8, 16, 24]);
-        this.horizontalTabPadding = new PropertyPixelSelectable("Horizontal Tab Padding", false, this, [4, 8, 16, 24]);
+        this.verticalPadding = new PropertyNumberSelectable("Vertical Padding", false, this, [0.5,1,2,3], 1);
+        this.horizontalTabPadding = new PropertyNumberSelectable("Horizontal Tab Padding", false, this, [0.5,1,2,3], 1);
         this.navText = new PropertyButtonText("Nav Text", false, this);
     }
 

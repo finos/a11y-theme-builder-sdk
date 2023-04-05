@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2023 Discover Financial Services
+ * Licensed under MIT License. See License.txt in the project root for license information
+ */
 import { Atom } from "./atom";
 import { IAtoms } from "../interfaces";
 import { PropertyNumberSelectable } from "../common/props";
@@ -14,10 +18,7 @@ export class GridSettings extends Atom {
     constructor(atoms: IAtoms) {
         super("Grid Settings", false, atoms);
         this.addDependency(atoms.colorThemes);
-        this.grid = new PropertyNumberSelectable("grid", false, this, {
-            selectables: [8, 10],
-            defaultValue: 8,
-        });
+        this.grid = new PropertyNumberSelectable("grid", false, this, [8, 10], 8);
     }
 
     public deserialize(obj: any) {
