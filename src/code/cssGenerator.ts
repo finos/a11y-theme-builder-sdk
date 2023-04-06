@@ -85,6 +85,7 @@ export class CSSGenerator {
             "gray-0": "#fafafa",
             "gray-100": "#e4e4e4",
             "gray-200": "#cdcdcd",
+            "gray-300": "#b7b7b7",
             "gray-400": "#a0a0a0",
             "gray-500": "#8a8a8a",
             "gray-600": "#737373",
@@ -434,7 +435,7 @@ export class CSSGenerator {
     // core system settings
     private coreSystemSettings() {
         const atoms = this.atoms;
-        const vk = new CSSVariableKind("", "", [], this);
+        let vk = new CSSVariableKind("", "", [], this);
         // targets
         this.addPropVar("min-target", "px", atoms.minimumTarget.minHeight);
         this.addPropVar("mobile-target", "px", atoms.minimumTarget.minHeight);
@@ -442,12 +443,14 @@ export class CSSGenerator {
         this.addPropVar("animation-distance", "px", atoms.animationSettings.hoverAndFocusAnimationDistance);
         this.addPropVar("animation-focus-distance", "px", atoms.animationSettings.hoverAndFocusAnimationDistance);
         // radius
+        vk = new CSSVariableKind("", "", [atoms.borderSettings.baseBorderRadius], this);
         vk.setVar("radius-0", "0px");
         this.addPropVar("radius-1", "px", atoms.borderSettings.baseBorderRadius);
         for (let i = 2; i <= 10; i++) vk.setVar(`radius-${i}`, `calc(var(--radius-1) * ${i})`);
         vk.setVar(`radius-quarter`, `calc(var(--radius-1 / 4)`);
         vk.setVar(`radius-half`, `calc(var(--radius-1 / 2)`);
         // spacing
+        vk = new CSSVariableKind("", "", [atoms.gridSettings.grid], this);
         vk.setVar("spacing-0", "0px");
         this.addPropVar("spacing-1", "px", atoms.gridSettings.grid);
         for (let i = 2; i <= 10; i++) vk.setVar(`spacing-${i}`, `calc(var(--spacing-1) * ${i})`);
@@ -455,10 +458,12 @@ export class CSSGenerator {
         vk.setVar(`spacing-half`, `calc(var(--spacing-1 / 2)`);
         vk.setVar(`negative-size-half`, `calc(0 - var(--spacing-1 / 2)`);
         // borders
+        vk = new CSSVariableKind("", "", [atoms.borderSettings.baseBorderWidth], this);
         vk.setVar("border-0", "0px");
         this.addPropVar("border-1", "px", atoms.borderSettings.baseBorderWidth);
         for (let i = 2; i <= 4; i++) vk.setVar(`border-${i}`, `calc(var(--border-1) * ${i})`);
         // elevation settings
+        vk = new CSSVariableKind("", "", [atoms.elevationSettings.percentageChange], this);
         this.addPercentToDecimal("elevation-change", atoms.elevationSettings.percentageChange);
         for (let i = 2; i <= 9; i++) vk.setVar(`change-${i}`, `calc(1 + calc(var(--elevation-change) * ${i}))`);
         this.addPropVar("elevation-horizontal", "px", atoms.elevationSettings.horizontalShadowLength);
@@ -844,7 +849,7 @@ class CSSTheme {
         this.setShadeListener({name: "text-gradient-b", pcs: this.theme.gradientHeaderText.to, on: true, dm: true});
 
         // accent
-        this.setShadeListener({name: "accent", pcs: this.theme.accent, dm: true, dmPrefix: "dm"});
+        this.setShadeListener({name: "accent", pcs: this.theme.accent, dm: true, palette: true, on: true});
 
     }
 
@@ -869,19 +874,24 @@ class CSSTheme {
         log.debug(`backgroundListener entry - name=${name}`)
         const vk = new CSSVariableKind(name,"", [pcp], this.cssGenerator);
         const prefix = lm ? "" : "dm-";
-        vk.setShadeVar(`${prefix}background`, vars.primary);
-        vk.setShadeVar(`${prefix}background-secondary`, vars.secondary);
-        vk.setShadeVar(`${prefix}border`, vars.borderColor);
-        vk.setShadeVar(`${prefix}chip`, vars.chip);
-        vk.setShadeVar(`${prefix}color-drop`, vars.colorDrop);
-        vk.setShadeVar(`${prefix}group-button-bg`, vars.groupButton);
-        vk.setShadeVar(`${prefix}line-color`, vars.lineColor);
-        vk.setShadeVar(`${prefix}surface`, vars.surface);
+        vk.setShadeVarRef(`${prefix}background`, vars.primary);
+        vk.setShadeVarRef(`${prefix}background-secondary`, vars.secondary);
+        vk.setShadeVarRef(`${prefix}border`, vars.borderColor);
+        vk.setShadeVarRef(`${prefix}chip`, vars.chip);
+        vk.setShadeVarRef(`${prefix}color-drop`, vars.colorDrop);
+        vk.setShadeVarRef(`${prefix}group-button-bg`, vars.groupButton);
+        vk.setShadeVarRef(`${prefix}line-color`, vars.lineColor);
+        vk.setShadeVarRef(`${prefix}surface`, vars.surface);
+        if (lm) {
+            vk.setShadeVarRef("on-background", vars.primary.getOnShade());
+        } else {
+            vk.setVar("dm-on-background", "var(--on-nearblack)");
+        }
         // Set elevation backgrounds
         const lmeShades = this.theme.getElevationShades(lm);
         for (let i = 0; i < lmeShades.length; i++) {
-            vk.setShadeVar(`${prefix}elevation-bg-${i}`, lmeShades[i]);
-            vk.setShadeVar(`${prefix}on-elevation-bg-${i}`, lmeShades[i].getOnShade());
+            vk.setShadeVarRef(`${prefix}elevation-bg-${i}`, lmeShades[i]);
+            vk.setShadeVarRef(`${prefix}on-elevation-bg-${i}`, lmeShades[i].getOnShade());
         }
         log.debug(`backgroundListener exit - ${name}`);
     }
@@ -952,18 +962,18 @@ export class CSSVariableKind {
     private setButtonGroupVars(name: string, lm: boolean, sg: ShadeGroup) {
         if (name === "Default") {
             const prefix = lm ? "" : "dm-";
-            this.setButtonVarRef(`${prefix}button`, sg.shade, false);
-            this.setButtonVarRef(`${prefix}on-button`, sg.onShade, true);
-            this.setButtonVarRef(`${prefix}button-half`, sg.halfShade, false);
+            this.setShadeVarRef(`${prefix}button`, sg.shade);
+            this.setShadeVarRef(`${prefix}on-button`, sg.onShade, true);
+            this.setShadeVarRef(`${prefix}button-half`, sg.halfShade);
         } else {
             const prefix = lm ? "" : "dm";
-            this.setButtonVarRef(`${prefix}buttonOn${name}`, sg.shade, false);
-            this.setButtonVarRef(`${prefix}onbuttonOn${name}`, sg.onShade, true);
-            this.setButtonVarRef(`${prefix}buttonHalfOn${name}`, sg.halfShade, false);
+            this.setShadeVarRef(`${prefix}buttonOn${name}`, sg.shade);
+            this.setShadeVarRef(`${prefix}onbuttonOn${name}`, sg.onShade, true);
+            this.setShadeVarRef(`${prefix}buttonHalfOn${name}`, sg.halfShade);
         }
     }
 
-    private setButtonVarRef(name: string, shade: Shade, core: boolean) {
+    public setShadeVarRef(name: string, shade: Shade, core?: boolean) {
         const varName = core ? getCoreShadeVarName(shade) : getShadeVarName(shade);
         if (varName) {
             this.cssGenerator.setVar(name, "", this, `var(--${varName})`);
@@ -1100,7 +1110,7 @@ function getShadeVarName(shade: Shade): string | undefined {
         const mode = shade.getMode();
         const prefix = mode.name === 'dm' ? 'dm-' : '';
         const color = mode.color;
-        return `${prefix}color-${color.name}-${shade.index}`;
+        return `${prefix}${color.name}-${shade.index}`;
     }
     return getCoreShadeVarName(shade);
 }
