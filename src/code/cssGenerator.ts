@@ -348,8 +348,8 @@ export class CSSGenerator {
         this.addPropVar("inline-image-radius", "", image.listImageBorderRadius);
         // Avatar Images
         const avatar = ms.avatars;
-        this.addPropVar("avatar-border", "px", avatar.mediumBorder);
-        this.addPropVar("avatar-border-lg", "px", avatar.extraLargeBorder);
+        this.addPropVar("avatar-border", "", avatar.mediumBorder);
+        this.addPropVar("avatar-border-lg", "", avatar.extraLargeBorder);
         this.addPropVar("avatar-elevation", "", avatar.elevation, elevationToCSS);
         vk.setVar("avatar-shadow", "var(--avatar-elevation)");
         // sliders
@@ -717,7 +717,7 @@ export class CSSGenerator {
 
     public setVar(name: string, unit: string, kind: CSSVariableKind, value?: any) {
         const cssName = this.cssName(name);
-        let cssValue: string | undefined = undefined;
+        let cssValue = "unset";
         if (value !== undefined && value !== null) {
             cssValue = `${value}${unit}`;
         }
@@ -725,12 +725,12 @@ export class CSSGenerator {
         // For each of the component keys (e.g. keys of individual atoms, molecules, or organisms),
         // set the variable in the appropriate groups, one group for each atom, molecule, or organism.
         kind.componentKeys.forEach(key => this.getVarGroup(key).setVar(cssName, cssValue));
-        if (cssValue !== undefined) {
+        //if (cssValue !== undefined) {
             this.cssVars[cssName] = cssValue;
-        } else {
+        //} else {
             // Delete CSS variable
-            delete this.cssVars[cssName];
-        }
+        //    delete this.cssVars[cssName];
+        //}
         // Notify listeners of change
         Object.values(this.cssVarListeners).forEach((l) => l(cssName,cssValue));
     }
