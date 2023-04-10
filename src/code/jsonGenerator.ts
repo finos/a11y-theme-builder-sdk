@@ -169,7 +169,7 @@ export class JSONGenerator {
             buttonShade = buttonShade.getDarkModeShade();
             iconShade = iconShade.getDarkModeShade();
         }
-        const buttonVars = theme.getButtonShadeGroups(buttonShade);
+        const buttonVars = theme.getShadeGroups(buttonShade);
         const buttonSG = lm ? buttonVars.lm : buttonVars.dm;
         const hotlinkVars = this.atoms.hotlinks.findHotlinkVariables();
         const hotlinkShade = lm? hotlinkVars.lm.unvisited.shade : hotlinkVars.dm.unvisited.shade;

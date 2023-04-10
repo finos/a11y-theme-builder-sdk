@@ -2,11 +2,11 @@
  * Copyright (c) 2023 Discover Financial Services
  * Licensed under MIT License. See License.txt in the project root for license information
  */
-import { Atoms, Shade, ColorTheme, ShadeGroup, ButtonModeShadeGroups, StateSetting, BevelSettingsProps, HotlinkModeVariables, OnHotlink, OnHotlinkWithDecoration, TypographyStyling} from "../atoms/index";
-import { Molecules } from "../molecules/index";
+import { Atoms, Shade, ColorTheme, ShadeGroup, ModeShadeGroups, StateSetting, BevelSettingsProps, HotlinkModeVariables, OnHotlink, OnHotlinkWithDecoration, TypographyStyling} from "../atoms/index";
+import { Molecules, Dropdowns } from "../molecules/index";
 import { Organisms } from "../organisms/index";
 import { PropertyColorShade, PropertyPercentage, PropertyGroupListener, PropertyColorPair, Property, ListenerSubscription, ColorPair } from "../common/index";
-import { IDesignSystem, EventValueChange, VarListener, IVarGroup, IColor } from "../interfaces";
+import { IDesignSystem, EventValueChange, VarListener, IVarGroup, IColor, EventType } from "../interfaces";
 
 import { Logger } from "../util/logger";
 
@@ -49,6 +49,7 @@ export class CSSGenerator {
 
         // Set all organism CSS variables
         this.setOrganismVars();
+
     }
 
     public getVars(): {[name: string]: string} {
@@ -73,7 +74,9 @@ export class CSSGenerator {
             "nearblack": "#181818",
             "on-nearblack": "#ffffff",
             "dm-white": "rgba(255, 255, 255, 0.6)",
+            "dm-white-bg": "var(--dm-midnight-600)",
             "dm-on-white": "#121212",
+            "dm-on-white-bg": "var(--dm-on-midnight-600)",
             "on-black": "#ffffff",
             "dm-on-black": "rgba(255, 255, 255, 0.6)",
             "dm-nearblack": "rgba(255, 255, 255, 0.6)",
@@ -115,6 +118,7 @@ export class CSSGenerator {
             "dm-gray-700": "#383838",
             "dm-gray-800": "#212121",
             "dm-gray-900": "#070707",
+            "dm-on-gray": "var(--black)",
             "dm-on-gray-0": "var(--black)",
             "dm-on-gray-100": "var(--black)",
             "dm-on-gray-200": "var(--black)",
@@ -125,15 +129,52 @@ export class CSSGenerator {
             "dm-on-gray-700": "var(--white)",
             "dm-on-gray-800": "var(--white)",
             "dm-on-gray-900": "var(--white)",
+            "primaryDarkBG": "var(--black)",
+            "secondaryDarkBG": "var(--black)",
+            "on-background-secondary":  "var(--on-gray-0)",
+            "dm-on-background-secondary":  "var(--dm-white)",
+            "background-tertiary": "var(--primary)",
+            "on-background-tertiary":  "var(--on-primary)",
+            "dm-background-tertiary": "var(--dm-primary-800)",
+            "dm-on-background-tertiary":  "var(--dm-white)",
+            "gradient-1": "linear-gradient(45deg, var(--gradient1-a) 0%, var(--gradient1-b) 100%)",
+            "gradient-2": "linear-gradient(45deg, var(--gradient2-a) 0%, var(--gradient2-b) 100%)",
+            "gradient-3": "linear-gradient(45deg, var(--gradient3-a) 0%, var(--gradient3-b) 100%)",
+            "dm-gradient-1": "linear-gradient(45deg, var(--dm-gradient1-a) 0%, var(--dm-gradient1-b) 100%)",
+            "dm-gradient-2": "linear-gradient(45deg, var(--dm-gradient2-a) 0%, var(--dm-gradient2-b) 100%)",
+            "dm-gradient-3": "linear-gradient(45deg, var(--dm-gradient3-a) 0%, var(--dm-gradient3-b) 100%)",
+            "text-gradient": "linear-gradient(45deg, var(--text-gradient-a) 0%, var(--text-gradient-b) 100%)",
+            "dm-on-gradient-1": "var(--dm-on-gradient1-a)",
+            "dm-on-gradient-2": "var(--dm-on-gradient2-a)",
+            "dm-on-gradient-3": "var(--dm-on-gradient3-a)",
+            "dm-text-gradient": "linear-gradient(45deg, var(--dm-text-gradient-a) 0%, var(--dm-text-gradient-b) 100%)",
+            "dm-on-surface":  "var(--dm-on-background)",
             "white-bg": "#ffffff",
             "quiet": "68%",
             "disabled": "38%",
             "hover": "50%",
+            "input-hover": "rgba(255,255,255,.9)",
             "active": "100%",
+            "inset-border-0": "0 0 0 0 rgba(0,0,0,0)",
+            "inset-border-1": "0 0 0 var(--border-1) var(--icon)",
+            "inset-border-2": "0 0 0 var(--border-2) var(--icon)",
+            "inset-border-3": "0 0 0 var(--border-3) var(--icon)",
+            "inset-border-4": "0 0 0 var(--border-4) var(--icon)",
+            "dark-inset-border-1": "0 0 0 var(--border-1) var(--black)",
+            "dark-inset-border-2": "0 0 0 var(--border-2) var(--black)",
+            "dark-inset-border-3": "0 0 0 var(--border-3) var(--black)",
+            "dark-inset-border-4": "0 0 0 var(--border-4) var(--black)",
+            "white-inset-border-1": "0 0 0 var(--border-1) var(--white)",
+            "white-inset-border-2": "0 0 0 var(--border-2) var(--white)",
+            "white-inset-border-3": "0 0 0 var(--border-3) var(--white)",
+            "white-inset-border-4": "0 0 0 var(--border-4) var(--white)",
+            "buttonCharacterSpacing": "var(--CTALetterSpacing)",
+            "sm-buttonCharacterSpacing": "var(--CTALetterSpacing)",
         });
     }
 
     private setAtomVars() {
+        const self = this;
         const atoms = this.atoms;
 
         // Listen for the addition of colors or removal of colors from the color palette.
@@ -222,8 +263,6 @@ export class CSSGenerator {
         const vk = new CSSVariableKind("molecules","",[], this);
         // dropdowns
         const dd = ms.dropdowns;
-        const mfs = dd.menuFocusState;
-        this.addPropVar("dropdown-focus-theme", "", mfs, dropDownToCSS);
         this.addPropVar("dropdown-elevation", "", dd.menuElevation, elevationToCSS);
         this.addPropVar("dropdown-radius", "", dd.borderRadius);
         vk.setVars({
@@ -290,7 +329,7 @@ export class CSSGenerator {
         this.addPropVar("chip-text", "", chip.text, function(vk: CSSVariableKind) {
             const typography = (chip.text.getValue() === "Caption") ? "caption" : "caption-bold";
             vk.setVars({
-                "chipTypography": `var(--${typography}FontWeight) var(--${typography}FontSize) / var(--${typography}LineHeight) var(--${typography}FontFamily)`,
+                "chipTopography": `var(--${typography}FontWeight) var(--${typography}FontSize) / var(--${typography}LineHeight) var(--${typography}FontFamily)`,
                 "chipTextTransform": `var(--${typography}TextTransform)`,
                 "chipLetterSpacing": `var(--${typography}LetterSpacing)`,
             });    
@@ -466,12 +505,31 @@ export class CSSGenerator {
         vk = new CSSVariableKind("", "", [atoms.elevationSettings.percentageChange], this);
         this.addPercentToDecimal("elevation-change", atoms.elevationSettings.percentageChange);
         for (let i = 2; i <= 9; i++) vk.setVar(`change-${i}`, `calc(1 + calc(var(--elevation-change) * ${i}))`);
-        this.addPropVar("elevation-horizontal", "px", atoms.elevationSettings.horizontalShadowLength);
-        this.addPropVar("elevation-vertical", "px", atoms.elevationSettings.verticalShadowLength);
+        const emitChangeVars = function(name: string) {
+            for (let i = 2; i <= 9; i++) vk.setVar(`${name}-${i}`, `calc(var(--${name}) * var(--change-${i}))`);
+        }
+        atoms.elevationSettings.horizontalShadowLength.setListener("css.coreSystemSettings", function(vc: EventValueChange<number>) {
+            vk.setVar(`elevation-horizontal`, `${vc.newValue}px`);
+            vk.setVar(`reverse-elevation-horizontal`, `-${vc.newValue}px`);
+        }, [EventType.ValueChanged]);
+        atoms.elevationSettings.verticalShadowLength.setListener("css.coreSystemSettings", function(vc: EventValueChange<number>) {
+            vk.setVar(`elevation-vertical`, `${vc.newValue}px`);
+            vk.setVar(`reverse-elevation-vertical`, `-${vc.newValue}px`);
+        }, [EventType.ValueChanged]);
+        emitChangeVars("elevation-horizontal");
+        emitChangeVars("elevation-vertical");
+        emitChangeVars("reverse-elevation-horizontal");
+        emitChangeVars("reverse-elevation-vertical");
         this.addPropVar("elevation-blur", "px", atoms.elevationSettings.blurRadius);
+        emitChangeVars("elevation-blur");
         this.addPropVar("elevation-spread", "px", atoms.elevationSettings.spreadRadius);
+        emitChangeVars("elevation-spread");
+        vk.setVar("base-elevation-1", "0 0 var(--base-elevation-blur) var(--base-elevation-spread)");
+        for (let i = 2; i <= 9; i++) vk.setVar(`base-elevation-${i}`, `0 0 var(--base-elevation-blur-${i}) var(--base-elevation-spread-${i})`);
         this.addPropVar("base-elevation-blur", "px", atoms.elevationSettings.baseBlurRadius);
+        emitChangeVars("base-elevation-blur");
         this.addPropVar("base-elevation-spread", "px", atoms.elevationSettings.baseSpreadRadius);
+        emitChangeVars("base-elevation-spread");
         this.addPropVar("elevation-rgb", "", atoms.elevationSettings.shadowColor, this.shadowColorListener.bind(this)); 
         this.addPercentToDecimal("elevation-opacity", atoms.elevationSettings.colorOpacity);
         this.addPercentToDecimal("base-elevation-opacity", atoms.elevationSettings.baseColorOpacity);
@@ -582,7 +640,7 @@ export class CSSGenerator {
     }
 
     private generateFocusBlurVariables(vk: CSSVariableKind) {
-        const name = "focus-blur";
+        const name = "focusBlur";
         const unit = "px";
         const focusBlur = this.atoms.focusStates.addFocusBlur.getValue();
         const grid = this.atoms.gridSettings.grid.getValue();
@@ -605,7 +663,9 @@ export class CSSGenerator {
         this.setVar(`on-input`, "", vk, vars.onInputDefault.getHexOrRGBA());
         this.setVar(`on-input-disabled`, "", vk, vars.onInputDisabled.getHexOrRGBA());
         this.setVar(`dm-input`, "", vk, vars.dmInputDefault.getHexOrRGBA());
+        this.setVar(`dm-on-input`, "", vk, vars.dmInputDefault.getOnShade().getHexOrRGBA());
         this.setVar(`dm-input-disabled`, "", vk, vars.dmInputDisabled.getHexOrRGBA());
+        this.setVar("dm-input-hover", "", vk, "rgba(255,255,255,.12)");
     }
 
     private setStateSettingVar(ss: StateSetting, vk: CSSVariableKind) {
@@ -618,10 +678,10 @@ export class CSSGenerator {
         }
     }
 
-    private generateHotlinkVariables(vk: CSSVariableKind) {
-        log.debug(`Generating hotlinks variables`);
+    public generateHotlinkVariables(vk: CSSVariableKind) {
         const vars = this.atoms.hotlinks.getHotlinkVariables();
         if (vars) {
+            log.debug(`CSS: hotlink variables: found`);
             this.generateHotlinkModeVariables(vars.lm, "", vk);
             this.generateHotlinkModeVariables(vars.dm, "dm-", vk);
             this.generateOnHotlinkWithDecorationVariables("White", vk, vars.onWhite);
@@ -629,6 +689,8 @@ export class CSSGenerator {
             this.generateOnHotlinkWithDecorationVariables("Tertiary", vk, vars.onTertiary);
             this.generateOnHotlinkVariables("Gradient3", vk, vars.onGradient3);
             this.generateOnHotlinkVariables("dm-gradient3", vk, vars.onDMGradient3);
+        } else {
+            log.debug(`CSS: hotlink variables: not found`);
         }
     }
 
@@ -679,7 +741,12 @@ export class CSSGenerator {
         vk.setShadeVar(`${prefix}${name}`, shade);
         if (args.half) vk.setShadeVar(`${prefix}${name}-half`, shade.getHalfShade());
         if (args.quarter) vk.setShadeVar(`${prefix}${name}-quarter`, shade.getQuarterShade());
-        if (args.on) vk.setShadeVar(`${prefix}on-${name}`, shade.getOnShade());
+        if (args.on) {
+            const onShade = shade.getOnShade();
+            vk.setShadeVar(`${prefix}on-${name}`, onShade);
+            if (args.half) vk.setShadeVar(`${prefix}on-${name}-half`, onShade.getHalfShade());
+            if (args.quarter) vk.setShadeVar(`${prefix}on-${name}-quarter`, onShade.getQuarterShade());
+        }
     }
 
     private setPaletteVars(name: string, prefix: string, args: ShadeListenerArgs, shades: Shade[], vk: CSSVariableKind) {
@@ -754,19 +821,19 @@ export class CSSGenerator {
      * @param unit The unit that is appended to the value of the variable.
      * @param prop The input property from which the CSS variable value is derived
      */
-    private addPropVar(name: string, unit: string, prop: Property<any>, cb?: (propVar: CSSVariableKind) => void) {
+    public addPropVar(name: string, unit: string, prop: Property<any>, cb?: (propVar: CSSVariableKind) => void) {
         new CSSDynamicVariableKind(name, unit, [prop], this, cb);
     }
 
     /**
      * Call this when there is a more complicated relationship between input properties
-     * and output CSS variables.  The callback function
+     * and output CSS variables.
      * 
      * @param name A unique name.
      * @param props Any number of properties which are monitored for changes before calling 'cb'.
      * @param cb  The callback called each time all 'props' are initialized and any values change.
      */
-    private addPropsVar(name: string, unit: string, props: Property<any>[], cb: (propVar: CSSVariableKind) => void) {
+    public addPropsVar(name: string, unit: string, props: Property<any>[], cb: (propVar: CSSVariableKind) => void) {
         new CSSDynamicVariableKind(name, unit, props, this, cb);
     }
 
@@ -822,6 +889,8 @@ class CSSTheme {
 
     public start() {
 
+        const self = this;
+
         // Listen for changes to the primary, secondary, and tertiary shades
         this.setShadeListener({name: "primary", pcs: this.theme.primary, on: true, dm: true, palette: true, half: true, quarter: true});
         this.setShadeListener({name: "secondary", pcs: this.theme.secondary, on: true, dm: true, palette: true});
@@ -838,11 +907,10 @@ class CSSTheme {
         this.setShadeListener({name: "gradient2-b", pcs: this.theme.gradient2.to, on: true, dm: true});
 
         // button
-        const ls = this.theme.button.setListener(this.lkey("button"), this.buttonListener.bind(this));
-        this.listenerSubscriptions.push(ls);
+        this.setShadeGroupListener("button", this.theme.button);
 
         // icon
-        this.setShadeListener({name: "icon", pcs: this.theme.icon, on: true, dm: true});
+        this.setShadeGroupListener("icon", this.theme.icon);
 
         // text gradient
         this.setShadeListener({name: "text-gradient-a", pcs: this.theme.gradientHeaderText.from, on: true, dm: true});
@@ -851,6 +919,18 @@ class CSSTheme {
         // accent
         this.setShadeListener({name: "accent", pcs: this.theme.accent, dm: true, palette: true, on: true});
 
+        // dropdown related variables
+        const molecules = this.cssGenerator.molecules;
+        const props = [molecules.dropdowns.menuFocusState, this.theme.button];
+        this.cssGenerator.addPropsVar("lm-dropdowns", "", [...props, this.theme.lightModeBackground], this.generateDropDownVars.bind(this, true));
+        this.cssGenerator.addPropsVar("dm-dropdowns", "", [...props, this.theme.darkModeBackground], this.generateDropDownVars.bind(this, false));
+
+        this.theme.addTheme.setListener("hotlinks", function(event) {
+            if (event.type === EventType.NodeEnabled) {
+                const vk = new CSSVariableKind("hotlinks","",[], self.cssGenerator);
+                self.cssGenerator.generateHotlinkVariables(vk);
+            }
+        });
     }
 
     public stop() {
@@ -860,6 +940,11 @@ class CSSTheme {
 
     private setShadeListener(args: ShadeListenerArgs) {
         const ls = this.cssGenerator.setShadeListener(args);
+        this.listenerSubscriptions.push(ls);
+    }
+
+    private setShadeGroupListener(type: string, prop: PropertyColorShade) {
+        const ls = prop.setListener(this.lkey(type), this.shadeGroupListener.bind(this, type, prop));
         this.listenerSubscriptions.push(ls);
     }
 
@@ -878,14 +963,16 @@ class CSSTheme {
         vk.setShadeVarRef(`${prefix}background-secondary`, vars.secondary);
         vk.setShadeVarRef(`${prefix}border`, vars.borderColor);
         vk.setShadeVarRef(`${prefix}chip`, vars.chip);
+        vk.setShadeVarRef(`${prefix}on-chip`, vars.chip.getOnShade());
         vk.setShadeVarRef(`${prefix}color-drop`, vars.colorDrop);
         vk.setShadeVarRef(`${prefix}group-button-bg`, vars.groupButton);
         vk.setShadeVarRef(`${prefix}line-color`, vars.lineColor);
         vk.setShadeVarRef(`${prefix}surface`, vars.surface);
         if (lm) {
+            vk.setShadeVarRef(`on-surface`, vars.surface.getOnShade());
             vk.setShadeVarRef("on-background", vars.primary.getOnShade());
         } else {
-            vk.setVar("dm-on-background", "var(--on-nearblack)");
+            vk.setVar("dm-on-background", "rgba(255,255,255,0.6)");
         }
         // Set elevation backgrounds
         const lmeShades = this.theme.getElevationShades(lm);
@@ -896,20 +983,59 @@ class CSSTheme {
         log.debug(`backgroundListener exit - ${name}`);
     }
 
-    private buttonListener(vc: EventValueChange<Shade>): void {
+    private shadeGroupListener(type: string, prop: PropertyColorShade, vc: EventValueChange<Shade>): void {
         const shade = vc.newValue;
         if (!shade) return;
-        log.debug("buttonListener entry")
-        const vars = this.theme.getButtonShadeGroups(shade);
-        const vk = new CSSVariableKind("button", "", [this.theme.button], this.cssGenerator);
+        log.debug(`shadeGroupListener entry: type=${type}`);
+        const vars = this.theme.getShadeGroups(shade);
+        const vk = new CSSVariableKind("button", "", [prop], this.cssGenerator);
         // Set light and dark mode button CSS variables
-        vk.setButtonModeVars(true, vars.lm);
-        vk.setButtonModeVars(false, vars.dm);
-        log.debug("buttonListener exit")
+        vk.setModeVars(type, true, vars.lm);
+        vk.setModeVars(type, false, vars.dm);
+        log.debug(`shadeGroupListener exit: type=${type}`);
     }
 
     public setShadeVar(name: string, kind: CSSVariableKind, shade: Shade) {
         this.cssGenerator.setShadeVar(name, kind, shade);
+    }
+
+    private generateDropDownVars(lm: boolean, vk: CSSVariableKind) {
+        log.debug(`generateDropDownVars enter - lm=${lm}`);
+        const mfs = this.cssGenerator.molecules.dropdowns.menuFocusState;
+        const mfsVal = mfs.getValue();
+        if (!mfsVal) {
+            log.debug(`generateDropDownVars exit - lm=${lm} (no menu focus state)`);
+            return;
+        }
+        const bg = lm ? this.theme.lightModeBackground : this.theme.darkModeBackground;
+        const bgVars = this.theme.getBackgroundVariables(bg);
+        if (!bgVars) {
+            log.debug(`generateDropDownVars exit - lm=${lm} (no background variables)`);
+            return;
+        }
+        const surfaceShade = bgVars.surface;
+        const buttonShade = this.theme.button.getValue();
+        if (!buttonShade) {
+            log.debug(`generateDropDownVars exit - lm=${lm} (no button shade)`);
+            return undefined;
+        }
+        // Set 3 CSS variables based on the dropdowns selection
+        const var1 = lm ? "dropdown-focus-theme" : "dm-dropdown-focus-theme";
+        const var2 = lm ? "on-dropdown-focus-bg" : "dm-on-dropdown-focus-bg";
+        const var3 = lm ? "on-dropdown-hover-bg" : "dm-on-dropdown-focus-bg";
+        if (mfsVal === Dropdowns.FULL_COLOR) {
+            vk.setVar(var1, "100%");
+            vk.setVar(var2, buttonShade.getOnShade().hex);
+            vk.setVar(var3, surfaceShade.mix(buttonShade,0.5).getContrastShade().hex);
+        } else if (mfsVal === Dropdowns.LEFT_BORDER_ONLY) {
+            vk.setVar(var1, "var(--spacing-half)");
+            const onSurfaceHex = surfaceShade.getOnShade().hex;
+            vk.setVar(var2, onSurfaceHex);
+            vk.setVar(var3, onSurfaceHex);
+        } else {
+            throw new Error(`Invalid dropdown menu focus state: ${mfsVal}`);
+        }
+        log.debug(`generateDropDownVars exit - lm=${lm}`);
     }
 
     private lkey(name: string): string {
@@ -949,27 +1075,27 @@ export class CSSVariableKind {
         }
     }
 
-    public setButtonModeVars(lm: boolean, bmsg: ButtonModeShadeGroups) {
-        this.setButtonGroupVars("White", lm, bmsg.white);
-        this.setButtonGroupVars("Black", lm, bmsg.black);
-        this.setButtonGroupVars("Tertiary", lm, bmsg.tertiary);
-        this.setButtonGroupVars("Gradient1", lm, bmsg.gradient1);
-        this.setButtonGroupVars("Gradient2", lm, bmsg.gradient2);
-        this.setButtonGroupVars("Gradient3", lm, bmsg.gradient3);
-        this.setButtonGroupVars("Default", lm, bmsg.default);
+    public setModeVars(type: string, lm: boolean, bmsg: ModeShadeGroups) {
+        this.setGroupVars("White", type, lm, bmsg.white);
+        this.setGroupVars("Black", type, lm, bmsg.black);
+        this.setGroupVars("Tertiary", type, lm, bmsg.tertiary);
+        this.setGroupVars("Gradient1", type, lm, bmsg.gradient1);
+        this.setGroupVars("Gradient2", type, lm, bmsg.gradient2);
+        this.setGroupVars("Gradient3", type, lm, bmsg.gradient3);
+        this.setGroupVars("Default", type, lm, bmsg.default);
     }
 
-    private setButtonGroupVars(name: string, lm: boolean, sg: ShadeGroup) {
+    private setGroupVars(name: string, type: string, lm: boolean, sg: ShadeGroup) {
         if (name === "Default") {
             const prefix = lm ? "" : "dm-";
-            this.setShadeVarRef(`${prefix}button`, sg.shade);
-            this.setShadeVarRef(`${prefix}on-button`, sg.onShade, true);
-            this.setShadeVarRef(`${prefix}button-half`, sg.halfShade);
+            this.setShadeVarRef(`${prefix}${type}`, sg.shade);
+            this.setShadeVarRef(`${prefix}on-${type}`, sg.onShade, true);
+            this.setShadeVarRef(`${prefix}${type}-half`, sg.halfShade);
         } else {
             const prefix = lm ? "" : "dm";
-            this.setShadeVarRef(`${prefix}buttonOn${name}`, sg.shade);
-            this.setShadeVarRef(`${prefix}onbuttonOn${name}`, sg.onShade, true);
-            this.setShadeVarRef(`${prefix}buttonHalfOn${name}`, sg.halfShade);
+            this.setShadeVarRef(`${prefix}${type}On${name}`, sg.shade);
+            this.setShadeVarRef(`${prefix}on${type}On${name}`, sg.onShade, true);
+            this.setShadeVarRef(`${prefix}${type}HalfOn${name}`, sg.halfShade);
         }
     }
 
@@ -1120,17 +1246,6 @@ function getCoreShadeVarName(shade: Shade): string | undefined {
         return `color-${shade.coreShadeName}`;
     }
     return undefined;
-}
-
-function dropDownToCSS(vk: CSSVariableKind) {
-    const val = vk.props[0].getValue();
-    if (val === "Full Color") {
-        vk.setVar(vk.name, "100%");
-    } else if (val === "Left border only") {
-        vk.setVar(vk.name, "var(--spacing-half)");
-    } else {
-        throw new Error(`Invalid dropdown menu focus state: ${val}`);
-    }
 }
 
 function elevationToCSS(vk: CSSVariableKind) {

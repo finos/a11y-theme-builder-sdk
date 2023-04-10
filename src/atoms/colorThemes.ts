@@ -32,7 +32,7 @@ export interface BackgroundVariables {
     surface: Shade;
 }
 
-export interface ButtonModeShadeGroups {
+export interface ModeShadeGroups {
     default: ShadeGroup;
     white: ShadeGroup;
     black: ShadeGroup;
@@ -42,9 +42,9 @@ export interface ButtonModeShadeGroups {
     gradient3: ShadeGroup;
 }
 
-export interface ButtonShadeGroups {
-    lm: ButtonModeShadeGroups;
-    dm: ButtonModeShadeGroups;
+export interface ShadeGroups {
+    lm: ModeShadeGroups;
+    dm: ModeShadeGroups;
 }
 
 const log = new Logger("colorThemes");
@@ -362,13 +362,13 @@ export class ColorTheme extends Node implements IColorTheme {
         return { primary, secondary, colorDrop, borderColor, chip, groupButton, lineColor, surface };
     }
 
-    public getButtonShadeGroups(shade: Shade): ButtonShadeGroups {
-        const lm: ButtonModeShadeGroups = this.getModeButtonShadeGroups(shade, true);
-        const dm: ButtonModeShadeGroups = this.getModeButtonShadeGroups(this.findDMShade(shade), true);
+    public getShadeGroups(shade: Shade): ShadeGroups {
+        const lm: ModeShadeGroups = this.getModeShadeGroups(shade, true);
+        const dm: ModeShadeGroups = this.getModeShadeGroups(this.findDMShade(shade), true);
         return { lm, dm };
     }
 
-    private getModeButtonShadeGroups(button: Shade, lm: boolean): ButtonModeShadeGroups {
+    private getModeShadeGroups(button: Shade, lm: boolean): ModeShadeGroups {
         const tertiaryShade = this.tertiary.getValue();
         const gradient1Shade = this.gradient1.from.getValue();
         const gradient2Shade = this.gradient2.from.getValue();
