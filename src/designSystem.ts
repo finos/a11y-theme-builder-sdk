@@ -140,9 +140,10 @@ export class DesignSystem extends Node implements IDesignSystem {
      * @param newName The name of the new design system copy to make.
      * @returns A copy of this design system with a new name.
      */
-    public copy(newName: string): DesignSystem {
+    public async copy(newName: string): Promise<DesignSystem> {
         const ds = new DesignSystem(newName, this.themeBuilder);
         ds.deserialize(this.serialize());
+        await ds.store();
         return ds;
     }
 
