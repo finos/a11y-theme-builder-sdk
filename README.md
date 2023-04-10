@@ -1,7 +1,7 @@
 [![DFS - Incubating](./_images/discover-incubating.svg)](https://technology.discover.com/technologies/open_source) [![Maintainers-Invited](https://img.shields.io/badge/Maintainers-Wanted-blueviolet)](./CONTRIBUTE.md) [![Contributors-Invited](https://img.shields.io/badge/Contributors-Wanted-blue)](./CONTRIBUTE.md)
 # Accessibility Theme Builder SDK
 
-Accessibility compliance is a difficult and a cost intensive task.  This is true not only when creating an initially compliant application, but also when maintaining that compliance.
+Accessibility compliance is a difficult and cost intensive task.  This is true not only when creating an initially compliant application, but also when maintaining that compliance.
 
 The purpose of this SDK is to simplify this task by performing the necessary calculations and generating output (e.g. CSS, JSON tokens, or other) to be imported into your application.  
 
