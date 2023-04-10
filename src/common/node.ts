@@ -50,8 +50,8 @@ export class Node implements INode {
 
     constructor(name: string, parent?: INode) {
         this.name = name;
-        this.key = (parent ? `${parent.key}/${name}` : name).replace(/\s/g, '');
         const p = parent as Node;
+        this.key = (!p || !p.parent ? name: `${p.key}/${name}`).replace(/\s/g, '');
         this.parent = p;
         if (p) {
             p.children.push(this);

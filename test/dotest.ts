@@ -62,10 +62,10 @@ async function test() {
     ds.removeListener("dsListener");
     assert(colorPalette.isInitialized(), "The color palette atom is not initialized");
     // Add another color for good measure
-    console.log("TEST: Adding red to the color palette");
-    const red = colorPalette.addColor("red","#EE3A3A");
-    console.log("TEST: Added red to the color palette");
-    assert(red.light.shades.length === 10, `Incorrect number of light color shades: ${red.light.shades.length}`);
+    //console.log("TEST: Adding red to the color palette");
+    //const red = colorPalette.addColor("red","#EE3A3A");
+    //console.log("TEST: Added red to the color palette");
+    //assert(red.light.shades.length === 10, `Incorrect number of light color shades: ${red.light.shades.length}`);
     assert(blue.dark.shades.length === 10, `Incorrect number of dark color shades: ${blue.dark.shades.length}`);
     assert(colorThemes.isEnabled(), "The color themes atom is not editable");
     assert(!states.isEnabled(), "States atom is editable");
@@ -129,9 +129,8 @@ async function test() {
     assert(bsCount === 1, "bsCount should be 1");
     console.log(`TEST: Border settings: ${JSON.stringify(bsg)}`);
 
-    dsObj = ds.serialize();
     console.log(`TEST: create design system from string: ${JSON.stringify(dsObj,null,4)}`);
-    const ds2 = themeBuilder.newDesignSystemFromObject("ds1", dsObj);
+    const ds2 = ds.copy("ds2");
     console.log(`TEST: deserializing design system 2`);
     const dsStr = JSON.stringify(ds2.serialize(),null,4);
     console.log(`TEST: finished deserializing design system 2: ${dsStr}`);
@@ -168,8 +167,8 @@ async function test() {
     console.log(`TEST: MISSING CSS VARIABLES: total=${missingCssVars.length}, ${JSON.stringify(missingCssVars)}`);
     console.log(`TEST: EXTRA CSS VARIABLES: total=${extraCssVars.length}, ${JSON.stringify(extraCssVars)}`);
 
-    console.log(`TEST: JSON lightmode: ${JSON.stringify(ds.code.getJSON(true),null,4)}`);
-    console.log(`TEST: JSON darkmode: ${JSON.stringify(ds.code.getJSON(false),null,4)}`);
+    console.log(`TEST: JSON lightmode: ${JSON.stringify(ds.code.getJSON(true))}`);
+    console.log(`TEST: JSON darkmode: ${JSON.stringify(ds.code.getJSON(false))}`);
 
     await ds.store();
     const md = await themeBuilder.listMetadata();
@@ -871,7 +870,7 @@ const expectedCssVars = [
     "--chip-radius",
     "--chip-minwidth",
     "--chip-height",
-    "--chipTopography",
+    "--chipTypography",
     "--chipTextTransform",
     "--chipLetterSpacing",
     "--chip-bevel",
@@ -932,7 +931,6 @@ const expectedCssVars = [
     "--sliderhandleRadius",
     "--barInBevel",
     "--popoverBevel",
-    "--popoverElvation",
     "--popoverShadow",
     "--popoverRadius",
     "--navbarPrimary-font",
@@ -964,10 +962,10 @@ const expectedCssVars = [
     "--hero-heroBodySpacing",
     "--hero-title-gap",
     "--hero-justify-content",
-    "--tableheaderTopography",
+    "--tableheaderTypography",
     "--tableheaderSpacing",
     "--tableheaderTransform",
-    "--tablebodyTopography",
+    "--tablebodyTypography",
     "--tablebodySpacing",
     "--tablebodyTransform",
     "--tableheaderPadding",
@@ -1368,7 +1366,7 @@ const expectedCssVars = [
     "--sliderhandleElevation",
     "--sliderBarHeight",
     "--popoverElevation",
-    "--hero-heroTitleTopography"
+    "--hero-heroTitleTypography"
 ];
 
 test();

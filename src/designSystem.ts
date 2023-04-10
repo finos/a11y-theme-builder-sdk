@@ -135,6 +135,17 @@ export class DesignSystem extends Node implements IDesignSystem {
         await this.themeBuilder.storage.set(this.name, this.serialize());
     }
 
+    /**
+     * Make a copy of this design system under a new name.
+     * @param newName The name of the new design system copy to make.
+     * @returns A copy of this design system with a new name.
+     */
+    public copy(newName: string): DesignSystem {
+        const ds = new DesignSystem(newName, this.themeBuilder);
+        ds.deserialize(this.serialize());
+        return ds;
+    }
+
     public serialize(): any {
         const obj = super.serialize();
         obj.atoms = this.atoms.serialize();
