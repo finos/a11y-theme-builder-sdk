@@ -293,7 +293,7 @@ export class Shade {
         if (this.equals(Shade.HALF_WHITE_DM)) return Shade.HALF_BLACK;
         if (this.equals(Shade.DARK_BLUE)) return Shade.WHITE;
         if (this.onHex !== "") return Shade.fromHex(this.onHex);
-        return this.calculateContrastShade();
+        return this.getContrastShade();
     }
 
     public getShadeGroup(): ShadeGroup {
@@ -327,15 +327,11 @@ export class Shade {
         return this.luminance;
     }
 
-    /**
-     * Get the contrast shade.
-     * @returns The luminance
-     */
     public getContrastShade(): Shade {
-        if (!this.contrastShade) {
-            this.contrastShade = this.clone().calculateContrastShade();
-        }
-        return this.contrastShade;
+        // Get YIQ ratio
+        var yiq = ((this.R * 299) + (this.G * 587) + (this.B * 114)) / 1000;
+        // Check contrast
+        return (yiq >= 128) ? Shade.BLACK: Shade.WHITE;
     }
 
     /**
@@ -666,6 +662,7 @@ export class Shade {
 
     public getElevationShades(): Shade[] {
         const shades: Shade[] = [];
+        shades.push(this);
         for (let opacity of [.05, .07, .08, .09, .11, .12, .14, .15, .16]) {
             shades.push(this.getElevationShade(opacity));
         }
@@ -742,13 +739,6 @@ export class Shade {
         return (max + min) / 2 / 255;
     }
 
-    private calculateContrastShade(): Shade {
-        // Get YIQ ratio
-        var yiq = ((this.R * 299) + (this.G * 587) + (this.B * 114)) / 1000;
-        // Check contrast
-        return (yiq >= 128) ? Shade.BLACK: Shade.WHITE;
-    }
-
     public calculateLuminance(): number {
         const a = [this.R, this.G, this.B].map(function(v) {
             v /= 255;
@@ -805,10 +795,30 @@ export class Shade {
 
     /**
      * Get the contrast of this shade to white or black.
-     * @returns 
+     * @returns The contrast of this shade to white or black.
      */
     public getContrast(): number {
+        return this.getContrastToWhiteOrBlack();
+    }
+
+    /**
+     * Get the contrast of this shade to white or black.
+     * @returns 
+     */
+    public getContrastToWhiteOrBlack(): number {
         return this.getContrastRatio(this.getContrastShade());
+    }
+
+    /**
+     * Mix this shade with another shade to produce a third shade.
+     * @param shade The other shade to mix with this shade
+     * @param ratio The ratio; a value between 0 and 1 denoting how much of this shade verses the other shade in the resulting shade.
+     * @returns A third shade which is the mixture of this shade and the 'shade'.
+     */
+    public mix(shade: Shade, ratio: number): Shade {
+        if (ratio < 0 || ratio > 1) throw new Error(`Expecting a ratio between [0,1] but found ${ratio}`);
+        const hex: any = chroma.mix(this.hex, shade.hex, ratio, "rgb");
+        return Shade.fromHex(hex);
     }
 
     /**

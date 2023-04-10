@@ -12,6 +12,9 @@ import { PropertyStringSelectable, PropertyNumberSelectable, PropertyElevationSe
  */
 export class Dropdowns extends Molecule {
     
+    public static readonly FULL_COLOR = "Full Color";
+    public static readonly LEFT_BORDER_ONLY = "Left border only";
+
     /** The menu focus state property */
     public menuFocusState: PropertyStringSelectable;
     /** The menu elevation property */
@@ -22,8 +25,8 @@ export class Dropdowns extends Molecule {
     constructor(molecules: IMolecules) {
         super("Dropdowns", molecules);
         this.menuFocusState = new PropertyStringSelectable("Dropdown Menu Focus State", true, this, {
-            selectables: ["Full Color", "Left border only"],
-            defaultValue: "Left border only",
+            selectables: [Dropdowns.LEFT_BORDER_ONLY, Dropdowns.FULL_COLOR],
+            defaultValue: Dropdowns.LEFT_BORDER_ONLY,
         });
         this.menuElevation = new PropertyElevationSelectable("Open Dropdown Menu Elevation", true, this, 0, 9, 2);
         this.borderRadius = new PropertyNumberSelectable("Dropdown Border Radius", true, this, [0, 0.5, 1, 2], 1);
