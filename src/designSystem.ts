@@ -136,7 +136,7 @@ export class DesignSystem extends Node implements IDesignSystem {
     }
 
     /**
-     * Make a copy of this design system under a new name.
+     * Make copy of this design system under a new name.
      * @param newName The name of the new design system copy to make.
      * @returns A copy of this design system with a new name.
      */
