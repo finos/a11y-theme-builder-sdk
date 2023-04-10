@@ -130,7 +130,7 @@ async function test() {
     console.log(`TEST: Border settings: ${JSON.stringify(bsg)}`);
 
     console.log(`TEST: create design system from string: ${JSON.stringify(dsObj,null,4)}`);
-    const ds2 = ds.copy("ds2");
+    const ds2 = await ds.copy("ds2");
     console.log(`TEST: deserializing design system 2`);
     const dsStr = JSON.stringify(ds2.serialize(),null,4);
     console.log(`TEST: finished deserializing design system 2: ${dsStr}`);
