@@ -194,7 +194,7 @@ export class CSSGenerator {
         // Listen for changes affecting hotlinks calculations
         this.addPropsVar("hotlinks", "", [atoms.hotlinks.underlineHotlinksInLightMode, this.ds.atoms.colorThemes.defaultTheme], this.generateHotlinkVariables.bind(this));
 
-        // Topography root
+        // Typography root
         const fs = atoms.fontsSettings;
         this.addPropVar("primaryFont", "", fs.primaryFont);
         this.addPropVar("secondaryFont", "", fs.secondaryFont);
@@ -329,7 +329,7 @@ export class CSSGenerator {
         this.addPropVar("chip-text", "", chip.text, function(vk: CSSVariableKind) {
             const typography = (chip.text.getValue() === "Caption") ? "caption" : "caption-bold";
             vk.setVars({
-                "chipTopography": `var(--${typography}FontWeight) var(--${typography}FontSize) / var(--${typography}LineHeight) var(--${typography}FontFamily)`,
+                "chipTypography": `var(--${typography}FontWeight) var(--${typography}FontSize) / var(--${typography}LineHeight) var(--${typography}FontFamily)`,
                 "chipTextTransform": `var(--${typography}TextTransform)`,
                 "chipLetterSpacing": `var(--${typography}LetterSpacing)`,
             });    
@@ -384,7 +384,8 @@ export class CSSGenerator {
         this.addPropVar("image-elevation", "", image.imageElevation, elevationToCSS);
         this.addPropVar("image-radius", "", image.generalImageBorderRadius);
         this.addPropVar("inline-image-height", "", image.listImageHeight);
-        this.addPropVar("inline-image-radius", "", image.listImageBorderRadius);
+        this.addPropVar("inline-image-image-radius", "", image.listImageBorderRadius);
+        // TODO: How do I get values for image-border && image-shadow?
         // Avatar Images
         const avatar = ms.avatars;
         this.addPropVar("avatar-border", "", avatar.mediumBorder);
@@ -396,7 +397,7 @@ export class CSSGenerator {
         this.addPropVar("sliderhandleHeight", "px", slider.visibleHeight);
         this.addPropVar("sliderhandleRadius", "px", slider.handleBorderRadius);
         this.addPropVar("sliderhandleElevation", "px", slider.handleElevation);
-        this.addPropVar("sliderBarHeight", "px", slider.barHeight);
+        this.addPropVar("sliderbarHeight", "px", slider.barHeight);
         this.addPropVar("barInBevel", "", slider.barInsetShadow);
         // popover
         const popover = ms.popovers;
@@ -449,7 +450,7 @@ export class CSSGenerator {
         this.addPropVar("hero-gap", "px", hero.verticalGap);
         vk.setVars({
             "hero-padding": "3",
-            "hero-heroTitleTopography": "var(--Display1FontWeight) var(--Dislay1FontSize) / var(--Display1LineHeight) var(--Display1FontFamily)",
+            "hero-heroTitleTypography": "var(--Display1FontWeight) var(--Dislay1FontSize) / var(--Display1LineHeight) var(--Display1FontFamily)",
             "hero-heroTitleTransform": "var(--Display1TextTransform)",
             "hero-heroTitleSpacing": "var(--Dislay1LetterSpacing)",
             "hero-heroBodyTypography": "var(--body1FontWeight) var(--body1FontSize) / var(--body1LineHeight) var(--body1FontFamily)",
@@ -460,10 +461,10 @@ export class CSSGenerator {
         });
         // tables
         vk.setVars({
-            "tableheaderTopography": "var(--label-1FontWeight) var(--label-1FontSize) / var(--label-1LineHeight) var(--label-1FontFamily)",
+            "tableheaderTypography": "var(--label-1FontWeight) var(--label-1FontSize) / var(--label-1LineHeight) var(--label-1FontFamily)",
             "tableheaderSpacing": "var(--label-1LetterSpacing)",
             "tableheaderTransform": "var(--label-1TextTransform)",
-            "tablebodyTopography": "var(--body1FontWeight) var(--body1FontSize) / var(--body1LineHeight) var(--body1FontFamily)",
+            "tablebodyTypography": "var(--body1FontWeight) var(--body1FontSize) / var(--body1LineHeight) var(--body1FontFamily)",
             "tablebodySpacing": "var(--body1LetterSpacing)",
             "tablebodyTransform": "var(--body1TextTransform)",
             "tableheaderPadding": "1",
@@ -1236,7 +1237,7 @@ function getShadeVarName(shade: Shade): string | undefined {
         const mode = shade.getMode();
         const prefix = mode.name === 'dm' ? 'dm-' : '';
         const color = mode.color;
-        return `${prefix}${color.name}-${shade.index}`;
+        return `${prefix}${color.name}-${shade.index*100}`;
     }
     return getCoreShadeVarName(shade);
 }
