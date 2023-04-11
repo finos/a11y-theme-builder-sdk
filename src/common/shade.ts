@@ -282,7 +282,9 @@ export class Shade {
      * @returns The on shade
      */
     public getOnShade(): Shade {
+        /*
         if (this.equals(Shade.BLACK)) return Shade.WHITE;
+        if (this.equals(Shade.GRAY)) return Shade.WHITE;
         if (this.equals(Shade.HALF_BLACK)) return Shade.HALF_WHITE;
         if (this.equals(Shade.OFF_BLACK)) return Shade.OFF_WHITE;
         if (this.equals(Shade.WHITE)) return Shade.BLACK;
@@ -293,6 +295,7 @@ export class Shade {
         if (this.equals(Shade.HALF_WHITE_DM)) return Shade.HALF_BLACK;
         if (this.equals(Shade.DARK_BLUE)) return Shade.WHITE;
         if (this.onHex !== "") return Shade.fromHex(this.onHex);
+        */
         return this.getContrastShade();
     }
 
@@ -473,7 +476,7 @@ export class Shade {
      * @returns A dark mode shade meeting the contrast ratio requirement, or undefined if not found
      */
     public getDMShade(bgShade: Shade, ratio: number): Shade | undefined {
-        log.debug(`Getting darkmode shade on ${JSON.stringify(bgShade)} for ${JSON.stringify(this)}`);
+        log.debug(`Getting darkmode shade for ${JSON.stringify(this)} on ${JSON.stringify(bgShade)}`);
         const curRatio = this.getContrastRatio(bgShade);
         if (curRatio >= ratio) {
             log.debug(`No searching required; shade ${JSON.stringify(this)} on ${JSON.stringify(bgShade)} (${curRatio} >= ${ratio})`);
@@ -492,7 +495,7 @@ export class Shade {
                 return shade;
             }
         }
-        log.debug(`Could not find darkmode shade for ${JSON.stringify(bgShade)} on ${JSON.stringify(this)}`);
+        log.debug(`Could not find darkmode shade for ${JSON.stringify(this)} on ${JSON.stringify(bgShade)}`);
         return undefined;
     }
 

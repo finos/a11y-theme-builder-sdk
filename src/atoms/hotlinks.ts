@@ -172,6 +172,7 @@ export class Hotlinks extends Atom {
             log.debug(`Hotlinks.getHotlinkModeVariables i=${i}, onBackgroundContrast=${contrast2}`);
             // TODO: The following requirement fails with the test, so use the best for now
             // if (contrast2 < 3.1) continue;  
+            // If not underlined, must have 3.1 contrast with text around it; if not found, means it MUST be underlined
             contrast += contrast2;
             if (contrast > bestContrast2) {
                 bestShade2 = shade;
