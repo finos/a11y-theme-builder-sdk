@@ -87,7 +87,7 @@ async function test() {
     selectColorShade(ct.gradient1.to, 1);
     selectColorShade(ct.gradient2.from, 7);
     selectColorShade(ct.gradient2.to, 2);
-    selectColorShade(ct.button, 5);
+    selectColorShade(ct.button, 2);
     selectColorShade(ct.icon, 2);
     selectColorShade(ct.gradientHeaderText.from, 4);
     selectColorShade(ct.gradientHeaderText.to, 0);
@@ -926,7 +926,6 @@ const expectedCssVars = [
     "--avatar-border-lg",
     "--avatar-elevation",
     "--avatar-shadow",
-    "--sliderbarHeight",
     "--sliderhandleHeight",
     "--sliderhandleRadius",
     "--barInBevel",
@@ -1364,9 +1363,12 @@ const expectedCssVars = [
     "--chipTypography",
     "--inline-image-radius",
     "--sliderhandleElevation",
-    "--sliderBarHeight",
     "--popoverElevation",
     "--hero-heroTitleTypography"
+];
+
+const expectedCssVarsPostMVP = [
+    "--sliderbarHeight",
 ];
 
 test();

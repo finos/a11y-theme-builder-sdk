@@ -499,15 +499,14 @@ export class JSONGenerator {
     private getElevations(lm: boolean): any {
         log.debug(`getElevations enter`);
         const rtn: any = {};
-        if (lm) {
-            for (let i = 1; i < 10; i++) {
-                rtn[`Elevation-${i}`] = this.getColor("{Core-Colors.White.Color");
-            }
-        } else {
-            const shades = Shade.WHITE.getElevationShades();
-            for (let i = 0; i < shades.length; i++) {
-                rtn[`Elevation-${i+1}`] = this.getShadeColor(shades[i]);
-            }
+        const theme = this.atoms.colorThemes.getDefaultTheme();
+        if (!theme) {
+            log.debug("getElevations exit (no default theme)");
+            return undefined;
+        }
+        const shades = theme.getElevationShades(lm);
+        for (let i = 0; i < shades.length; i++) {
+            rtn[`Elevation-${i+1}`] = this.getShadeColor(shades[i]);
         }
         log.debug(`getElevations exit`);
         return rtn;

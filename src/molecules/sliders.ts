@@ -4,7 +4,7 @@
  */
 import { Molecule } from "./molecule";
 import { IMolecules } from "../interfaces";
-import { PropertyPixelSelectable, PropertyElevationSelectable, PropertyShadowSelectable } from "../common/props";
+import { PropertyNumberSelectable, PropertyElevationSelectable, PropertyShadowSelectable } from "../common/props";
 
 /**
  * The sliders molecule.
@@ -13,22 +13,22 @@ import { PropertyPixelSelectable, PropertyElevationSelectable, PropertyShadowSel
 export class Sliders extends Molecule {
     
     /** The handle border radius property */
-    public handleBorderRadius: PropertyPixelSelectable;
+    public handleBorderRadius: PropertyNumberSelectable;
     /** The visible height property */
-    public visibleHeight: PropertyPixelSelectable;
+    public visibleHeight: PropertyNumberSelectable;
     /** The handle elevation property */
     public handleElevation: PropertyElevationSelectable;
     /** The bar height property */
-    public barHeight: PropertyPixelSelectable;
+    public barHeight: PropertyNumberSelectable;
     /** The bar inset shadow property */
     public barInsetShadow: PropertyShadowSelectable;
 
     constructor(molecules: IMolecules) {
         super("Sliders", molecules);
-        this.handleBorderRadius = new PropertyPixelSelectable("Handle Border Radius", false, this, [0,8,16,24,32,40,48,56,64], 8);
-        this.visibleHeight = new PropertyPixelSelectable("Visible Height", false, this, [24, 32, 40, 44], 32);
+        this.handleBorderRadius = new PropertyNumberSelectable("Handle Border Radius", false, this, [0,1,2,3,4,5,6,7,8], 1);
+        this.visibleHeight = new PropertyNumberSelectable("Visible Height", false, this, [3, 4, 5, 6], 4);
         this.handleElevation = new PropertyElevationSelectable("Handle Elevation", false, this, 0, 9);
-        this.barHeight = new PropertyPixelSelectable("Bar Height", false, this, [8, 16, 32], 32);
+        this.barHeight = new PropertyNumberSelectable("Bar Height", false, this, [1, 2, 4], 4);
         this.barInsetShadow = new PropertyShadowSelectable("Bar Inset Shadow", false, this, 9, 0);
     }
 
