@@ -38,6 +38,11 @@ export class JSONGenerator {
             return undefined;
         }
         const json: any = {};
+        if (!lm) {
+            json["Core-Colors"] = this.getCoreColors();
+            json["Text"] = this.getText();
+            json["Image-Overlay"] = this.getImageOverlay();
+        }
         json["All-Colors"] = this.getAllColors(lm);
         json["Theme-Colors"] = this.getThemeColors(theme, lm);
         json["Theme"] = this.getTheme(theme, lm);
@@ -276,10 +281,10 @@ export class JSONGenerator {
 
     private getGradientBackgrounds(theme: ColorTheme, lm: boolean): any {
         const self = this;
-        const fcn2 = function(lm: boolean, from?: Shade, to?: Shade): any {
+        const fcn2 = function(lm: boolean, from?: Shade, to?: Shade, fromShadeName?: string): any {
             let color, onColor, button, onButton, icon, hotlink: string | undefined;
             if (from && to) {
-                const fromName = self.getShadeName(from, theme);
+                const fromName = fromShadeName ? fromShadeName : self.getShadeName(from, theme);
                 const toName = self.getShadeName(to, theme);
                 color = `linear-gradient(90deg, ${fromName} 0%, ${toName} 100%)`;
                 onColor = self.getShadeName(from, theme, true);
@@ -304,10 +309,11 @@ export class JSONGenerator {
         const fcn = function(gc: GradientColors, lm: boolean): any {
             return fcn2(lm, gc.from.getValue(), gc.to.getValue());
         };
+        const gradient3FromShadeName = lm ? undefined : "{Core-Colors.Gray.Color.900}";
         return {
             "Gradient-1": fcn(theme.gradient1, lm),
             "Gradient-2": fcn(theme.gradient2, lm),
-            "Gradient-3": fcn2(lm, Shade.GRAY, Shade.NEAR_BLACK),
+            "Gradient-3": fcn2(lm, Shade.GRAY, Shade.NEAR_BLACK, gradient3FromShadeName),
         };
     }
 
@@ -570,7 +576,6 @@ export class JSONGenerator {
             Colored: {
                 Link: this.getShadeColor(shade, theme),
                 Visited: this.getColor("{Hotlinks.Colored.Link}B3"),
-                Active: this.getColor("{Hotlinks.Colored.Link"),
             },
         };
         log.debug(`getHotlinks exit`);
@@ -747,11 +752,12 @@ export class JSONGenerator {
     }
 
     private getButtons(theme: ColorTheme, lm: boolean): any {
-        const button = theme.button.getValue();
+        let button = theme.button.getValue();
         if (!button) {
             log.debug("getButtons exit (no button)");
             return;
         }
+        if (!lm) button = button.getDarkModeShade();
         return {
             Colored: {
                 "Color": this.getShadeColor(button, theme),
@@ -790,15 +796,19 @@ export class JSONGenerator {
         if (shade) return this.getShadeName(shade, theme, onShade);
     }
 
-    private getShadeName(shade: Shade, theme?: ColorTheme, onShade?: boolean): string | undefined {
-        const coreShadeName = shade.coreShadeName;
+    private getShadeName(shade: Shade, theme?: ColorTheme, onColor?: boolean): string | undefined {
+        let coreShadeName = shade.coreShadeName;
+        if (coreShadeName && onColor) {
+            shade = shade.getOnShade();
+            coreShadeName = shade.coreShadeName;
+        }
         if (coreShadeName) {
             return "{Core-Colors." + coreShadeName + ".Color}";
         }
         if (theme) {
             const ref = this.getShadeRef(shade, theme);
             if (ref && shade.index != undefined) {
-                return "{Theme-Colors." + ref + (onShade ? ".On-Color." : ".Color.") + this.getShadeId(shade) + "}";
+                return "{Theme-Colors." + ref + (onColor ? ".On-Color." : ".Color.") + this.getShadeId(shade) + "}";
             }
         }
         return shade.getRGBA();
@@ -847,6 +857,143 @@ export class JSONGenerator {
     private getShadeId(shade: Shade): string {
         if (shade.id === "0") return "050";
         return shade.id;
+    }
+
+    private getCoreColors(): any {
+        return {
+              "White": {
+                "Color": {
+                  "value": "rgba(255,255,255,0.6)",
+                  "type": "color"
+                }
+              },
+              "Gray": {
+                "Color": {
+                  "100": {
+                    "value": "#C8C8C8",
+                    "type": "color"
+                  },
+                  "200": {
+                    "value": "#B1B1B1",
+                    "type": "color"
+                  },
+                  "300": {
+                    "value": "#9B9B9B",
+                    "type": "color"
+                  },
+                  "400": {
+                    "value": "#858585",
+                    "type": "color"
+                  },
+                  "500": {
+                    "value": "#6A6A6A",
+                    "type": "color"
+                  },
+                  "600": {
+                    "value": "#505050",
+                    "type": "color"
+                  },
+                  "700": {
+                    "value": "#383838",
+                    "type": "color"
+                  },
+                  "800": {
+                    "value": "#212121",
+                    "type": "color"
+                  },
+                  "900": {
+                    "value": "#070707",
+                    "type": "color"
+                  },
+                  "050": {
+                    "value": "#DFDFDF",
+                    "type": "color"
+                  }
+                },
+                "On-Color": {
+                  "100": {
+                    "value": "{Text.Dark}",
+                    "type": "color",
+                    "description": "Contrast ratio: 13.24"
+                  },
+                  "200": {
+                    "value": "{Text.Dark}",
+                    "type": "color",
+                    "description": "Contrast ratio: 10.59"
+                  },
+                  "300": {
+                    "value": "{Text.Dark}",
+                    "type": "color",
+                    "description": "Contrast ratio: 8.39"
+                  },
+                  "400": {
+                    "value": "{Text.Dark}",
+                    "type": "color",
+                    "description": "Contrast ratio: 6.44"
+                  },
+                  "500": {
+                    "value": "{Text.Dark}",
+                    "type": "color",
+                    "description": "Contrast ratio: 4.88"
+                  },
+                  "600": {
+                    "value": "{Text.White}",
+                    "type": "color",
+                    "description": "Contrast ratio: 4.74"
+                  },
+                  "700": {
+                    "value": "{Text.White}",
+                    "type": "color",
+                    "description": "Contrast ratio: 6.58"
+                  },
+                  "800": {
+                    "value": "{Text.White}",
+                    "type": "color",
+                    "description": "Contrast ratio: 9.44"
+                  },
+                  "900": {
+                    "value": "{Text.White}",
+                    "type": "color",
+                    "description": "Contrast ratio: 13.20"
+                  },
+                  "050": {
+                    "value": "{Text.Dark}",
+                    "type": "color",
+                    "description": "Contrast ratio: 16.12"
+                  },
+                  "Half": {
+                    "value": "{Text.Dark}",
+                    "type": "color",
+                    "description": "Contrast ratio: "
+                  },
+                  "Quarter": {
+                    "value": "{Text.Dark}",
+                    "type": "color",
+                    "description": "Contrast ratio: "
+                  }
+                }
+              }
+            };
+    }
+
+    private getText(): any {
+        return {
+              "Dark": {
+                "value": "#121212",
+                "type": "color"
+              },
+              "White": {
+                "value": "{Core-Colors.White.Color}",
+                "type": "color"
+              }
+        };
+    }
+
+    private getImageOverlay(): any {
+        return {
+              "value": "rgba(0,0,0,.25)",
+              "type": "color"
+        };
     }
 
 }
