@@ -93,11 +93,10 @@ export class Hotlinks extends Atom {
             log.debug(`Hotlinks.getHotlinkVariables exit (tertiary not set)`)
             return undefined;
         }
-        const buttonColor = button.getMode().color;
         const lmBackground = lmbg.primary;
         const dmBackground = dmbg.primary;
-        const lm = this.getHotlinkModeVariables(buttonColor as any, lmBackground, underline, true);
-        const dm = this.getHotlinkModeVariables(buttonColor as any, dmBackground, underline, false);
+        const lm = this.getHotlinkModeVariables(button, lmBackground, underline, true);
+        const dm = this.getHotlinkModeVariables(button, dmBackground, underline, false);
         const onWhite = this.getOnHotlinkWithDecoration(lm, Shade.WHITE);
         const onBlack = this.getOnHotlinkWithDecoration(lm, Shade.BLACK);
         const onTertiary = this.getOnHotlinkWithDecoration(lm, tertiary);
@@ -150,43 +149,41 @@ export class Hotlinks extends Atom {
         return { unvisited, visited };
     }
 
-    private getHotlinkModeVariables(buttonColor: Color, background: Shade, underline: boolean, lm: boolean): HotlinkModeVariables {
+    private getHotlinkModeVariables(button: Shade, background: Shade, underline: boolean, lm: boolean): HotlinkModeVariables {
         const onBackground = background.getOnShade();
-        const shades = lm ? buttonColor.light.shades : buttonColor.dark.shades;
-        let bestShade1: Shade | undefined;
-        let bestShade2: Shade | undefined;
-        let bestContrast1 = 0;
-        let bestContrast2 = 0;
-        log.debug(`Hotlinks.getHotlinkModeVariables enter: buttonColor=${buttonColor.name}, underline=${underline}, lm=${lm}, numShades=${shades.length}`);
-        // Search all of the shades for the best match based on comparison to background and onBackground
-        for (let i = 0; i < shades.length; i++) {
-            const shade = shades[i];
-            let contrast = shade.getContrastRatio(background);
-            log.debug(`Hotlinks.getHotlinkModeVariables i=${i}, backgroundContrast=${contrast}`);
-            if (contrast < 4.5) continue;
-            if (contrast > bestContrast1) {
-                bestShade1 = shade;
-                bestContrast1 = contrast;
+        let shade1:Shade | undefined;
+        let shade2:Shade | undefined;
+        log.debug(`Hotlinks.getHotlinkModeVariables enter: button=${button.toString()}, underline=${underline}, lm=${lm}`);
+        const shades = button.getMode().shades;
+        let cmpShade: Shade | undefined = button;
+        let count = 0;
+        while (cmpShade) {
+            count++;
+            let contrast = cmpShade.getContrastRatio(background);
+            log.debug(`Hotlinks.getHotlinkModeVariables backgroundContrast=${contrast}, index=${cmpShade.index}`);
+            if (contrast >= 4.5) {
+                // Found a shade meeting the minimum requirements which is acceptable with underline
+                if (!shade1) shade1 = cmpShade;
+                const contrast2 = cmpShade.getContrastRatio(onBackground);
+                log.debug(`Hotlinks.getHotlinkModeVariables onBackgroundContrast=${contrast2}, index=${cmpShade.index}`);
+                if (contrast2 >= 3.1) {
+                    // Found a shade meeting both requirements which is allows no underline
+                    if (!shade2) shade2 = cmpShade;
+                    break;
+                }
             }
-            const contrast2 = shade.getContrastRatio(onBackground);
-            log.debug(`Hotlinks.getHotlinkModeVariables i=${i}, onBackgroundContrast=${contrast2}`);
-            // TODO: The following requirement fails with the test, so use the best for now
-            // if (contrast2 < 3.1) continue;  
-            // If not underlined, must have 3.1 contrast with text around it; if not found, means it MUST be underlined
-            contrast += contrast2;
-            if (contrast > bestContrast2) {
-                bestShade2 = shade;
-                bestContrast2 = contrast;
-            }
-            log.debug(`Hotlinks.getHotlinkModeVariables i=${i}, contrastToBackground=${contrast}, contrastToOnBackground=${contrast2}`);
+            // Advance to the next shade, to higher shades for light mode and lower shades for dark mode
+            if (lm) cmpShade = shades.length > cmpShade.index+1 ? shades[cmpShade.index+1] : undefined;
+            else cmpShade = cmpShade.index > 0 ? shades[cmpShade.index-1] : undefined;
         }
         // Underlining is required if we couldn't find a shade which meets both contrast requirements
-        const underlineRequired = bestShade2 === undefined;
+        const underlineRequired = shade2 === undefined;
         // Switch to underline if they requested no underline but underline is required
         underline = underline || underlineRequired;
-        const unvisitedShade = underline ? bestShade2 : bestShade1;
+        const unvisitedShade = underline ? shade1 : shade2;
         if (!unvisitedShade) throw new Error(`No hotlink shade was found for ${lm?"light":"dark"} mode`);
         const visitedShade = unvisitedShade.clone().setOpacity(0.9);
+        log.debug(`Hotlinks.getHotlinkModeVariables exit count=${count}, shade1=${shade1}, shade2=${shade2}`);
         return {
             unvisited: {
                 shade: unvisitedShade,

@@ -394,10 +394,10 @@ export class CSSGenerator {
         vk.setVar("avatar-shadow", "var(--avatar-elevation)");
         // sliders
         const slider = ms.sliders;
-        this.addPropVar("sliderhandleHeight", "px", slider.visibleHeight);
-        this.addPropVar("sliderhandleRadius", "px", slider.handleBorderRadius);
+        this.addPropVar("sliderhandleHeight", "", slider.visibleHeight);
+        this.addPropVar("sliderhandleRadius", "", slider.handleBorderRadius);
         this.addPropVar("sliderhandleElevation", "px", slider.handleElevation);
-        this.addPropVar("sliderbarHeight", "px", slider.barHeight);
+        this.addPropVar("sliderbarHeight", "", slider.barHeight);
         this.addPropVar("barInBevel", "", slider.barInsetShadow);
         // popover
         const popover = ms.popovers;
