@@ -487,16 +487,16 @@ export class CSSGenerator {
         vk.setVar("radius-0", "0px");
         this.addPropVar("radius-1", "px", atoms.borderSettings.baseBorderRadius);
         for (let i = 2; i <= 10; i++) vk.setVar(`radius-${i}`, `calc(var(--radius-1) * ${i})`);
-        vk.setVar(`radius-quarter`, `calc(var(--radius-1 / 4)`);
-        vk.setVar(`radius-half`, `calc(var(--radius-1 / 2)`);
+        vk.setVar(`radius-quarter`, `calc(var(--radius-1) / 4)`);
+        vk.setVar(`radius-half`, `calc(var(--radius-1) / 2)`);
         // spacing
         vk = new CSSVariableKind("", "", [atoms.gridSettings.grid], this);
         vk.setVar("spacing-0", "0px");
         this.addPropVar("spacing-1", "px", atoms.gridSettings.grid);
         for (let i = 2; i <= 10; i++) vk.setVar(`spacing-${i}`, `calc(var(--spacing-1) * ${i})`);
-        vk.setVar(`spacing-quarter`, `calc(var(--spacing-1 / 4)`);
-        vk.setVar(`spacing-half`, `calc(var(--spacing-1 / 2)`);
-        vk.setVar(`negative-size-half`, `calc(0 - var(--spacing-1 / 2)`);
+        vk.setVar(`spacing-quarter`, `calc(var(--spacing-1) / 4)`);
+        vk.setVar(`spacing-half`, `calc(var(--spacing-1) / 2)`);
+        vk.setVar(`negative-size-half`, `calc(0 - var(--spacing-1) / 2)`);
         // borders
         vk = new CSSVariableKind("", "", [atoms.borderSettings.baseBorderWidth], this);
         vk.setVar("border-0", "0px");
@@ -535,7 +535,7 @@ export class CSSGenerator {
         this.addPercentToDecimal("elevation-opacity", atoms.elevationSettings.colorOpacity);
         this.addPercentToDecimal("base-elevation-opacity", atoms.elevationSettings.baseColorOpacity);
         // elevations
-        vk.setVar("elevation-0", "0 0 0 0 rgba(0,0,");
+        vk.setVar("elevation-0", "0 0 0 0 rgba(0,0,0,0)");
         for (let i = 1; i <= 9; i++) {
             const vc = `var(--change-${i})`;
             vk.setVar( `elevation-${i}`, 
@@ -567,7 +567,7 @@ export class CSSGenerator {
         this.addPercentToDecimal(`${p}-dark-opacity`, props.darkShadowOpacity);
         this.addPercentToDecimal(`${p}-change`, props.percentageChange);
         // bevels
-        const vk = new CSSVariableKind(p, "", [], this);
+        const vk = new CSSVariableKind(p, "", [props.blurRadius], this);
         if (props.standard) {
             vk.setVar("bevel-0", "0 0 0 0 rgba(0,0,0,0)");
             vk.setVar("bevel-1", "inset var(--bevel-horizontal) var(--bevel-vertical) var(--bevel-blur) var(--bevel-spread) rgba(255, 255, 255, var(--bevel-light-opacity)), inset calc(0px-var(--bevel-horizontal)) calc(0px - var(--bevel-vertical)) var(--bevel-blur) var(--bevel-spread) rgba(0,0,0,var(--bevel-dark-opacity))");
@@ -579,8 +579,8 @@ export class CSSGenerator {
                     `var(--bevel-blur) ` +
                     `var(--bevel-spread) ` +
                     `rgba(255, 255, 255, var(--bevel-light-opacity)), ` +
-                    `inset calc(0px - calc(var(--bevel-horizontal) * ${bc}) ` +
-                    `calc(0px - calc(var(--bevel-vertical) * ${bc}) ` +
+                    `inset calc(0px - calc(var(--bevel-horizontal) * ${bc})) ` +
+                    `calc(0px - calc(var(--bevel-vertical) * ${bc})) ` +
                     `var(--bevel-blur) ` +
                     `var(--bevel-spread) ` +
                     `rgba(0,0,0,calc(var(--bevel-dark-opacity) * ${bc}))`);
