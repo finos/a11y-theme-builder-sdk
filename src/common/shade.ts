@@ -477,7 +477,7 @@ export class Shade {
         const shades = this.getLighterShades(false);
         // Search backwards for the first one of these built shades which has a contrast ratio to the selected shade >=
         // the required ratio.
-        for (let i = shades.length - 1; i >= 0; i--) {
+        for (let i = Math.min(this.index,4); i >= 0; i--) {
             const shade = shades[i];
             const curRatio = shade.getContrastRatio(bgShade);
             log.debug(`Ratio of darkmode shade ${JSON.stringify(shade)} to ${JSON.stringify(bgShade)} (i=${i}) is ${curRatio}`);

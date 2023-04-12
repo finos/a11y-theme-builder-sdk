@@ -905,6 +905,9 @@ class CSSTheme {
         this.setBackgroundListener("lmbg", true, this.theme.lightModeBackground);
         this.setBackgroundListener("dmbg", false, this.theme.darkModeBackground);
 
+        // elevations listener
+        this.setElevationsListener(true);
+
         // gradients
         this.setShadeListener({name: "gradient1-a", pcs: this.theme.gradient1.from, on: true, dm: true});
         this.setShadeListener({name: "gradient1-b", pcs: this.theme.gradient1.to, on: true, dm: true});
@@ -979,13 +982,26 @@ class CSSTheme {
         } else {
             vk.setVar("dm-on-background", "rgba(255,255,255,0.6)");
         }
+        log.debug(`backgroundListener exit - ${name}`);
+    }
+
+    private setElevationsListener(lm: boolean) {
+        const ls = this.theme.darkModeBackground.setListener(this.lkey("css.elevations"), this.elevationsListener.bind(this,lm));
+        this.listenerSubscriptions.push(ls);
+    }
+
+    private elevationsListener(lm: boolean, _: EventValueChange<ColorPair>) {
+        log.debug(`elevationsListener entry`)
+        const pcp = this.theme.darkModeBackground;
+        const vk = new CSSVariableKind("css.elevations","", [pcp], this.cssGenerator);
+        const prefix = lm ? "" : "dm-";
         // Set elevation backgrounds
         const lmeShades = this.theme.getElevationShades(lm);
         for (let i = 0; i < lmeShades.length; i++) {
             vk.setShadeVarRef(`${prefix}elevation-bg-${i}`, lmeShades[i]);
             vk.setShadeVarRef(`${prefix}on-elevation-bg-${i}`, lmeShades[i].getOnShade2(lm));
         }
-        log.debug(`backgroundListener exit - ${name}`);
+        log.debug(`elevationsListener exit`);
     }
 
     private shadeGroupListener(type: string, prop: PropertyColorShade, vc: EventValueChange<Shade>): void {
