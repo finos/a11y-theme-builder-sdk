@@ -231,8 +231,8 @@ export class PropertyRange extends Property<number> {
     public min: number;
     public max: number;
 
-    constructor(name: string, min: number, max: number, required: boolean, parent: Node) {
-        super(name, required, parent);
+    constructor(name: string, min: number, max: number, required: boolean, parent: Node, opts?: PropertyOpts<number>) {
+        super(name, required, parent, opts);
         this.min = min;
         this.max = max;
     }

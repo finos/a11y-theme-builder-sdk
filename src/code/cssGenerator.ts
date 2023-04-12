@@ -176,6 +176,8 @@ export class CSSGenerator {
     private setAtomVars() {
         const atoms = this.atoms;
 
+        const vk = new CSSVariableKind("atoms","",[], this);
+
         // Listen for the addition of colors or removal of colors from the color palette.
         atoms.colorPalette.setColorListener(this.lkey("colorPalette"), this.colorListener.bind(this));
 
@@ -216,6 +218,10 @@ export class CSSGenerator {
         for (var i=0; i<dhs.headerStyles.length; i++) {
             this.generateTypographyVars(dhs.headerStyles[i], "h"+(i+1));
         }
+        vk.setVars({
+            "headerFamily": "var(--secondaryFont)", // TODO: static?  If not, where from?
+            "bodyFamily": "var(--primaryFont)", // TODO: static?  If not, where from?
+        });
 
         // Body styles
         const bds = atoms.bodyStyles;
@@ -255,6 +261,10 @@ export class CSSGenerator {
         this.addPropVar(prefix+"FontWeight", "", typography.fontWeight);
         this.addPropVar(prefix+"FontFamily", "", typography.fontFamily);
         this.addPropVar(prefix+"LetterSpacing", "%", typography.letterSpacing);
+        this.addPropVar(prefix+"LineHeight", "%", typography.lineHeight);
+        const vk = new CSSVariableKind("molecules.topograpy","",[], this);
+        vk.setVar(`${prefix}TextDecoration`,"none");   // TODO: if not static, where does this come from?
+        vk.setVar(`${prefix}TextTransform`,"none");   // TODO: if not static, where does this come from?
     }
 
     private setMoleculeVars() {
@@ -312,7 +322,7 @@ export class CSSGenerator {
         })
         vk.setVars({
             "groupButton-radius": "calc(var(--radius-1) * var(--button-radius) * 1.6)",
-            "groupButtonBG": "#ffffff", // TODO: This should be dynamic
+            "groupButtonBG": "#ffffff", // TODO: This should be dynamic.  How is it determined?
             "on-groupButtonBG": "var(--textDark)",
             "dm-groupButtonBG": "rgba(0,0,0,.6)",
             "dm-on-groupButtonBG": "var(--dm-dmwhite)",
@@ -333,12 +343,11 @@ export class CSSGenerator {
                 "chipLetterSpacing": `var(--${typography}LetterSpacing)`,
             });    
         });
-        // switch - TODO - part of charts?
         vk.setVars({
-           "switch-height": "var(--spacing-3)",  // TODO: should be dynamic
-           "switch-radius": "3", // TODO: should be dynamic
-           "switch-bar-height": "0.5", // TODO: should be dynamic
-           "switch-bar-radius": "0.5", // TODO: should be dynamic
+           "switch-height": "var(--spacing-3)",  // TODO: should be dynamic?
+           "switch-radius": "3", // TODO: should be dynamic?
+           "switch-bar-height": "0.5", // TODO: should be dynamic?
+           "switch-bar-radius": "0.5", // TODO: should be dynamic?
         });
         // cards
         const card = ms.standardCards;
@@ -352,20 +361,19 @@ export class CSSGenerator {
             "card-border-color": "var(--border)",
             "card-shadow": "var(--card-elevation), var(--card-bevel)",
         });
-        // modals - TODO: modal-overlay comes modal molecule
+        // modals
         const modal = ms.modal;
         this.addPropVar("modal-radius", "px", modal.borderRadius);
         this.addPropVar("modal-elevation", "", modal.elevation, elevationToCSS);
         vk.setVars({
-            "modal-padding": "2",
+            "modal-padding": "2", // TODO: static?
             "modal-border": "var(--spacing-2)",
             "modal-shadow": "var(--spacing-2)",
             "modal-overlay": "var(--spacing-2)",
         });
         vk.setVars({
-            // TODO: Need to set tooltip-color & tooltip-oncolor for lm & dm 
-            // The tooltip on-color should always the opposite of the background (dark vs white)
-            "dmtooltip": "", // TODO: There should be a tooltip color and on-color for both lm and dm
+            // TODO: Do I need to set tooltip-color & tooltip-oncolor for lm & dm?  If yes, how to determine them?
+            "dmtooltip": "",
             "tooltip-padding": "2",
             "tooltip-border": "var(--border-1)",
             "tooltip-elevation": "0",
@@ -383,8 +391,10 @@ export class CSSGenerator {
         this.addPropVar("image-elevation", "", image.imageElevation, elevationToCSS);
         this.addPropVar("image-radius", "", image.generalImageBorderRadius);
         this.addPropVar("inline-image-height", "", image.listImageHeight);
-        this.addPropVar("inline-image-image-radius", "", image.listImageBorderRadius);
-        // TODO: How do I get values for image-border && image-shadow?
+        this.addPropVar("inline-image-radius", "", image.listImageBorderRadius);
+        vk.setVars({
+            "image-shadow": "var(--image-elevation)",
+        })
         // Avatar Images
         const avatar = ms.avatars;
         this.addPropVar("avatar-border", "px", avatar.mediumBorder);
@@ -395,7 +405,7 @@ export class CSSGenerator {
         const slider = ms.sliders;
         this.addPropVar("sliderhandleHeight", "", slider.visibleHeight);
         this.addPropVar("sliderhandleRadius", "", slider.handleBorderRadius);
-        this.addPropVar("sliderhandleElevation", "px", slider.handleElevation);
+        this.addPropVar("sliderhandleElevation", "", slider.handleElevation, elevationToCSS);
         this.addPropVar("sliderbarHeight", "", slider.barHeight);
         this.addPropVar("barInBevel", "", slider.barInsetShadow);
         // popover
@@ -552,7 +562,7 @@ export class CSSGenerator {
         this.addBevelProps(atoms.bevelSettings.standard);
         this.addBevelProps(atoms.bevelSettings.inverse);
 
-        this.addPropsVar("focusBlur", "px", [atoms.gridSettings.grid, atoms.focusStates.addFocusBlur], this.generateFocusBlurVariables.bind(this));
+        this.addPropsVar("focusBlur", "", [atoms.gridSettings.grid, atoms.focusStates.addFocusBlur], this.generateFocusBlurVariable.bind(this));
     }
 
     private addBevelProps(props: BevelSettingsProps) {
@@ -639,9 +649,9 @@ export class CSSGenerator {
         }
     }
 
-    private generateFocusBlurVariables(vk: CSSVariableKind) {
+    private generateFocusBlurVariable(vk: CSSVariableKind) {
         const name = "focusBlur";
-        const unit = "px";
+        const unit = "";
         const focusBlur = this.atoms.focusStates.addFocusBlur.getValue();
         const grid = this.atoms.gridSettings.grid.getValue();
         if (focusBlur === undefined || grid === undefined) {
@@ -1244,7 +1254,7 @@ function getShadeVarName(shade: Shade): string | undefined {
 
 function getCoreShadeVarName(shade: Shade): string | undefined {
     if (shade.coreShadeName) {
-        return `color-${shade.coreShadeName}`;
+        return `${shade.coreShadeName.toLowerCase()}`;
     }
     return undefined;
 }

@@ -26,7 +26,7 @@ export class DisplayAndHeaderStyles extends Atom {
         super("Display And Header Styles", false, atoms);
         this.addDependency(atoms.colorThemes);
         this.headingDisplayFontWeight = new PropertyNumber("Heading/Display Font Weight", false, this, {defaultValue: 700});
-        this.percentChangeInHeaderDisplaySizes = new PropertyRange("Percent Change in Header/Display Sizes", 0, 100, false, this);
+        this.percentChangeInHeaderDisplaySizes = new PropertyRange("Percent Change in Header/Display Sizes", 0, 100, false, this, {defaultValue: 42});
         this.displayStyles.push(new TypographyStyling(`Display 1`, this, 76.48, 400, 130, -1.5));
         this.displayStyles.push(new TypographyStyling(`Display 2`, this, 69.76, 400, 130, -0.5));
         this.headerStyles.push(new TypographyStyling(`Header 1`, this, 56.32, 400, 130, -0.5));

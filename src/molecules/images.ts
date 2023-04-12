@@ -23,9 +23,9 @@ export class Images extends Molecule {
 
     constructor(molecules: IMolecules) {
         super("Images And Videos", molecules);
-        this.listImageHeight = new PropertyNumberSelectable("List Image Height", false, this, [48/8, 56/8, 64/8, 72/8], 56/8);
-        this.listImageBorderRadius = new PropertyNumberSelectable("List Image Border Radius", false, this, [0, 4/8, 8/8, 16/8], 1);
-        this.generalImageBorderRadius = new PropertyNumberSelectable("General Image Border Radius", false, this, [0, 4/8, 8/8, 16/8, 24/8, 32/8], 2);
+        this.listImageHeight = new PropertyNumberSelectable("List Image Height", false, this, [6, 7, 8, 9], 7);
+        this.listImageBorderRadius = new PropertyNumberSelectable("List Image Border Radius", false, this, [0, 0.5, 1, 2], 1);
+        this.generalImageBorderRadius = new PropertyNumberSelectable("General Image Border Radius", false, this, [0, 0.5, 1, 2, 3, 4], 2);
         this.imageElevation = new PropertyElevationSelectable("Image Elevation", false, this, 0, 9, 0);
     }
 
