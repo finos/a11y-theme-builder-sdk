@@ -382,21 +382,21 @@ export class ColorTheme extends Node implements IColorTheme {
         const buttonShadeGroup = {
             shade: button,
             halfShade: Shade.fromHex(button.hex).setOpacity(0.5).setMode(button.getMode()),
-            onShade: button.getOnShade(),
+            onShade: button.getOnShade2(lm),
         };
-        const white = this.getShadeGroup(button, Shade.WHITE, lm? 1: 0.6);
-        const black = this.getShadeGroup(button, Shade.BLACK, 1);
-        const tertiary = this.getShadeGroup(button, tertiaryShade, 1);
-        const gradient1 = gradient1Shade.getShadeGroup();
-        const gradient2 = gradient2Shade.getShadeGroup();
-        const gradient3 = this.getShadeGroup(button, Shade.fromRGB(227,227,228), 1);
+        const white = this.getShadeGroup(button, Shade.WHITE, lm, lm? 1: 0.6);
+        const black = this.getShadeGroup(button, Shade.BLACK, lm, 1);
+        const tertiary = this.getShadeGroup(button, tertiaryShade, lm, 1);
+        const gradient1 = gradient1Shade.getShadeGroup(lm);
+        const gradient2 = gradient2Shade.getShadeGroup(lm);
+        const gradient3 = this.getShadeGroup(button, Shade.fromRGB(227,227,228), lm, 1);
         return {
             default: buttonShadeGroup, white, black, tertiary, gradient1, gradient2, gradient3
         }
     }
 
-    public getShadeGroup(shade: Shade, compShade: Shade, multiplier: number): ShadeGroup {
-        return shade.getShadeOrOnShadeBasedOnContrast(compShade, multiplier).getShadeGroup();
+    public getShadeGroup(shade: Shade, compShade: Shade, lm: boolean, multiplier: number): ShadeGroup {
+        return shade.getShadeOrOnShadeBasedOnContrast(compShade, lm, multiplier).getShadeGroup(lm);
     }
 
     private findDMShade(button: Shade): Shade {
