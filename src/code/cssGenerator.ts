@@ -964,7 +964,7 @@ class CSSTheme {
         vk.setShadeVarRef(`${prefix}background-secondary`, vars.secondary);
         vk.setShadeVarRef(`${prefix}border`, vars.borderColor);
         vk.setShadeVarRef(`${prefix}chip`, vars.chip);
-        vk.setShadeVarRef(`${prefix}on-chip`, vars.chip.getOnShade());
+        vk.setShadeVarRef(`${prefix}on-chip`, vars.onChip);
         vk.setShadeVarRef(`${prefix}color-drop`, vars.colorDrop);
         vk.setShadeVarRef(`${prefix}group-button-bg`, vars.groupButton);
         vk.setShadeVarRef(`${prefix}line-color`, vars.lineColor);

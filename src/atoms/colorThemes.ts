@@ -27,6 +27,7 @@ export interface BackgroundVariables {
     colorDrop: Shade;
     borderColor: Shade;
     chip: Shade;
+    onChip: Shade;
     groupButton: Shade;
     lineColor: Shade;
     surface: Shade;
@@ -325,6 +326,7 @@ export class ColorTheme extends Node implements IColorTheme {
         let colorDrop: Shade;
         let borderColor: Shade;
         let chip: Shade;
+        let onChip: Shade;
         let groupButton: Shade;
         let lineColor: Shade;
         let surface: Shade;
@@ -338,6 +340,7 @@ export class ColorTheme extends Node implements IColorTheme {
                 colorDrop = this.primary100;
                 borderColor = Shade.fromRGBAString('rgba(0,0,0,.15)');
                 chip = Shade.fromRGBAString('rgba(0,0,0,.25)');
+                onChip = Shade.BLACK;
                 const inputBG = this.themes.atoms.inputBackground.overlayColor.getValue();
                 if (!inputBG) {
                     log.debug("ColorTheme.getPrimaryBackgroundVariables: no input background");
@@ -352,6 +355,7 @@ export class ColorTheme extends Node implements IColorTheme {
                 colorDrop = Shade.BLACK;
                 borderColor = Shade.fromRGBAString('rgba(255,255,255,.15)');
                 chip = Shade.fromRGBAString('rgba(255,255,255,.25)');
+                onChip = Shade.WHITE;
                 groupButton = Shade.fromRGBAString('rgba(255,255,255,.1)');
                 lineColor = Shade.fromRGBAString('rgba(255,255,255,.05)');
                 surface = primary;
@@ -359,7 +363,7 @@ export class ColorTheme extends Node implements IColorTheme {
             default:
                 throw new Error(`Unexpected lightmode background selection for ${this.name} color theme: ${bg.title}`);
         }
-        return { primary, secondary, colorDrop, borderColor, chip, groupButton, lineColor, surface };
+        return { primary, secondary, colorDrop, borderColor, chip, onChip, groupButton, lineColor, surface };
     }
 
     public getShadeGroups(shade: Shade): ShadeGroups {
