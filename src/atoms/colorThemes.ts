@@ -408,7 +408,7 @@ export class ColorTheme extends Node implements IColorTheme {
         // we find the first shade with a contrast of >= 3.1 when compared with the primary of the selected
         // dark mode background.
         const shades = button.getMode().color.dark.shades;
-        for (let i = button.index; i >= 0; i--) {
+        for (let i = Math.min(button.index,4); i >= 0; i--) {
             const shade = shades[i];
             const contrast = shade.getContrastRatio(bg);
             if (contrast >= 3.1) {
@@ -452,12 +452,10 @@ export class ColorTheme extends Node implements IColorTheme {
     }
 
     public getElevationShades(lm: boolean): Shade[] {
-        const val = lm ? this.lightModeBackground.getValue() : this.darkModeBackground.getValue();
-        if (!val) {
-            return [];
-        }
-        const bg = lm ? val.primary : val.secondary;
-        return bg.getElevationShades();
+        const dmbg = this.darkModeBackground.getValue();
+        if (!dmbg) return [];
+        const shade = lm ? dmbg.primary : dmbg.secondary;
+        return shade.getElevationShades();
     }
 
     public deserialize(obj: any) {

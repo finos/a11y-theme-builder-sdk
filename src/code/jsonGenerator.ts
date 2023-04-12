@@ -52,13 +52,13 @@ export class JSONGenerator {
         json["Buttons"] = this.getButtons(theme, lm);
         json["Icons"] = this.getIcons(theme, lm);
         json["Surface"] = this.getSurface(theme, lm);
-        json["Borders"] = this.getBorders(lm);
         json["States"] = this.getStates(lm);
         json["Elevations"] = this.getElevations(lm);
         json["Hotlinks"] = this.getHotlinks(theme, lm);
         json["Chips"] = this.getChips(theme, lm);
         json["Text-Decoration"] = this.getTextDecoration(theme, lm);
         if (lm) {
+            json["Borders"] = this.getBorders(lm);
             json["fontFamilies"] = this.getFontFamilies();
             json["baseFont"] = this.getBaseFont();
             json["fontWeights"] = this.getFontWeights();
@@ -471,8 +471,8 @@ export class JSONGenerator {
     }
 
     private getBorders(lm: boolean): any {
-        const defaultColor = lm ? "" : "";
-        const bottomLine = `linear-gradient(0deg, ${defaultColor}, 1px, #00000000 1px)`;
+        const defaultColor = lm ? "ffffff40" : "";
+        const bottomLine = `linear-gradient(0deg, , 1px, ${defaultColor} 1px)`;
         return {
             "Default": this.getColor(defaultColor), 
             "Bottom Line": this.getColor(bottomLine),
@@ -579,6 +579,9 @@ export class JSONGenerator {
 
     private getSurface(theme: ColorTheme, lm: boolean): any {
         log.debug(`getSurface entry - lm=${lm}`);
+        if (!lm) {
+            return this.getColorPair("{Elevations.Elevation-1}", "{Text.White}");
+        }
         const bg = lm ? theme.lightModeBackground : theme.darkModeBackground;
         const bgVal = bg.getValue();
         if (!bgVal) {
