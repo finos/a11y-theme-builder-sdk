@@ -177,7 +177,7 @@ export class JSONGenerator {
         const buttonVars = theme.getShadeGroups(buttonShade);
         const buttonSG = lm ? buttonVars.lm : buttonVars.dm;
         const hotlinkVars = this.atoms.hotlinks.findHotlinkVariables();
-        const hotlinkShade = lm ? hotlinkVars.lm.unvisited.shade: hotlinkVars.dm.unvisited.shade;
+        const hotlinkShade = lm ? hotlinkVars.lm.unvisited.shade : hotlinkVars.dm.unvisited.shade;
         if (!hotlinkShade) {
             log.debug("getSolidBackgrounds exit (no hotlink shade)");
             return {};
@@ -281,13 +281,17 @@ export class JSONGenerator {
 
     private getGradientBackgrounds(theme: ColorTheme, lm: boolean): any {
         const self = this;
-        const fcn2 = function(lm: boolean, from?: Shade, to?: Shade, fromShadeName?: string): any {
+        const getShadeName = function(prop: PropertyColorShade, lm: boolean): string | undefined {
+            const shade = prop.getValue();
+            if (shade) {
+                return self.getShadeName(shade, lm, theme);
+            }
+        };
+        const fcn2 = function(lm: boolean, fromName?: string, toName?: string): any {
             let color, onColor, button, onButton, icon, hotlink: string | undefined;
-            if (from && to) {
-                const fromName = fromShadeName ? fromShadeName : self.getShadeName(from, lm, theme);
-                const toName = self.getShadeName(to, lm, theme);
+            if (fromName && toName) {
                 color = `linear-gradient(90deg, ${fromName} 0%, ${toName} 100%)`;
-                onColor = self.getShadeName(from, lm, theme, true);
+                onColor = fromName;
             }
             button = self.getPropShadeName(theme.button, lm, theme);
             onButton = self.getPropShadeName(theme.button, lm, theme, true);
@@ -306,13 +310,14 @@ export class JSONGenerator {
             }
         };
         const fcn = function(gc: GradientColors, lm: boolean): any {
-            return fcn2(lm, gc.from.getValue(), gc.to.getValue());
+            return fcn2(lm, getShadeName(gc.from, lm), getShadeName(gc.to, lm));
         };
-        const gradient3FromShadeName = lm ? undefined : "{Core-Colors.Gray.Color.900}";
+        const gradient3FromName = lm ? "{Core-Colors.White.Color}": "{Core-Colors.Gray.Color.900}";
+        const gradient3ToName = lm ? "{Core-Colors.Gray.Color.200}": "{Core-Colors.Gray.Color.900}";
         return {
             "Gradient-1": fcn(theme.gradient1, lm),
             "Gradient-2": fcn(theme.gradient2, lm),
-            "Gradient-3": fcn2(lm, Shade.GRAY, Shade.NEAR_BLACK, gradient3FromShadeName),
+            "Gradient-3": fcn2(lm, gradient3FromName, gradient3ToName),
         };
     }
 
@@ -536,22 +541,15 @@ export class JSONGenerator {
         const from = theme.gradientHeaderText.from.getValue();
         const to = theme.gradientHeaderText.to.getValue();
         if (from && to) {
-            const fromName = this.getShadeName(from, lm, theme);
-            const toName = this.getShadeName(to, lm, theme);
+            const fromName = lm ? this.getShadeName(from, lm, theme) : "{Theme-Colors.Primary.Color.100}";
+            const toName = lm ? this.getShadeName(to, lm, theme) : "{Theme-Colors.Primary.Color.400}";
             textGradient = `linear-gradient(90deg, ${fromName} 0%, ${toName} 100%)`;
-        }
-        // Get color dropshadow
-        const bg = lm ? theme.lightModeBackground : theme.darkModeBackground;
-        const bgVal = bg.getValue();
-        if (bgVal) {
-
         }
         if (lm) {
             const bg = theme.lightModeBackground.getValue();
             colorDropshadow = bg && bg.lighter ?  "{Theme-Colors.Primary.Color.100}" : "{Core-Colors.Black.Color}80";
         } else {
-            const bg = theme.darkModeBackground.getValue();
-            colorDropshadow = bg && bg.lighter ?  "{Theme-Colors.Primary.Color.900}" : "{Core-Colors.Black.Color}";
+            colorDropshadow = "transparent";
         }
         const rtn = {
             "Text-Gradient": this.getColor(textGradient),

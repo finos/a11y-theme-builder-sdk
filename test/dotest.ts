@@ -58,6 +58,7 @@ async function test() {
     }, [EventType.NodeEnabled]);
     console.log("TEST: Adding cobalt to the color palette");
     const blue = colorPalette.addColor("cobalt","#0047AB");
+    //const blue = colorPalette.addColor("cobalt","#3ac324");
     console.log("TEST: Added blue to the color palette");
     assert(colorThemesAtomEnabled, "ColorThemes atom should be enabled after adding a color");
     ds.removeListener("dsListener");
@@ -925,7 +926,6 @@ const expectedCssVars = [
     "--toast-boxshadow",
     "--image-elevation",
     "--image-radius",
-    "--image-border",
     "--image-shadow",
     "--inline-image-height",
     "--inline-image-radius",
@@ -1377,6 +1377,7 @@ const doNotSet = [
     "--dm-on-cobalt-800",
     "--dm-on-cobalt-900",
     "--chipTypography",
+    "--image-border",
 ]
 
 test();

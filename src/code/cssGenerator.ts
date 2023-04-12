@@ -1027,7 +1027,7 @@ class CSSTheme {
         // Set 3 CSS variables based on the dropdowns selection
         const var1 = lm ? "dropdown-focus-theme" : "dm-dropdown-focus-theme";
         const var2 = lm ? "on-dropdown-focus-bg" : "dm-on-dropdown-focus-bg";
-        const var3 = lm ? "on-dropdown-hover-bg" : "dm-on-dropdown-focus-bg";
+        const var3 = lm ? "on-dropdown-hover-bg" : "dm-on-dropdown-hover-bg";
         if (mfsVal === Dropdowns.FULL_COLOR) {
             vk.setVar(var1, "100%");
             vk.setVar(var2, buttonShade.getOnShade2(lm).getRGBA());
@@ -1039,6 +1039,17 @@ class CSSTheme {
             vk.setVar(var3, onSurfaceHex);
         } else {
             throw new Error(`Invalid dropdown menu focus state: ${mfsVal}`);
+        }
+        if (lm) {
+            vk.setVars({
+                "dropdown-hover-bg": "linear-gradient(90deg, var(--button-half) var(--dropdown-focus-theme), var(--transparent) var(--dropdown-focus-theme)) !important",
+                "on-dropdown-hover-bg": "var(--on-surface)",
+            });
+        } else {
+            vk.setVars({
+                "dm-dropdown-hover-bg": "linear-gradient(90deg, var(--dm-button-half) var(--dm-dropdown-focus-theme), var(--transparent) var(--dm-dropdown-focus-theme)) !important",
+                "dm-on-dropdown-hover-bg": "var(--dm-on-surface)",
+            });
         }
         log.debug(`generateDropDownVars exit - lm=${lm}`);
     }
