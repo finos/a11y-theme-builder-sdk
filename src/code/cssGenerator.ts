@@ -174,7 +174,6 @@ export class CSSGenerator {
     }
 
     private setAtomVars() {
-        const self = this;
         const atoms = this.atoms;
 
         // Listen for the addition of colors or removal of colors from the color palette.
@@ -188,8 +187,8 @@ export class CSSGenerator {
         // Listen for changes to the input background
         this.addPropVar("myInputBackground", "", atoms.inputBackground.overlayColor, this.generateInputBackgroundVariables.bind(this));
 
-        // Listen for the state settings changes
-        atoms.stateSettings.all.forEach(ss => this.addPropVar(ss.name, "", ss.prop, this.setStateSettingVar.bind(this, ss)));
+        // Listen for the state settings to be ready
+        this.addPropVar("cssStateSettings", "", atoms.stateSettings.ready, this.setStateSettingsVars.bind(this));
 
         // Listen for changes affecting hotlinks calculations
         this.addPropsVar("hotlinks", "", [atoms.hotlinks.underlineHotlinksInLightMode, this.ds.atoms.colorThemes.defaultTheme], this.generateHotlinkVariables.bind(this));
@@ -669,14 +668,15 @@ export class CSSGenerator {
         this.setVar("dm-input-hover", "", vk, "rgba(255,255,255,.12)");
     }
 
-    private setStateSettingVar(ss: StateSetting, vk: CSSVariableKind) {
-        const hex = vk.props[0].getValue();
-        if (hex !== undefined) {
+    private setStateSettingsVars(vk: CSSVariableKind) {
+        log.debug(`Begin setting state settings variables`);
+        this.atoms.stateSettings.all.forEach(ss => {
             this.setVar(ss.name, "", vk, ss.lmShade.hex);
             this.setVar(`on-${ss.name}`, "", vk, ss.lmShade.getOnShade().hex);
             this.setVar(`dm-${ss.name}`, "", vk, ss.dmShade.hex);
             this.setVar(`dm-on-${ss.name}`, "", vk, ss.dmShade.getOnShade().hex);
-        }
+        });
+        log.debug(`Finished setting state settings variables`);
     }
 
     public generateHotlinkVariables(vk: CSSVariableKind) {

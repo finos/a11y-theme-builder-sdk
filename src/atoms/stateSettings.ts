@@ -6,7 +6,7 @@ import { Atom } from "./atom";
 import { ColorTheme } from "./colorThemes";
 import { IAtoms, EventValueChange } from "../interfaces";
 import { Shade } from "../common/shade";
-import { PropertyString, PropertyGroupListener } from "../common/props";
+import { PropertyString, PropertyBoolean, PropertyGroupListener } from "../common/props";
 import { Logger } from "../util/logger";
 
 const log = new Logger("ss");
@@ -27,14 +27,17 @@ export class StateSettings extends Atom {
     public readonly danger: StateSetting;
     /** All state setting properties */
     public readonly all: StateSetting[] = [];
+    /** Property set to true when everything is ready */
+    public readonly ready: PropertyBoolean;
 
     constructor(atoms: IAtoms) {
-        super("State Settings", false,atoms);
+        super("State Settings", false, atoms);
         this.addDependency(atoms.colorThemes);
         this.info = new StateSetting("info", "#0066EF", this);
         this.success = new StateSetting("success", "#327D35", this);
         this.warning = new StateSetting("warning", "#FDC630", this);
         this.danger = new StateSetting("danger", "#D62B2B", this);
+        this.ready = new PropertyBoolean("ready", false, this, {defaultValue: false});
         this.atoms.colorThemes.defaultTheme.setPropertyListener(`_tb.StateSettings`, this.setDefaultTheme.bind(this));
     }
 
@@ -44,9 +47,11 @@ export class StateSettings extends Atom {
         const theme = this.atoms.colorThemes.getDefaultTheme() as ColorTheme;
         if (!theme) throw new Error("There is no default theme");
         new PropertyGroupListener("stateSettings", [theme.lightModeBackground, theme.darkModeBackground], function(_: PropertyGroupListener){
+            log.debug("StateSettings light and dark mode are set in theme");
             for (const ss of self.all) {
                 ss.setShades();
             }
+            self.ready.setValue(true);
         });
     }
 
@@ -94,7 +99,7 @@ export class StateSetting {
         log.debug(`StateSettings.setShades enter: name=${this.name}`);
         const theme = this.atoms.colorThemes.getDefaultTheme() as ColorTheme;
         if (!theme) {
-            log.debug(`StateSetting.setShades exit (no default theme): name=${this.name}`);
+            log.debug(`StateSettings.setShades exit (no default theme): name=${this.name}`);
             return;
         }
         this.setLMShade(theme);
