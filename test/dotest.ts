@@ -28,6 +28,7 @@ async function test() {
     ds.atoms.colorThemes.setListener(`testListener`, notify);
     ds.atoms.fontsSettings.setListener(`testListener`, notify);
     ds.atoms.stateSettings.setListener(`testListener`, notify);
+    ds.atoms.stateSettings.setListener(`testListener`, ssNotify);
 
     const prop = ds.atoms.gridSettings.grid;
     const prop2 = ds.getNode(prop.key);
@@ -188,6 +189,10 @@ function notify(event: Event) {
     console.log(`TEST: Received ${event.type} notification for node ${event.node.key}`);
 }
 
+function ssNotify(event: Event) {
+    console.log(`TEST: StateSettings: Received ${event.type} notification for node ${event.node.key}`);
+}
+
 function selectColorShade(prop: PropertyColorShade, idx: number) {
     const sels = prop.getSelectableValues();
     if (sels.length === 0) throw new Error(`No selectables`);
@@ -210,7 +215,7 @@ function selectTitledShade(prop: PropertyTitledShade, idx: number) {
 }
 
 function cssVar(name: string, value?: string) {
-    console.log(`${name}: ${value};`);
+    console.log(`TEST: CSS setting: ${name}: ${value};`);
 }
 
 function buttonEventListener(event: Event) {

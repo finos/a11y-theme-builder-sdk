@@ -55,17 +55,21 @@ export class Property<T> extends Node implements IProperty {
             // Change the property value
             this.value = newValue;
             // Send the value change event
-            const event: EventValueChange<T> = {
-                type: EventType.ValueChanged,
-                node: this,
-                oldValue,
-                newValue,
-            };
-            this.notifyListeners(event);
+            this.sendValueChangeNotification(oldValue, newValue);
             // Compare the current node state to the old state and send
             // any node enabled/disabled events which should be sent.
             this.compareNodeState(oldNodeState);
         }
+    }
+
+    public sendValueChangeNotification(oldValue: any, newValue: any) {
+        const event: EventValueChange<T> = {
+            type: EventType.ValueChanged,
+            node: this,
+            oldValue,
+            newValue,
+        };
+        this.notifyListeners(event);
     }
 
     public getDefaultValue(): T | undefined {
