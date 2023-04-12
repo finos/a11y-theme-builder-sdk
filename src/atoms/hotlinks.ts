@@ -119,7 +119,7 @@ export class Hotlinks extends Atom {
         let decorate: boolean;
         const shade = vars.unvisited.shade;
         const underline = vars.underline;
-        const onComp = comp.getOnShade();
+        const onComp = comp.getOnShade2(true);
         let contrast = shade.getContrastRatio(comp);
         if (contrast >= 3.1) {
             unvisited = shade;      
@@ -150,7 +150,7 @@ export class Hotlinks extends Atom {
     }
 
     private getHotlinkModeVariables(button: Shade, background: Shade, underline: boolean, lm: boolean): HotlinkModeVariables {
-        const onBackground = background.getOnShade();
+        const onBackground = background.getOnShade2(lm);
         let shade1:Shade | undefined;
         let shade2:Shade | undefined;
         log.debug(`Hotlinks.getHotlinkModeVariables enter: button=${button.toString()}, underline=${underline}, lm=${lm}`);

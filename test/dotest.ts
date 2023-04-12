@@ -156,7 +156,8 @@ async function test() {
     ds2.code.setCSSVarListener("test", cssVar);
     console.log("TEST: END CSS VARIABLES")
 
-    const actualCssVars = Object.keys(ds.code.getCSSVars());
+    const cssVars = ds.code.getCSSVars();
+    const actualCssVars = Object.keys(cssVars);
     const missingCssVars: string[] = [];
     expectedCssVars.forEach(name => {
         if (actualCssVars.indexOf(name) < 0) missingCssVars.push(name);
@@ -165,6 +166,7 @@ async function test() {
     actualCssVars.forEach(name => {
         if (expectedCssVars.indexOf(name) < 0) extraCssVars.push(name);
     });
+    console.log(`TEST: CSS VARIABLES: ${JSON.stringify(cssVars,null,4)}`);
     console.log(`TEST: MISSING CSS VARIABLES: total=${missingCssVars.length}, ${JSON.stringify(missingCssVars,null,4)}`);
     console.log(`TEST: EXTRA CSS VARIABLES: total=${extraCssVars.length}, ${JSON.stringify(extraCssVars,null,4)}`);
 

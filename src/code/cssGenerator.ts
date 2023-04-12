@@ -276,13 +276,8 @@ export class CSSGenerator {
         this.addPropVar("dropdown-radius", "", dd.borderRadius);
         vk.setVars({
             "dropdown-focus-bg": "linear-gradient(90deg, var(--button) var(--dropdown-focus-theme), var(--transparent) var(--dropdown-focus-theme))",
-            "on-dropdown-focus-bg": "#ffffff",
             "dm-dropdown-focus-bg": "linear-gradient(90deg, var(--dm-button) var(--dropdown-focus-theme), var(--transparent) var(--dropdown-focus-theme))",
-            "dm-on-dropdown-focus-bg": "rgba(255,255,255,.6)",
             "dropdown-hover-style": "100%",
-            "dropdown-hover-bg": "linear-gradient(90deg, var(--button-half) var(--dropdown-focus-theme), var(--transparent) var(--dropdown-focus-theme)) !important",
-            "dm-dropdown-hover-bg": "linear-gradient(90deg, var(--button-half) var(--dropdown-focus-theme), var(--transparent) var(--dropdown-focus-theme))",
-            "dm-on-dropdown-hover-bg": "rgba(255,255,255,.6)",
             "dropdown-bottom-hover-bg": "linear-gradient(0deg, var(--button-half) var(--dropdown-focus-theme), var(--transparent) var(--dropdown-focus-theme)) !important",
             "dm-dropdown-bottom-hover-bg": "linear-gradient(0deg, var(--dm-button) var(--dropdown-focus-theme), var(--transparent) var(--dropdown-focus-theme)) !important",
         });
@@ -673,7 +668,7 @@ export class CSSGenerator {
         this.setVar(`on-input`, "", vk, vars.onInputDefault.getHexOrRGBA());
         this.setVar(`on-input-disabled`, "", vk, vars.onInputDisabled.getHexOrRGBA());
         this.setVar(`dm-input`, "", vk, vars.dmInputDefault.getHexOrRGBA());
-        this.setVar(`dm-on-input`, "", vk, vars.dmInputDefault.getOnShade().getHexOrRGBA());
+        this.setVar(`dm-on-input`, "", vk, vars.dmInputDefault.getOnShade2(false).getHexOrRGBA());
         this.setVar(`dm-input-disabled`, "", vk, vars.dmInputDisabled.getHexOrRGBA());
         this.setVar("dm-input-hover", "", vk, "rgba(255,255,255,.12)");
     }
@@ -682,9 +677,9 @@ export class CSSGenerator {
         log.debug(`Begin setting state settings variables`);
         this.atoms.stateSettings.all.forEach(ss => {
             this.setVar(ss.name, "", vk, ss.lmShade.hex);
-            this.setVar(`on-${ss.name}`, "", vk, ss.lmShade.getOnShade().hex);
+            this.setVar(`on-${ss.name}`, "", vk, ss.lmShade.getOnShade2(true).getRGBA());
             this.setVar(`dm-${ss.name}`, "", vk, ss.dmShade.hex);
-            this.setVar(`dm-on-${ss.name}`, "", vk, ss.dmShade.getOnShade().hex);
+            this.setVar(`dm-on-${ss.name}`, "", vk, ss.dmShade.getOnShade2(false).getRGBA());
         });
         log.debug(`Finished setting state settings variables`);
     }
@@ -699,7 +694,6 @@ export class CSSGenerator {
             this.generateOnHotlinkWithDecorationVariables("Black", vk, vars.onBlack);
             this.generateOnHotlinkWithDecorationVariables("Tertiary", vk, vars.onTertiary);
             this.generateOnHotlinkVariables("Gradient3", vk, vars.onGradient3);
-            this.generateOnHotlinkVariables("dm-gradient3", vk, vars.onDMGradient3);
         } else {
             log.debug(`CSS: hotlink variables: not found`);
         }
@@ -735,35 +729,35 @@ export class CSSGenerator {
             const pcs = args.pcs;
             const vk = new CSSVariableKind(name,"", [pcs], this);
             const dmPrefix = args.dmPrefix || "dm-";
-            this.setShadeVars(name, "", args, shade, vk);
+            this.setShadeVars(name, true, "", args, shade, vk);
             if (args.dm) {
                 const dmShade = shade.getDarkModeShade();
-                this.setShadeVars(name, dmPrefix, args, dmShade, vk);
+                this.setShadeVars(name, false, dmPrefix, args, dmShade, vk);
             }
             if (args.palette) {
                 const color = shade.getMode().color;
-                this.setPaletteVars(name, "", args, color.light.shades, vk);
-                if (args.dm) this.setPaletteVars(name, dmPrefix, args, color.dark.shades, vk);
+                this.setPaletteVars(name, true, "", args, color.light.shades, vk);
+                if (args.dm) this.setPaletteVars(name, false, dmPrefix, args, color.dark.shades, vk);
             }
         }
     }
 
-    private setShadeVars(name: string, prefix: string, args: ShadeListenerArgs, shade: Shade, vk: CSSVariableKind) {
+    private setShadeVars(name: string, lm: boolean, prefix: string, args: ShadeListenerArgs, shade: Shade, vk: CSSVariableKind) {
         vk.setShadeVar(`${prefix}${name}`, shade);
         if (args.half) vk.setShadeVar(`${prefix}${name}-half`, shade.getHalfShade());
         if (args.quarter) vk.setShadeVar(`${prefix}${name}-quarter`, shade.getQuarterShade());
         if (args.on) {
-            const onShade = shade.getOnShade();
+            const onShade = shade.getOnShade2(lm);
             vk.setShadeVar(`${prefix}on-${name}`, onShade);
             if (args.half) vk.setShadeVar(`${prefix}on-${name}-half`, onShade.getHalfShade());
             if (args.quarter) vk.setShadeVar(`${prefix}on-${name}-quarter`, onShade.getQuarterShade());
         }
     }
 
-    private setPaletteVars(name: string, prefix: string, args: ShadeListenerArgs, shades: Shade[], vk: CSSVariableKind) {
+    private setPaletteVars(name: string, lm: boolean, prefix: string, args: ShadeListenerArgs, shades: Shade[], vk: CSSVariableKind) {
         shades.forEach(shade => {
             vk.setShadeVar(`${prefix}${name}-${shade.id}`, shade);
-            if (args.on) vk.setShadeVar(`${prefix}on-${name}-${shade.id}`, shade.getOnShade());
+            if (args.on) vk.setShadeVar(`${prefix}on-${name}-${shade.id}`, shade.getOnShade2(lm));
         });
     }
     public setShadeVar(name: string, kind: CSSVariableKind, shade?: Shade) {
@@ -877,7 +871,7 @@ class CSSColor {
             const name = getShadeVarName(shade);
             if (name) {
                 this.cssGenerator.setShadeVar(name, this.varKind, shade);
-                this.cssGenerator.setShadeVar(`on-${name}`, this.varKind, shade.getOnShade());
+                this.cssGenerator.setShadeVar(`on-${name}`, this.varKind, shade.getOnShade2(true));
             } else {
                 log.warn(`Unable to set CSS variable for shade ${shade.toString()} because no variable name can be determined`);
             }
@@ -980,8 +974,8 @@ class CSSTheme {
         vk.setShadeVarRef(`${prefix}line-color`, vars.lineColor);
         vk.setShadeVarRef(`${prefix}surface`, vars.surface);
         if (lm) {
-            vk.setShadeVarRef(`on-surface`, vars.surface.getOnShade());
-            vk.setShadeVarRef("on-background", vars.primary.getOnShade());
+            vk.setShadeVarRef(`on-surface`, vars.surface.getOnShade2(lm));
+            vk.setShadeVarRef("on-background", vars.primary.getOnShade2(lm));
         } else {
             vk.setVar("dm-on-background", "rgba(255,255,255,0.6)");
         }
@@ -989,7 +983,7 @@ class CSSTheme {
         const lmeShades = this.theme.getElevationShades(lm);
         for (let i = 0; i < lmeShades.length; i++) {
             vk.setShadeVarRef(`${prefix}elevation-bg-${i}`, lmeShades[i]);
-            vk.setShadeVarRef(`${prefix}on-elevation-bg-${i}`, lmeShades[i].getOnShade());
+            vk.setShadeVarRef(`${prefix}on-elevation-bg-${i}`, lmeShades[i].getOnShade2(lm));
         }
         log.debug(`backgroundListener exit - ${name}`);
     }
@@ -1036,11 +1030,11 @@ class CSSTheme {
         const var3 = lm ? "on-dropdown-hover-bg" : "dm-on-dropdown-focus-bg";
         if (mfsVal === Dropdowns.FULL_COLOR) {
             vk.setVar(var1, "100%");
-            vk.setVar(var2, buttonShade.getOnShade().hex);
+            vk.setVar(var2, buttonShade.getOnShade2(lm).getRGBA());
             vk.setVar(var3, surfaceShade.mix(buttonShade,0.5).getContrastShade().hex);
         } else if (mfsVal === Dropdowns.LEFT_BORDER_ONLY) {
             vk.setVar(var1, "var(--spacing-half)");
-            const onSurfaceHex = surfaceShade.getOnShade().hex;
+            const onSurfaceHex = surfaceShade.getOnShade2(lm).getRGBA();
             vk.setVar(var2, onSurfaceHex);
             vk.setVar(var3, onSurfaceHex);
         } else {

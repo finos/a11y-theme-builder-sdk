@@ -87,7 +87,7 @@ export class JSONGenerator {
             shades.forEach( shade => {
                 const id = this.getShadeId(shade);
                 colorObj[id] = this.getColor(shade.getRGB());
-                onColorObj[id] = this.getColor(shade.getOnShade().getRGB());
+                onColorObj[id] = this.getColor(shade.getOnShade2(lm).getRGBA());
             });
         });
         return rtn;
@@ -177,7 +177,7 @@ export class JSONGenerator {
         const buttonVars = theme.getShadeGroups(buttonShade);
         const buttonSG = lm ? buttonVars.lm : buttonVars.dm;
         const hotlinkVars = this.atoms.hotlinks.findHotlinkVariables();
-        const hotlinkShade = lm? hotlinkVars.lm.unvisited.shade : hotlinkVars.dm.unvisited.shade;
+        const hotlinkShade = lm ? hotlinkVars.lm.unvisited.shade: hotlinkVars.dm.unvisited.shade;
         if (!hotlinkShade) {
             log.debug("getSolidBackgrounds exit (no hotlink shade)");
             return {};
@@ -223,7 +223,7 @@ export class JSONGenerator {
                 tertiaryButton = '{Buttons.White.Color}';
                 tertiaryOnButton = '{Buttons.White.On-Color}';
             }
-            const iconOnTertiary = iconShade.getShadeOrOnShadeBasedOnContrast(tertiaryShade);
+            const iconOnTertiary = iconShade.getShadeOrOnShadeBasedOnContrast(tertiaryShade, lm);
             if (iconOnTertiary.equals(iconShade)) {
                 tertiaryIcon = '{Icons.Colored.Color}';
             }  else if (iconOnTertiary.equals(Shade.BLACK)) {
@@ -247,14 +247,14 @@ export class JSONGenerator {
         Tertiary["On-Button"] = this.getColor(tertiaryOnButton);
         Tertiary.Icon = this.getColor(tertiaryIcon);
         Tertiary.Hotlink = this.getColor(tertiaryHotlink);
-        const Black = this.getSolidColor(buttonShade, iconShade, hotlinkShade, Shade.BLACK, "White");
-        const White = this.getSolidColor(buttonShade, iconShade, hotlinkShade, Shade.WHITE, "Dark");
+        const Black = this.getSolidColor(lm, buttonShade, iconShade, hotlinkShade, Shade.BLACK, "White");
+        const White = this.getSolidColor(lm, buttonShade, iconShade, hotlinkShade, Shade.WHITE, "Dark");
         return { Primary, Secondary, Tertiary, Black, White };
     }
 
-    private getSolidColor(button: Shade, icon: Shade, hotlink: Shade, compShade: Shade, other: string): any {
+    private getSolidColor(lm: boolean, button: Shade, icon: Shade, hotlink: Shade, compShade: Shade, other: string): any {
         let Button, OnButton: any;
-        const buttonOn = button.getShadeOrOnShadeBasedOnContrast(compShade);
+        const buttonOn = button.getShadeOrOnShadeBasedOnContrast(compShade, lm);
         if (buttonOn.equals(button)) {
             Button = this.getColor("{Buttons.Colored.Color}");
             OnButton = this.getColor("{Buttons.Colored.On-Color}");
@@ -263,14 +263,14 @@ export class JSONGenerator {
             OnButton = this.getColor(`{Buttons.${other}.On-Color}`);
         }
         let Icon: any;
-        const iconOn = icon.getShadeOrOnShadeBasedOnContrast(compShade);
+        const iconOn = icon.getShadeOrOnShadeBasedOnContrast(compShade, lm);
         if (iconOn.equals(icon)) {
             Icon = this.getColor('{Icons.Colored.Color}');
         } else {
             Icon = this.getColor(`{Icons.${other}.Color}`);
         }
         let Hotlink;
-        const hotlinkOn = hotlink.getShadeOrOnShadeBasedOnContrast(compShade);
+        const hotlinkOn = hotlink.getShadeOrOnShadeBasedOnContrast(compShade, lm);
         if (hotlinkOn.equals(hotlink)) {
             Hotlink = this.getColor('{Hotlinks.Colored.Link}');
         } else {
@@ -284,18 +284,17 @@ export class JSONGenerator {
         const fcn2 = function(lm: boolean, from?: Shade, to?: Shade, fromShadeName?: string): any {
             let color, onColor, button, onButton, icon, hotlink: string | undefined;
             if (from && to) {
-                const fromName = fromShadeName ? fromShadeName : self.getShadeName(from, theme);
-                const toName = self.getShadeName(to, theme);
+                const fromName = fromShadeName ? fromShadeName : self.getShadeName(from, lm, theme);
+                const toName = self.getShadeName(to, lm, theme);
                 color = `linear-gradient(90deg, ${fromName} 0%, ${toName} 100%)`;
-                onColor = self.getShadeName(from, theme, true);
+                onColor = self.getShadeName(from, lm, theme, true);
             }
-            button = self.getPropShadeName(theme.button, theme);
-            onButton = self.getPropShadeName(theme.button, theme, true);
-            icon = self.getPropShadeName(theme.icon, theme);
+            button = self.getPropShadeName(theme.button, lm, theme);
+            onButton = self.getPropShadeName(theme.button, lm, theme, true);
+            icon = self.getPropShadeName(theme.icon, lm, theme);
             const hlVars = self.atoms.hotlinks.getHotlinkVariables();
             if (hlVars) {
-                const shades = lm ? hlVars.lm : hlVars.dm;
-                hotlink = self.getShadeName(shades.unvisited.shade, theme);
+                hotlink = self.getShadeName(lm ? hlVars.lm.unvisited.shade : hlVars.dm.unvisited.shade, lm, theme);
             }
             return {
                 "Color": self.getColor(color),
@@ -482,7 +481,7 @@ export class JSONGenerator {
         const fcn = function(ss: StateSetting, lm: boolean) {
             const shade = lm ? ss.lmShade : ss.dmShade;
             if (!shade) return undefined;
-            const rtn = self.getColorPair(shade.getRGB(), shade.getOnShade().getRGB());
+            const rtn = self.getColorPair(shade.getRGB(), shade.getOnShade2(lm).getRGB());
             log.debug(`getStates name=${ss.name}, shade=${shade.hex}`);
             return rtn;
         };
@@ -506,7 +505,7 @@ export class JSONGenerator {
         }
         const shades = theme.getElevationShades(lm);
         for (let i = 0; i < shades.length; i++) {
-            rtn[`Elevation-${i+1}`] = this.getShadeColor(shades[i]);
+            rtn[`Elevation-${i+1}`] = this.getShadeColor(shades[i], lm);
         }
         log.debug(`getElevations exit`);
         return rtn;
@@ -537,8 +536,8 @@ export class JSONGenerator {
         const from = theme.gradientHeaderText.from.getValue();
         const to = theme.gradientHeaderText.to.getValue();
         if (from && to) {
-            const fromName = this.getShadeName(from, theme);
-            const toName = this.getShadeName(to, theme);
+            const fromName = this.getShadeName(from, lm, theme);
+            const toName = this.getShadeName(to, lm, theme);
             textGradient = `linear-gradient(90deg, ${fromName} 0%, ${toName} 100%)`;
         }
         // Get color dropshadow
@@ -569,11 +568,10 @@ export class JSONGenerator {
             log.debug(`getHotlinks exit (no variables)`);
             return;
         }
-        const mvars = lm ? vars.lm : vars.dm;
-        const shade = mvars.unvisited.shade;
+        const shade = lm ? vars.lm.unvisited.shade : vars.dm.unvisited.shade;
         const rtn = {
             Colored: {
-                Link: this.getShadeColor(shade, theme),
+                Link: this.getShadeColor(shade, lm, theme),
                 Visited: this.getColor("{Hotlinks.Colored.Link}B3"),
             },
         };
@@ -759,8 +757,8 @@ export class JSONGenerator {
         if (!lm) button = button.getDarkModeShade();
         return {
             Colored: {
-                "Color": this.getShadeColor(button, theme),
-                "On-Color": this.getShadeColor(button, theme, true),
+                "Color": this.getShadeColor(button, lm, theme),
+                "On-Color": this.getShadeColor(button, lm, theme, true),
                 "Color-Half": this.getColor("{Buttons.Colored.Color}80"),
             },
         };
@@ -772,7 +770,7 @@ export class JSONGenerator {
             log.debug("getIcons exit (no icon)");
             return;
         }
-        return { Colored: { "Color": this.getShadeColor(icon, theme) } };
+        return { Colored: { "Color": this.getShadeColor(icon, lm, theme) } };
     }
 
     private getInputBackgrounds(lm: boolean): any {
@@ -786,19 +784,19 @@ export class JSONGenerator {
         }; 
     }
 
-    private getShadeColor(shade: Shade, theme?: ColorTheme, onShade?: boolean): string {
-        return this.getColor(this.getShadeName(shade, theme, onShade));
+    private getShadeColor(shade: Shade, lm: boolean, theme?: ColorTheme, onShade?: boolean): string {
+        return this.getColor(this.getShadeName(shade, lm, theme, onShade));
     }
 
-    private getPropShadeName(prop: PropertyColorShade, theme?: ColorTheme, onShade?: boolean): string | undefined {
+    private getPropShadeName(prop: PropertyColorShade, lm: boolean, theme?: ColorTheme, onShade?: boolean): string | undefined {
         const shade = prop.getValue();
-        if (shade) return this.getShadeName(shade, theme, onShade);
+        if (shade) return this.getShadeName(shade, lm, theme, onShade);
     }
 
-    private getShadeName(shade: Shade, theme?: ColorTheme, onColor?: boolean): string | undefined {
+    private getShadeName(shade: Shade, lm: boolean, theme?: ColorTheme, onColor?: boolean): string | undefined {
         let coreShadeName = shade.coreShadeName;
         if (coreShadeName && onColor) {
-            shade = shade.getOnShade();
+            shade = shade.getOnShade2(lm);
             coreShadeName = shade.coreShadeName;
         }
         if (coreShadeName) {
