@@ -4,7 +4,7 @@
  */
 import { Molecule } from "./molecule";
 import { IMolecules } from "../interfaces";
-import { PropertyPixelSelectable, PropertyElevationSelectable } from "../common/props";
+import { PropertyNumberSelectable, PropertyElevationSelectable } from "../common/props";
 
 /**
  * The avatars molecule.
@@ -13,16 +13,16 @@ import { PropertyPixelSelectable, PropertyElevationSelectable } from "../common/
 export class Avatars extends Molecule {
     
     /** The medium border property */
-    public mediumBorder: PropertyPixelSelectable;
+    public mediumBorder: PropertyNumberSelectable;
     /** The extra large border property */
-    public extraLargeBorder: PropertyPixelSelectable;
+    public extraLargeBorder: PropertyNumberSelectable;
     /** The elevation property */
     public elevation: PropertyElevationSelectable;
 
     constructor(molecules: IMolecules) {
         super("Avatars", molecules);
-        this.mediumBorder = new PropertyPixelSelectable("Medium Avatar Border", false, this, [0, 0.5, 1, 2, 3, 4], 2);
-        this.extraLargeBorder = new PropertyPixelSelectable("Extra Large Avatar Border", false, this, [0, 0.5, 1, 2, 3, 4, 5, 6, 7, 8], 2);
+        this.mediumBorder = new PropertyNumberSelectable("Medium Avatar Border", false, this, [0, 0.5, 1, 2, 3, 4], 2);
+        this.extraLargeBorder = new PropertyNumberSelectable("Extra Large Avatar Border", false, this, [0, 0.5, 1, 2, 3, 4, 5, 6, 7, 8], 2);
         this.elevation = new PropertyElevationSelectable("Avatar Elevation", false, this, 0, 9);
     }
 
