@@ -572,8 +572,7 @@ export class CSSGenerator {
         const vk = new CSSVariableKind(p, "", [props.blurRadius], this);
         if (props.standard) {
             vk.setVar("bevel-0", "0 0 0 0 rgba(0,0,0,0)");
-            vk.setVar("bevel-1", "inset var(--bevel-horizontal) var(--bevel-vertical) var(--bevel-blur) var(--bevel-spread) rgba(255, 255, 255, var(--bevel-light-opacity)), inset calc(0px-var(--bevel-horizontal)) calc(0px - var(--bevel-vertical)) var(--bevel-blur) var(--bevel-spread) rgba(0,0,0,var(--bevel-dark-opacity))");
-            for (let i = 2; i <= 9; i++) {
+            for (let i = 1; i <= 9; i++) {
                 const bc = `calc(1 + calc(var(--bevel-change) * ${i}))`;
                 vk.setVar(`bevel-${i}`, 
                     `inset calc(var(--bevel-horizontal) * ${bc}) ` +
@@ -591,10 +590,10 @@ export class CSSGenerator {
             for (let i = 1; i <= 9; i++) {
                 vk.setVar(`reverse-bevel-${i}`,
                     `inset calc(var(--inbevel-horizontal) * calc(1 - calc(var(--inbevel-change) * ${i}))) ` +
-                    `calc(var(--inbevel-vertical) * calc(1 - calc(var(--inbevel-change) * 0.${i}))) ` +
-                    `calc(var(--inbevel-blur) * 0.${10-i}) ` +
-                    `calc(var(--inbevel-spread) * 0.${10-i}) ` +
-                    `rgba(0,0,0,calc(var(--inbevel-dark-opacity) * .${i})`);
+                    `calc(var(--inbevel-vertical) * calc(1 - calc(var(--inbevel-change) * .${i}))) ` +
+                    `calc(var(--inbevel-blur) * .${10-i}) ` +
+                    `calc(var(--inbevel-spread) * .${10-i}) ` +
+                    `rgba(0,0,0, calc(var(--inbevel-dark-opacity)  * calc(1 + calc(var(--inbevel-change) * .${i})) ))`);
             }
         }
     }
