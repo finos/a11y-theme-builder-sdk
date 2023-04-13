@@ -373,7 +373,7 @@ export class ColorTheme extends Node implements IColorTheme {
     }
 
     private getModeShadeGroups(button: Shade, lm: boolean): ModeShadeGroups {
-        const primaryShade = this.primary.getValue();
+        let primaryShade = this.primary.getValue();
         const gradient1Shade = this.gradient1.from.getValue();
         const gradient2Shade = this.gradient2.from.getValue();
         if (!primaryShade) throw new Error(`No primary color has been set`);
@@ -386,10 +386,13 @@ export class ColorTheme extends Node implements IColorTheme {
         };
         const white = this.getShadeGroup(button, Shade.WHITE, lm, lm? 1: 0.6);
         const black = this.getShadeGroup(button, Shade.BLACK, lm, 1);
-        const tertiary = this.getShadeGroup(button, primaryShade, lm, 1); 
-        const gradient1 = gradient1Shade.getShadeGroup(lm);
-        const gradient2 = gradient2Shade.getShadeGroup(lm);
-        const gradient3 = this.getShadeGroup(button, Shade.fromRGB(227,227,228), lm, 1);
+        const tertiary = lm ? 
+            this.getShadeGroup(button, primaryShade, lm, 1) : 
+            // For dark mode, we get the 700 dark mode shade of the primary.
+            primaryShade.getMode().color.dark.shades[7].getShadeGroup(lm);
+        const gradient1 = gradient1Shade.getOnShade().getShadeGroup(lm);
+        const gradient2 = gradient2Shade.getOnShade().getShadeGroup(lm);
+        const gradient3 = this.getShadeGroup(button, lm ? Shade.fromRGB(227,227,228) : Shade.fromRGB(24,24,24), lm, 1);
         return {
             default: buttonShadeGroup, white, black, tertiary, gradient1, gradient2, gradient3
         }
