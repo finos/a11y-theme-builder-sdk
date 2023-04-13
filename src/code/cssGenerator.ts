@@ -591,10 +591,10 @@ export class CSSGenerator {
             for (let i = 1; i <= 9; i++) {
                 vk.setVar(`reverse-bevel-${i}`,
                     `inset calc(var(--inbevel-horizontal) * calc(1 - calc(var(--inbevel-change) * ${i}))) ` +
-                    `calc(var(--inbevel-vertical) * calc(1 - calc(var(--inbevel-change) * 0.${i}))) ` +
-                    `calc(var(--inbevel-blur) * 0.${10-i}) ` +
-                    `calc(var(--inbevel-spread) * 0.${10-i}) ` +
-                    `rgba(0,0,0,calc(var(--inbevel-dark-opacity) * .${i})`);
+                    `calc(var(--inbevel-vertical) * calc(1 - calc(var(--inbevel-change) * .${i}))) ` +
+                    `calc(var(--inbevel-blur) * .${10-i}) ` +
+                    `calc(var(--inbevel-spread) * .${10-i}) ` +
+                    `rgba(0,0,0, calc(var(--inbevel-dark-opacity)  * calc(1 + calc(var(--inbevel-change) * .${i})) ))`);
             }
         }
     }
