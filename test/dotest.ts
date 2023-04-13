@@ -153,6 +153,14 @@ async function test() {
         errCnt++;
     }
 
+    console.log("TEST: BEGIN BUTTON SELECTIONS");
+    const sels = ct.button.getSelectableValues();
+    for (let i = 0; i < sels.length; i++) {
+        console.log(`TEST: BUTTON SELECTION ${i}`);
+        selectColorShade(ct.button, 0);
+    }
+    console.log("TEST: END BUTTON SELECTIONS");
+
     console.log("TEST: BEGIN CSS VARIABLES")
     ds2.code.setCSSVarListener("test", cssVar);
     console.log("TEST: END CSS VARIABLES")

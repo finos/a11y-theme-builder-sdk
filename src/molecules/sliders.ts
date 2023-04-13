@@ -26,9 +26,9 @@ export class Sliders extends Molecule {
     constructor(molecules: IMolecules) {
         super("Sliders", molecules);
         this.handleBorderRadius = new PropertyNumberSelectable("Handle Border Radius", false, this, [0,1,2,3,4,5,6,7,8], 1);
-        this.visibleHeight = new PropertyNumberSelectable("Visible Height", false, this, [3, 4, 5, 6], 4);
+        this.visibleHeight = new PropertyNumberSelectable("Visible Height", false, this, [3, 4, 5, 6], 3);
         this.handleElevation = new PropertyElevationSelectable("Handle Elevation", false, this, 0, 9);
-        this.barHeight = new PropertyNumberSelectable("Bar Height", false, this, [0.5, 1, 2, 4], 0.5);
+        this.barHeight = new PropertyNumberSelectable("Bar Height", false, this, [0.5, 1, 2, 4], 1);
         this.barInsetShadow = new PropertyShadowSelectable("Bar Inset Shadow", false, this, 9, 0);
     }
 

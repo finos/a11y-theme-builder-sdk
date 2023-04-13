@@ -50,7 +50,7 @@ export class JSONGenerator {
         json["Icons"] = this.getIcons(theme, lm);
         json["States"] = this.getStates(lm);
         json["Surface"] = this.getSurface(theme, lm);
-        json["Elevations"] = this.getElevations(lm);
+        if (!lm) json["Elevations"] = this.getElevations(lm);
         json["Hotlinks"] = this.getHotlinks(theme, lm);
         json["Chips"] = this.getChips(theme, lm);
         if (!lm) json["Text"] = this.getText();
@@ -193,7 +193,7 @@ export class JSONGenerator {
             onSecondary = '{Theme-Colors.Primary.On-Color.Quarter}';
             // tertiary BG //
             tertiary = '{Theme.Primary.Color}';
-            onTertiary = '{Theme.Primary.OnColor}';
+            onTertiary = '{Theme.Primary.On-Color}';
         } else {
             // else it is a dark color 
             // if the color is the primaryDarkBG
