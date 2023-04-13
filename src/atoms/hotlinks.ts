@@ -88,9 +88,9 @@ export class Hotlinks extends Atom {
             log.debug(`Hotlinks.getHotlinkVariables exit (darkModeBackground not set)`)
             return undefined;
         }
-        const tertiary = ct.tertiary.getValue();
-        if (tertiary === undefined) {
-            log.debug(`Hotlinks.getHotlinkVariables exit (tertiary not set)`)
+        const primary = ct.primary.getValue();
+        if (primary === undefined) {
+            log.debug(`Hotlinks.getHotlinkVariables exit (primary not set)`)
             return undefined;
         }
         const lmBackground = lmbg.primary;
@@ -99,7 +99,7 @@ export class Hotlinks extends Atom {
         const dm = this.getHotlinkModeVariables(button, dmBackground, underline, false);
         const onWhite = this.getOnHotlinkWithDecoration(lm, Shade.WHITE);
         const onBlack = this.getOnHotlinkWithDecoration(lm, Shade.BLACK);
-        const onTertiary = this.getOnHotlinkWithDecoration(lm, tertiary);
+        const onTertiary = this.getOnHotlinkWithDecoration(lm, primary);
         const onGradient3 = this.getOnGradient3(lm, 138, Shade.BLACK, Shade.HALF_BLACK);
         const onDMGradient3 = this.getOnGradient3(dm, 24, Shade.WHITE_DM, Shade.HALF_WHITE_DM);
         this.variables = {
@@ -172,7 +172,7 @@ export class Hotlinks extends Atom {
                     break;
                 }
             }
-            // Advance to the next shade, to higher shades for light mode and lower shades for dark mode
+            // Advance to the next shade, to higher indices (darker) for light mode and lower indices (lighter) for dark mode.
             if (lm) cmpShade = shades.length > cmpShade.index+1 ? shades[cmpShade.index+1] : undefined;
             else cmpShade = cmpShade.index > 0 ? shades[cmpShade.index-1] : undefined;
         }

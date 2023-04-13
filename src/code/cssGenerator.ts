@@ -168,8 +168,6 @@ export class CSSGenerator {
             "white-inset-border-2": "0 0 0 var(--border-2) var(--white)",
             "white-inset-border-3": "0 0 0 var(--border-3) var(--white)",
             "white-inset-border-4": "0 0 0 var(--border-4) var(--white)",
-            "buttonCharacterSpacing": "var(--CTALetterSpacing)",
-            "sm-buttonCharacterSpacing": "var(--CTALetterSpacing)",
         });
     }
 
@@ -1047,7 +1045,7 @@ class CSSTheme {
         if (mfsVal === Dropdowns.FULL_COLOR) {
             vk.setVar(var1, "100%");
             vk.setVar(var2, buttonShade.getOnShade2(lm).getRGBA());
-            vk.setVar(var3, surfaceShade.mix(buttonShade,0.5).getContrastShade().hex);
+            vk.setVar(var3, surfaceShade.mix(buttonShade,0.5).getContrastShade(lm).hex);
         } else if (mfsVal === Dropdowns.LEFT_BORDER_ONLY) {
             vk.setVar(var1, "var(--spacing-half)");
             const onSurfaceHex = surfaceShade.getOnShade2(lm).getRGBA();

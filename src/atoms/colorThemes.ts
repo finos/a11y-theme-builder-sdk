@@ -368,15 +368,15 @@ export class ColorTheme extends Node implements IColorTheme {
 
     public getShadeGroups(shade: Shade): ShadeGroups {
         const lm: ModeShadeGroups = this.getModeShadeGroups(shade, true);
-        const dm: ModeShadeGroups = this.getModeShadeGroups(this.findDMShade(shade), true);
+        const dm: ModeShadeGroups = this.getModeShadeGroups(this.findDMShade(shade), false);
         return { lm, dm };
     }
 
     private getModeShadeGroups(button: Shade, lm: boolean): ModeShadeGroups {
-        const tertiaryShade = this.tertiary.getValue();
+        const primaryShade = this.primary.getValue();
         const gradient1Shade = this.gradient1.from.getValue();
         const gradient2Shade = this.gradient2.from.getValue();
-        if (!tertiaryShade) throw new Error(`No tertiary color has been set`);
+        if (!primaryShade) throw new Error(`No primary color has been set`);
         if (!gradient1Shade) throw new Error(`No gradient 1 color has been set`);
         if (!gradient2Shade) throw new Error(`No gradient 1 color has been set`);
         const buttonShadeGroup = {
@@ -386,7 +386,7 @@ export class ColorTheme extends Node implements IColorTheme {
         };
         const white = this.getShadeGroup(button, Shade.WHITE, lm, lm? 1: 0.6);
         const black = this.getShadeGroup(button, Shade.BLACK, lm, 1);
-        const tertiary = this.getShadeGroup(button, tertiaryShade, lm, 1);
+        const tertiary = this.getShadeGroup(button, primaryShade, lm, 1); 
         const gradient1 = gradient1Shade.getShadeGroup(lm);
         const gradient2 = gradient2Shade.getShadeGroup(lm);
         const gradient3 = this.getShadeGroup(button, Shade.fromRGB(227,227,228), lm, 1);
