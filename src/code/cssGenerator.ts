@@ -729,7 +729,7 @@ export class CSSGenerator {
             const dmPrefix = args.dmPrefix || "dm-";
             this.setShadeVars(name, true, "", args, shade, vk);
             if (args.dm) {
-                const dmShade = shade.getDarkModeShade();
+                const dmShade = shade.getDarkModeShade(); // TODO: Need to search existing dark mode shades here, but what do I contrast it against
                 this.setShadeVars(name, false, dmPrefix, args, dmShade, vk);
             }
             if (args.palette) {
@@ -767,11 +767,13 @@ export class CSSGenerator {
     }
 
     private defaultThemeListener(vc: EventValueChange<string>) {
+        log.debug("defaultThemeListener enter");
         const name = vc.newValue;
         if (name !== undefined) {
             if (this.defaultTheme) this.defaultTheme.stop();
             this.defaultTheme = new CSSTheme(this.atoms.colorThemes.getTheme(name), this);
         }
+        log.debug("defaultThemeListener exit");
     }
 
     public setCSSVarListener(name: string, cb?: VarListener) {
@@ -892,6 +894,8 @@ class CSSTheme {
 
     public start() {
 
+        log.debug(`CSSTheme.start enter: theme=${this.theme.name}`);
+
         const self = this;
 
         // Listen for changes to the primary, secondary, and tertiary shades
@@ -900,43 +904,54 @@ class CSSTheme {
         this.setShadeListener({name: "tertiary", pcs: this.theme.tertiary, on: true, dm: true, palette: true});
 
         // light and dark mode backgrounds
+        log.debug(`CSSTheme.start setting light and dark mode background listeners`);
         this.setBackgroundListener("lmbg", true, this.theme.lightModeBackground);
         this.setBackgroundListener("dmbg", false, this.theme.darkModeBackground);
 
         // elevations listener
+        log.debug(`CSSTheme.start setting elevations listener`);
         this.setElevationsListener(true);
 
         // gradients
+        log.debug(`CSSTheme.start setting gradients listeners`);
         this.setShadeListener({name: "gradient1-a", pcs: this.theme.gradient1.from, on: true, dm: true});
         this.setShadeListener({name: "gradient1-b", pcs: this.theme.gradient1.to, on: true, dm: true});
         this.setShadeListener({name: "gradient2-a", pcs: this.theme.gradient2.from, on: true, dm: true});
         this.setShadeListener({name: "gradient2-b", pcs: this.theme.gradient2.to, on: true, dm: true});
 
         // button
+        log.debug(`CSSTheme.start setting button listener`);
         this.setShadeGroupListener("button", this.theme.button);
 
         // icon
+        log.debug(`CSSTheme.start setting icon listener`);
         this.setShadeGroupListener("icon", this.theme.icon);
 
         // text gradient
+        log.debug(`CSSTheme.start setting text gradient listeners`);
         this.setShadeListener({name: "text-gradient-a", pcs: this.theme.gradientHeaderText.from, on: true, dm: true});
         this.setShadeListener({name: "text-gradient-b", pcs: this.theme.gradientHeaderText.to, on: true, dm: true});
 
         // accent
+        log.debug(`CSSTheme.start setting accent listener`);
         this.setShadeListener({name: "accent", pcs: this.theme.accent, dm: true, palette: true, on: true});
 
         // dropdown related variables
+        log.debug(`CSSTheme.start setting dropdown listeners`);
         const molecules = this.cssGenerator.molecules;
         const props = [molecules.dropdowns.menuFocusState, this.theme.button];
         this.cssGenerator.addPropsVar("lm-dropdowns", "", [...props, this.theme.lightModeBackground], this.generateDropDownVars.bind(this, true));
         this.cssGenerator.addPropsVar("dm-dropdowns", "", [...props, this.theme.darkModeBackground], this.generateDropDownVars.bind(this, false));
 
+        log.debug(`CSSTheme.start setting hotlinks listener`);
         this.theme.addTheme.setListener("hotlinks", function(event) {
             if (event.type === EventType.NodeEnabled) {
                 const vk = new CSSVariableKind("hotlinks","",[], self.cssGenerator);
                 self.cssGenerator.generateHotlinkVariables(vk);
             }
         });
+
+        log.debug(`CSSTheme.start exit: theme=${this.theme.name}`);
     }
 
     public stop() {

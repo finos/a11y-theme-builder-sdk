@@ -465,6 +465,7 @@ export class ColorTheme extends Node implements IColorTheme {
         if (!obj) return;
         super.deserialize(obj);
         this.primary.deserialize(obj.primary);
+        this.setPrimary(this.primary.getValue());
         this.secondary.deserialize(obj.secondary);
         this.tertiary.deserialize(obj.tertiary);
         this.lightModeBackground.deserialize(obj.lightModeBackground);
