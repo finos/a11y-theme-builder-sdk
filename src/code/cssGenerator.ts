@@ -588,16 +588,13 @@ export class CSSGenerator {
                     `rgba(0,0,0,calc(var(--bevel-dark-opacity) * ${bc}))`);
             }
         } else {
-            vk.setVar("reverse-bevel-1", "inset var(--inbevel-horizontal) var(--inbevel-vertical) var(--inbevel-blur) var(--inbevel-spread) rgba(0,0,0,calc(var(--inbevel-dark-opacity)*(1+var(--inbevel-change))))");
-            for (let i = 2; i <= 9; i++) {
-                const bc = `calc(1-calc(var(--inbevel-change) * ${i-1}))`;
-                const m = Math.round((1 - ((i-1)/10)) * 10) / 10;
+            for (let i = 1; i <= 9; i++) {
                 vk.setVar(`reverse-bevel-${i}`,
-                    `inset calc(var(--inbevel-horizontal) * ${bc}) ` +
-                    `calc(var(--inbevel-vertical) * ${bc}) ` +
-                    `calc(var(--inbevel-blur) * ${m}) ` +
-                    `calc(var(--inbevel-spread) * ${m}) ` +
-                    `rgba(0,0,0,calc(var(--inbevel-dark-opacity)*${bc}))`);
+                    `inset calc(var(--inbevel-horizontal) * calc(1 - calc(var(--inbevel-change) * ${i}))) ` +
+                    `calc(var(--inbevel-vertical) * calc(1 - calc(var(--inbevel-change) * 0.${i}))) ` +
+                    `calc(var(--inbevel-blur) * 0.${10-i}) ` +
+                    `calc(var(--inbevel-spread) * 0.${10-i}) ` +
+                    `rgba(0,0,0,calc(var(--inbevel-dark-opacity) * .${i})`);
             }
         }
     }
