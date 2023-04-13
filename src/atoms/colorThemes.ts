@@ -392,7 +392,7 @@ export class ColorTheme extends Node implements IColorTheme {
             primaryShade.getMode().color.dark.shades[7].getShadeGroup(lm);
         const gradient1 = gradient1Shade.getOnShade().getShadeGroup(lm);
         const gradient2 = gradient2Shade.getOnShade().getShadeGroup(lm);
-        const gradient3 = this.getShadeGroup(button, lm ? Shade.fromRGB(227,227,228) : Shade.fromRGB(24,24,24), lm, 1);
+        const gradient3 = this.getShadeGroup(button, lm ? Shade.fromHex("#CDCDCD") : Shade.fromRGB(18,18,18), lm, 1);
         return {
             default: buttonShadeGroup, white, black, tertiary, gradient1, gradient2, gradient3
         }
