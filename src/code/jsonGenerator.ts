@@ -40,7 +40,6 @@ export class JSONGenerator {
         const json: any = {};
         if (!lm) json["Core-Colors"] = this.getCoreColors();
         if (!lm) json["Image-Overlay"] = this.getImageOverlay();
-        if (!lm) json["Surface"] = this.getSurface(theme, lm);
         json["All-Colors"] = this.getAllColors(lm);
         json["Theme-Colors"] = this.getThemeColors(theme, lm);
         json["Theme"] = this.getTheme(theme, lm);
@@ -50,6 +49,7 @@ export class JSONGenerator {
         json["Buttons"] = this.getButtons(theme, lm);
         json["Icons"] = this.getIcons(theme, lm);
         json["States"] = this.getStates(lm);
+        json["Surface"] = this.getSurface(theme, lm);
         json["Elevations"] = this.getElevations(lm);
         json["Hotlinks"] = this.getHotlinks(theme, lm);
         json["Chips"] = this.getChips(theme, lm);
@@ -69,6 +69,7 @@ export class JSONGenerator {
         if (lm) json["Base-Info"] = this.getBaseInfo();
         if (lm) json["Bevel-Info"] = this.getBevelInfo();
         if (lm) json["Inverse-Bevel-Info"] = this.getInverseBevelInfo();
+        if (!lm) json["Alert"] = this.getAlert();
         log.debug(`getJSON exit - ${JSON.stringify(json,null,4)}`);
         return json;
     }
@@ -987,6 +988,25 @@ export class JSONGenerator {
         return {
               "value": "rgba(0,0,0,.25)",
               "type": "color"
+        };
+    }
+
+    private getAlert(): any {
+        return {
+            "Button": {
+              "value": {
+                "fill": "{Core-Colors.White.Color}",
+                "horizontalPadding": "{Spacing.spacing-2}"
+              },
+              "type": "composition"
+            },
+            "On-Button": {
+              "value": {
+                "fill": "{Core-Colors.Black.Color}",
+                "typography": "{Small-Text.CTA-Small}"
+              },
+              "type": "composition"
+            }
         };
     }
 
