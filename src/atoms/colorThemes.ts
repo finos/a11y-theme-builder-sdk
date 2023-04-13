@@ -394,7 +394,7 @@ export class ColorTheme extends Node implements IColorTheme {
         const gradient2 = gradient2Shade.getOnShade().getShadeGroup(lm);
         let gradient3 = this.getShadeGroup(button, lm ? Shade.fromHex("#CDCDCD") : Shade.fromRGB(18,18,18), lm, 1);
         // The following line is a temp work around to force a white button to be black until we figure out why it is happening.
-        if (gradient3.shade.equals(Shade.WHITE)) gradient3 = Shade.BLACK.getShadeGroup(lm);
+        //if (gradient3.shade.equals(Shade.WHITE)) gradient3 = Shade.NEAR_BLACK.getShadeGroup(lm);
         return {
             default: buttonShadeGroup, white, black, tertiary, gradient1, gradient2, gradient3
         }

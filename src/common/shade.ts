@@ -54,7 +54,7 @@ export class Shade {
     /** The half-black shade */
     public static HALF_BLACK = Shade.fromHex("#000000", "Half-Black").setOpacity(0.5);
     /** The off-black shade */
-    public static OFF_BLACK = Shade.fromHex("#343231", "Off-Black");
+    public static OFF_BLACK = Shade.fromHex("#181818", "Off-Black");
     /** The white shade */
     public static WHITE = Shade.fromHex("#FFFFFF", "White");
     /** The half-white shade */

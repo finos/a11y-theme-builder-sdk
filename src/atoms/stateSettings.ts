@@ -43,9 +43,17 @@ export class StateSettings extends Atom {
 
     private setDefaultTheme(_: EventValueChange<string>) {
         log.debug("StateSettings default theme was set");
+        this.init();
+    }
+
+    private init() {
+        log.debug("StateSettings.init enter");
         const self = this;
         const theme = this.atoms.colorThemes.getDefaultTheme() as ColorTheme;
-        if (!theme) throw new Error("There is no default theme");
+        if (!theme) {
+            log.debug("StateSettings.init - exit (no default theme)");
+            return;
+        }
         new PropertyGroupListener("stateSettings", [theme.lightModeBackground, theme.darkModeBackground], function(_: PropertyGroupListener){
             log.debug("StateSettings light and dark mode are set in theme");
             for (const ss of self.all) {
@@ -53,6 +61,7 @@ export class StateSettings extends Atom {
             }
             self.ready.setValue(true);
         });
+        log.debug("StateSettings.init exit");
     }
 
     public deserialize(obj: any) {
@@ -62,6 +71,7 @@ export class StateSettings extends Atom {
         this.success.prop.deserialize(obj.success);
         this.warning.prop.deserialize(obj.warning);
         this.danger.prop.deserialize(obj.danger);
+        this.init();
     }
 
     public serialize(): any {
@@ -89,6 +99,10 @@ export class StateSetting {
         this.prop = new PropertyString(name, false, ss, {defaultValue});
         this.prop.setPropertyListener(`_tb.StateSetting.${name}`, this.setShadesListener.bind(this));
         ss.all.push(this);
+    }
+
+    public init() {
+
     }
 
     private setShadesListener(_: EventValueChange<string>) {
