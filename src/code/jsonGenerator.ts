@@ -38,11 +38,9 @@ export class JSONGenerator {
             return undefined;
         }
         const json: any = {};
-        if (!lm) {
-            json["Core-Colors"] = this.getCoreColors();
-            json["Text"] = this.getText();
-            json["Image-Overlay"] = this.getImageOverlay();
-        }
+        if (!lm) json["Core-Colors"] = this.getCoreColors();
+        if (!lm) json["Image-Overlay"] = this.getImageOverlay();
+        if (!lm) json["Surface"] = this.getSurface(theme, lm);
         json["All-Colors"] = this.getAllColors(lm);
         json["Theme-Colors"] = this.getThemeColors(theme, lm);
         json["Theme"] = this.getTheme(theme, lm);
@@ -51,28 +49,26 @@ export class JSONGenerator {
         json["Input-Backgrounds"] = this.getInputBackgrounds(lm);
         json["Buttons"] = this.getButtons(theme, lm);
         json["Icons"] = this.getIcons(theme, lm);
-        json["Surface"] = this.getSurface(theme, lm);
         json["States"] = this.getStates(lm);
         json["Elevations"] = this.getElevations(lm);
         json["Hotlinks"] = this.getHotlinks(theme, lm);
         json["Chips"] = this.getChips(theme, lm);
+        if (!lm) json["Text"] = this.getText();
         json["Text-Decoration"] = this.getTextDecoration(theme, lm);
-        if (lm) {
-            json["Borders"] = this.getBorders(lm);
-            json["fontFamilies"] = this.getFontFamilies();
-            json["baseFont"] = this.getBaseFont();
-            json["fontWeights"] = this.getFontWeights();
-            json["Typography-Info"] = this.getTypographyInfo();
-            json["Sizing"] = this.getSizing();
-            json["Spacing"] = this.getSpacing();
-            json["Radius"] = this.getRadius();
-            json["Border"] = this.getBorder();
-            json["Shadows"] = this.getShadows();
-            json["Elevation-Info"] = this.getElevationInfo();
-            json["Base-Info"] = this.getBaseInfo();
-            json["Bevel-Info"] = this.getBevelInfo();
-            json["Inverse-Bevel-Info"] = this.getInverseBevelInfo();
-        }
+        if (lm) json["Borders"] = this.getBorders(lm);
+        if (lm) json["fontFamilies"] = this.getFontFamilies();
+        if (lm) json["baseFont"] = this.getBaseFont();
+        if (lm) json["fontWeights"] = this.getFontWeights();
+        if (lm) json["Typography-Info"] = this.getTypographyInfo();
+        if (lm) json["Sizing"] = this.getSizing();
+        if (lm) json["Spacing"] = this.getSpacing();
+        if (lm) json["Radius"] = this.getRadius();
+        if (lm) json["Border"] = this.getBorder();
+        if (lm) json["Shadows"] = this.getShadows();
+        if (lm) json["Elevation-Info"] = this.getElevationInfo();
+        if (lm) json["Base-Info"] = this.getBaseInfo();
+        if (lm) json["Bevel-Info"] = this.getBevelInfo();
+        if (lm) json["Inverse-Bevel-Info"] = this.getInverseBevelInfo();
         log.debug(`getJSON exit - ${JSON.stringify(json,null,4)}`);
         return json;
     }
