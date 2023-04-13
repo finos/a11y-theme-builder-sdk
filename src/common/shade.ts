@@ -286,8 +286,7 @@ export class Shade {
      * @returns The on shade
      */
     public getOnShade2(lm: boolean): Shade {
-        if (lm) return this.getContrastShade();
-        return this.getContrastShade().setOpacity(0.6);
+        return this.getContrastShade(lm);
     }
 
     public getShadeGroup(lm: boolean): ShadeGroup {
@@ -321,11 +320,11 @@ export class Shade {
         return this.luminance;
     }
 
-    public getContrastShade(): Shade {
+    public getContrastShade(lm: boolean): Shade {
         // Get YIQ ratio
         var yiq = ((this.R * 299) + (this.G * 587) + (this.B * 114)) / 1000;
         // Check contrast
-        return (yiq >= 128) ? Shade.BLACK: Shade.WHITE;
+        return (yiq >= 128) ? Shade.BLACK: (lm ? Shade.WHITE : Shade.WHITE_DM);
     }
 
     /**
@@ -792,15 +791,15 @@ export class Shade {
      * @returns The contrast of this shade to white or black.
      */
     public getContrast(): number {
-        return this.getContrastToWhiteOrBlack();
+        return this.getContrastToWhiteOrBlack(true);
     }
 
     /**
      * Get the contrast of this shade to white or black.
      * @returns 
      */
-    public getContrastToWhiteOrBlack(): number {
-        return this.getContrastRatio(this.getContrastShade());
+    public getContrastToWhiteOrBlack(lm: boolean): number {
+        return this.getContrastRatio(this.getContrastShade(lm));
     }
 
     /**
