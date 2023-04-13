@@ -64,9 +64,9 @@ export class Shade {
     /** The gray shade */
     public static GRAY = Shade.fromHex("#FAFAFA", "Gray");
     /** The white dark mode shade */
-    public static WHITE_DM = Shade.fromHex("#FFFFFF", "White-DM").setOpacity(0.6);
+    public static WHITE_DM = Shade.fromHex("#FFFFFF", "DM-White").setOpacity(0.6);
     /** The half-white dark mode shade */
-    public static HALF_WHITE_DM = Shade.fromHex("#FFFFFF", "Half-White-DM").setOpacity(0.4);
+    public static HALF_WHITE_DM = Shade.fromHex("#FFFFFF", "DM-Half-White").setOpacity(0.4);
     /** The dark blue shade */
     public static DARK_BLUE = Shade.fromHex("#1D1D1F", "Dark-Blue");
     public static DARKEN_MULTIPLIER = 0.99;
@@ -337,9 +337,12 @@ export class Shade {
         multiplier = multiplier || 1;
         const contrast = this.getContrastRatio(shade) * multiplier;
         if (contrast >= 3.1) {
+            log.debug(`getShadeOrOnShadeBasedOnContrast: return shade, shade=${this.getRGBA()}, other=${shade.getRGBA()}, contrast=${contrast}`);
             return this;
         } else {
-            return this.getOnShade2(lm);
+            const onShade = this.getOnShade2(lm);
+            log.debug(`getShadeOrOnShadeBasedOnContrast: return onShade, onShade=${onShade.hex}, shade=${this.getRGBA()}, other=${shade.getRGBA()}, contrast=${contrast}`);
+            return onShade;
         }
     }
 
