@@ -18,7 +18,7 @@ export class MinimumTarget extends Atom {
     constructor(atoms: IAtoms) {
         super("Minimum Target", false, atoms);
         this.addDependency(atoms.colorThemes);
-        this.minHeight = new PropertyPixelSelectable("Min Height", false, this, [24, 32, 40, 44]);
+        this.minHeight = new PropertyPixelSelectable("Min Height", false, this, [24, 32, 40, 44], 44);
     }
 
     public deserialize(obj: any) {
