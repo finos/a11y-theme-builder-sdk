@@ -1,6 +1,6 @@
 {
   "name": "a11y-theme-builder-sdk",
-  "version": "0.1.0",
+  "version": "0.0.2",
   "description": "Accessibility Theme Builder SDK",
   "author": "Keith Smith <KeithSmith@discover.com>",
   "license": "MIT",
