@@ -267,9 +267,10 @@ export class CSSGenerator {
 
     private setMoleculeVars() {
         const ms = this.molecules;
-        const vk = new CSSVariableKind("molecules","",[], this);
+        let vk = new CSSVariableKind("molecules","",[], this);
         // dropdowns
         const dd = ms.dropdowns;
+        vk = new CSSVariableKind("dropdowns","",[dd.menuElevation], this);
         this.addPropVar("dropdown-elevation", "", dd.menuElevation, elevationToCSS);
         this.addPropVar("dropdown-radius", "", dd.borderRadius);
         vk.setVars({
@@ -281,6 +282,7 @@ export class CSSGenerator {
         });
         // standard button
         const stb = ms.standardButtons;
+        vk = new CSSVariableKind("stb","",[stb.buttonText], this);
         stb.buttonText.setListener(this.lkey("stb.buttonText"), function(event) {
             const ctaSize = (stb.buttonText.getValue() === "CTA Small") ? "CTA-Small" : "CTA"
             vk.setVars({
@@ -302,6 +304,7 @@ export class CSSGenerator {
         });
         // small button
         const smb = ms.smallButtons;
+        vk = new CSSVariableKind("smb","",[smb.visibleHeight], this);
         this.addPropVar("sm-button-height", "", smb.visibleHeight);
         this.addPropVar("sm-button-padding", "", smb.horizontalPadding);
         smb.buttonText.setListener(this.lkey("smb.buttonText"), function(event) {
@@ -322,6 +325,7 @@ export class CSSGenerator {
         });
         // chip
         const chip = ms.chips;
+        vk = new CSSVariableKind("chip","",[chip.minWidth], this);
         this.addPropVar("chip-minwidth", "px", chip.minWidth);
         this.addPropVar("chip-height", "", chip.visibleHeight);
         this.addPropVar("chip-radius", "", chip.radius);
@@ -344,6 +348,7 @@ export class CSSGenerator {
         });
         // cards
         const card = ms.standardCards;
+        vk = new CSSVariableKind("card","",[card.padding], this);
         this.addPropVar("card-padding", "", card.padding);
         this.addPropVar("card-gap", "", card.contentGap);
         this.addPropVar("card-radius", "", card.borderRadius);
@@ -356,7 +361,8 @@ export class CSSGenerator {
         });
         // modals
         const modal = ms.modal;
-        this.addPropVar("modal-radius", "px", modal.borderRadius);
+        vk = new CSSVariableKind("modal","",[modal.borderRadius], this);
+        this.addPropVar("modal-radius", "", modal.borderRadius);
         this.addPropVar("modal-elevation", "", modal.elevation, elevationToCSS);
         vk.setVars({
             "modal-padding": "2", // TODO: static?
@@ -364,6 +370,7 @@ export class CSSGenerator {
             "modal-shadow": "var(--spacing-2)",
             "modal-overlay": "var(--spacing-2)",
         });
+        vk = new CSSVariableKind("tooltip","",[], this);
         vk.setVars({
             // TODO: Do I need to set tooltip-color & tooltip-oncolor for lm & dm?  If yes, how to determine them?
             "dmtooltip": "",
@@ -371,16 +378,19 @@ export class CSSGenerator {
             "tooltip-border": "var(--border-1)",
             "tooltip-elevation": "0",
         });
+        // Toasts
         const toast = ms.toasts;
+        vk = new CSSVariableKind("toast","",[toast.handleBorderRadius], this);
         this.addPropVar("toast-radius", "", toast.handleBorderRadius);
+        this.addPropVar("toast-padding", "", toast.padding);
         this.addPropVar("toast-elevation", "", toast.elevation, elevationToCSS);
         vk.setVars({
-            "toast-padding": "2",
             "toast-bevel": "var(--bevel-0)",
             "toast-boxshadow": "var(--toast-elevation), var(--toast-bevel)",
         });
         // Images
         const image = ms.images;
+        vk = new CSSVariableKind("images","",[image.imageElevation], this);
         this.addPropVar("image-elevation", "", image.imageElevation, elevationToCSS);
         this.addPropVar("image-radius", "", image.generalImageBorderRadius);
         this.addPropVar("inline-image-height", "", image.listImageHeight);
@@ -390,12 +400,14 @@ export class CSSGenerator {
         })
         // Avatar Images
         const avatar = ms.avatars;
+        vk = new CSSVariableKind("avatar","",[avatar.mediumBorder], this);
         this.addPropVar("avatar-border", "", avatar.mediumBorder);
         this.addPropVar("avatar-border-lg", "", avatar.extraLargeBorder);
         this.addPropVar("avatar-elevation", "", avatar.elevation, elevationToCSS);
         vk.setVar("avatar-shadow", "var(--avatar-elevation)");
         // sliders
         const slider = ms.sliders;
+        vk = new CSSVariableKind("slider","",[slider.visibleHeight], this);
         this.addPropVar("sliderhandleHeight", "", slider.visibleHeight);
         this.addPropVar("sliderhandleRadius", "", slider.handleBorderRadius);
         this.addPropVar("sliderhandleElevation", "", slider.handleElevation, elevationToCSS);
@@ -403,21 +415,23 @@ export class CSSGenerator {
         this.addPropVar("barInBevel", "", slider.barInsetShadow);
         // popover
         const popover = ms.popovers;
+        vk = new CSSVariableKind("popover","",[popover.borderRadius], this);
         this.addPropVar("popoverRadius", "", popover.borderRadius);
         this.addPropVar("popoverElevation", "", popover.elevation, elevationToCSS);
         this.addPropVar("popoverBevel", "", popover.bevel, bevelToCSS);
         vk.setVar("popoverShadow", "var(--popoverElevation), var(--popoverBevel)");
+        // Spacing
+        const spacing = ms.spacing;
+        vk = new CSSVariableKind("spacing","",[spacing.sectionPadding], this);
+        this.addPropVar("section-padding", "", spacing.sectionPadding);
+        this.addPropVar("p-padding", "", spacing.paragraphPadding);
     }
 
     private setOrganismVars() {
         const org = this.organisms;
-        const vk = new CSSVariableKind("organism","",[], this);
-        vk.setVars({
-          "leftNav": "var(--gray-100)",
-          "on-leftNav": "var(--on-gray-100)",
-          "leftNavPadding": "var(--spacing-2)",
-        });
+        let vk = new CSSVariableKind("organism","",[], this);
         const fc = org.footerAndCopyright;
+        vk = new CSSVariableKind("fc","",[fc.footerVerticalPadding], this);
         this.addPropVar("footer-padding", "", fc.footerVerticalPadding);
         this.addPropVar("copyright-padding", "", fc.copyrightVerticalPadding);
         vk.setVars({
@@ -432,23 +446,29 @@ export class CSSGenerator {
             "dm-copyright": "var(--nearblack)",
             "dm-on-copyright": "var(--dm-on-nearblack)",
         });
-        vk.setVar("p-padding", "1");
-        vk.setVar("section-padding", "3");
         // navbar primary
         const pnav = org.primaryNav;
+        vk = new CSSVariableKind("pnav","",[pnav.verticalPadding], this);
         this.addPropVar("navbarPrimary-padding", "", pnav.verticalPadding);
         this.addPropVar("navbarPrimary-position", "", pnav.fixed, function(vk: CSSVariableKind) {
             vk.setVar(vk.name, pnav.fixed.getValue() ? "fixed" : "relative");
         });
         // navbar secondary /
         const snav = org.secondaryNav;
+        vk = new CSSVariableKind("snav","",[snav.verticalPadding], this);
         this.addPropVar("navbarSecondary-padding", "", snav.verticalPadding);
         this.addPropVar("navbarSecondary-position", "", snav.sticky, function(vk: CSSVariableKind) {
             vk.setVar(vk.name, snav.sticky.getValue() ? "sticky" : "fixed");
         });
         vk.setVar("navbarSecondary-stickyTop", "0"); // TODO: should be dynamic
+        vk.setVars({
+          "leftNav": "var(--gray-100)",
+          "on-leftNav": "var(--on-gray-100)",
+          "leftNavPadding": "var(--spacing-2)",
+        });
         // hero
         const hero = org.hero;
+        vk = new CSSVariableKind("hero","",[hero.verticalGap], this);
         this.addPropVar("hero-gap", "px", hero.verticalGap);
         vk.setVars({
             "hero-padding": "3",
@@ -462,6 +482,7 @@ export class CSSGenerator {
             "hero-justify-content": "flex-start",
         });
         // tables
+        vk = new CSSVariableKind("tables","",[], this);
         vk.setVars({
             "tableheaderTypography": "var(--label-1FontWeight) var(--label-1FontSize) / var(--label-1LineHeight) var(--label-1FontFamily)",
             "tableheaderSpacing": "var(--label-1LetterSpacing)",
