@@ -598,8 +598,8 @@ export class JSONGenerator {
             surface = bgVal.primary.getRGB();
             onSurface = '{Text.White}';
         } else if (title === ColorTheme.CP_HALF_QUARTER) {
-            surface =  '{Core-Colors.Near-Black.Color}';
-            onSurface = '{Text.White}';
+            surface =  '{Core-Colors.White.Color}';
+            onSurface = '{Core-Colors.White.On-Color}';
         } else {
             throw new Error(`Invalid title: ${title}`);
         }
