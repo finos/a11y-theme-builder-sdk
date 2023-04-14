@@ -918,7 +918,8 @@ class CSSTheme {
         // Listen for changes to the primary, secondary, and tertiary shades
         this.setShadeListener({name: "primary", pcs: this.theme.primary, on: true, dm: true, palette: true, half: true, quarter: true});
         this.setShadeListener({name: "secondary", pcs: this.theme.secondary, on: true, dm: true, palette: true});
-        this.setShadeListener({name: "tertiary", pcs: this.theme.tertiary, on: true, dm: true, palette: true});
+        // this.setShadeListener({name: "tertiary", pcs: this.theme.tertiary, on: true, dm: true, palette: true});
+        this.setShadeListener({name: "tertiary", pcs: this.theme.primary, on: true, dm: true, palette: true});
 
         // light and dark mode backgrounds
         log.debug(`CSSTheme.start setting light and dark mode background listeners`);
@@ -1153,7 +1154,41 @@ export class CSSVariableKind {
             this.setShadeVarRef(`${prefix}${type}`, sg.shade);
             this.setShadeVarRef(`${prefix}on-${type}`, sg.onShade, true);
             this.setShadeVarRef(`${prefix}${type}-half`, sg.halfShade);
-        } else {
+        }
+        // Shade isn't correct, so hardcode for now
+        else if (name === "Tertiary") {
+            const vars = this.cssGenerator.getVars();
+
+            if (lm) {
+                const onPrimary = vars["--on-primary"];
+                this.cssGenerator.setVar(`${type}OnTertiary`, "", this, onPrimary);
+                const color = (onPrimary == "#121212") ? "#FFFFFF" : "#121212" ;
+                this.cssGenerator.setVar(`on${type}OnTertiary`, "", this, color);
+                const hColor = (onPrimary == "#121212") ? "rgba(255,255,255,0.5)" : "rgba(0,0,0,0.5)";
+                this.cssGenerator.setVar(`on${type}HalfOnTertiary`, "", this, hColor);
+            }
+            else {
+                this.cssGenerator.setVar(`dm${type}OnTertiary`, "", this, "rgba(255,255,255,0.6)");
+                this.cssGenerator.setVar(`dmon${type}OnTertiary`, "", this, "#121212");
+                this.cssGenerator.setVar(`dmHalf${type}HalfOnTertiary`, "", this, "rgba(255,255,255,0.3)");
+            }
+        } 
+        // Shade isn't correct, so hardcode for now
+        else if (name === "Gradient3") {
+            const vars = this.cssGenerator.getVars();
+
+            if (lm) {
+                this.cssGenerator.setVar(`${type}OnGradient3`, "", this, "#121212");
+                this.cssGenerator.setVar(`on${type}OnGradient3`, "", this, "#FFFFFF");
+                this.cssGenerator.setVar(`on${type}HalfOnGradient3`, "", this, "rgba(0,0,0,0.5)");
+            }
+            else {
+                this.cssGenerator.setVar(`dm${type}OnGradient3`, "", this, "rgba(255,255,255,0.6)");
+                this.cssGenerator.setVar(`dmon${type}OnGradient3`, "", this, "#121212");
+                this.cssGenerator.setVar(`dmHalf${type}HalfOnGradient3`, "", this, "rgba(255,255,255,0.3)");
+            }
+        } 
+        else {
             const prefix = lm ? "" : "dm";
             this.setShadeVarRef(`${prefix}${type}On${name}`, sg.shade);
             this.setShadeVarRef(`${prefix}on${type}On${name}`, sg.onShade, true);
