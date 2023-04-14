@@ -4,7 +4,7 @@
  */
 import { Molecule } from "./molecule";
 import { IMolecules } from "../interfaces";
-import { PropertyPixelSelectable } from "../common/props";
+import { PropertyNumberSelectable } from "../common/props";
 
 /**
  * The spacing molecule.
@@ -13,14 +13,14 @@ import { PropertyPixelSelectable } from "../common/props";
 export class Spacing extends Molecule {
     
     /** The section padding property */
-    public sectionPadding: PropertyPixelSelectable;
+    public sectionPadding: PropertyNumberSelectable;
     /** The paragraph padding property */
-    public paragraphPadding: PropertyPixelSelectable;
+    public paragraphPadding: PropertyNumberSelectable;
 
     constructor(molecules: IMolecules) {
         super("Spacing", molecules);
-        this.sectionPadding = new PropertyPixelSelectable("Section Padding", false, this, [16, 24, 32, 40, 48, 56, 64, 72, 80], 24);
-        this.paragraphPadding = new PropertyPixelSelectable("Paragraph Padding", false, this, [8, 16, 24, 32, 40], 8);
+        this.sectionPadding = new PropertyNumberSelectable("Section Padding", false, this, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], 3);
+        this.paragraphPadding = new PropertyNumberSelectable("Paragraph Padding", false, this, [1, 2, 3, 4, 5], 2);
     }
 
     public deserialize(obj: any) {
