@@ -5,7 +5,7 @@
 import { Molecule } from "./molecule";
 import { Atoms, Shade } from "../atoms/index";
 import { IMolecules } from "../interfaces";
-import { PropertyPixelSelectable, PropertyElevationSelectable, PropertyColorShade } from "../common/props";
+import { PropertyNumberSelectable, PropertyElevationSelectable, PropertyColorShade } from "../common/props";
 
 /**
  * The modal molecule.
@@ -16,7 +16,7 @@ export class Modal extends Molecule {
     /** The modal color shade property */
     public color: PropertyColorShade;
     /** The modal border radius property */
-    public borderRadius: PropertyPixelSelectable;
+    public borderRadius: PropertyNumberSelectable;
     /** The modal elevation property */
     public elevation: PropertyElevationSelectable;
     private atoms: Atoms
@@ -28,7 +28,7 @@ export class Modal extends Molecule {
             getSelectables: this.getColorSelectables.bind(this),
             defaultValue: Shade.BLACK,
         });
-        this.borderRadius = new PropertyPixelSelectable("Border Radius", false, this, [0,8,16,24,32,40,48,56,64], 8);
+        this.borderRadius = new PropertyNumberSelectable("Border Radius", false, this, [0,1,2,3,4,5,6,7,8], 3);
         this.elevation = new PropertyElevationSelectable("Modal Elevation", false, this, 0, 9);
     }
 
