@@ -35,7 +35,7 @@ export class StateSettings extends Atom {
         this.addDependency(atoms.colorThemes);
         this.info = new StateSetting("info", "#0066EF", this);
         this.success = new StateSetting("success", "#327D35", this);
-        this.warning = new StateSetting("warning", "#FDC630", this);
+        this.warning = new StateSetting("warning", "#A06B1A", this);
         this.danger = new StateSetting("danger", "#D62B2B", this);
         this.ready = new PropertyBoolean("ready", false, this, {defaultValue: false});
         this.atoms.colorThemes.defaultTheme.setPropertyListener(`_tb.StateSettings`, this.setDefaultTheme.bind(this));
