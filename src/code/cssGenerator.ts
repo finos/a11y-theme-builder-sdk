@@ -364,11 +364,11 @@ export class CSSGenerator {
         vk = new CSSVariableKind("modal","",[modal.borderRadius], this);
         this.addPropVar("modal-radius", "", modal.borderRadius);
         this.addPropVar("modal-elevation", "", modal.elevation, elevationToCSS);
+        this.addPropVar("modal-overlay", "", modal.color);
         vk.setVars({
             "modal-padding": "2", // TODO: static?
             "modal-border": "var(--spacing-2)",
             "modal-shadow": "var(--spacing-2)",
-            "modal-overlay": "var(--spacing-2)",
         });
         vk = new CSSVariableKind("tooltip","",[], this);
         vk.setVars({
