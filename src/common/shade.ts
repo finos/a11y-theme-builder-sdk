@@ -569,6 +569,7 @@ export class Shade {
         for (let i = 0; i < shades.length; i++) {
             shades[i] = shades[i].buildShade(lm);
         }
+        log.debug(`lighter shades: ${JSON.stringify(shades)}`);
         return shades;
     }
 
@@ -589,7 +590,7 @@ export class Shade {
         for (let i = 0; i < shades.length; i++) {
             shades[i] = shades[i].buildShade(lm);
         }
-        log.debug(`lighter and darker shades: ${JSON.stringify(shades)}`);
+        log.debug(`darker shades: ${JSON.stringify(shades)}`);
         return shades;
     }
 
@@ -639,8 +640,9 @@ export class Shade {
         minRatio = minRatio || 4.5;
         let darkerShade: Shade = this;
         let lighterShade: Shade = this;
-        for (let count = 0; count <= 20; count++) {
-            const darkerRatio = darkerShade.getContrastRatio(Shade.WHITE);
+        const baseColor = lm ? Shade.WHITE : darkerShade.getElevationShade(0.6);
+        for (let count = 0; count <= 200; count++) {
+            const darkerRatio = darkerShade.getContrastRatio(baseColor);
             const lighterRatio = lighterShade.getContrastRatio(Shade.BLACK);
             if (darkerRatio > lighterRatio) {
                 if (darkerRatio >= minRatio) {
@@ -872,7 +874,9 @@ export class Shade {
      * @returns A new shade object.
      */
     public clone(): Shade {
-        const c = Shade.fromHex(this.hex).setOpacity(this.opacity);
+        //const c = Shade.fromHex(this.hex).setOpacity(this.opacity);
+        const c = new Shade({hex: this.hex});
+        c.setOpacity(this.opacity);
         c.mode = this.mode;
         c.index = this.index;
         return c;
