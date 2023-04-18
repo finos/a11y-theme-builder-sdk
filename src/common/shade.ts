@@ -321,10 +321,35 @@ export class Shade {
     }
 
     public getContrastShade(lm: boolean): Shade {
-        // Get YIQ ratio
-        var yiq = ((this.R * 299) + (this.G * 587) + (this.B * 114)) / 1000;
-        // Check contrast
-        return (yiq >= 128) ? Shade.BLACK: (lm ? Shade.WHITE : Shade.WHITE_DM);
+        if (!lm) {
+            console.log("darkmode")
+        }
+        if (this.onHex) {
+            const shade = new Shade({hex: this.onHex});
+            if (!lm) {
+                if (this.onHex === "#FFFFFF") {
+                    shade.setOpacity(0.6);
+                    return shade;
+                }
+            }
+            return shade;
+        }
+
+        // Get contrast with black and white & return best ratio
+        const blackRatio = this.getContrastRatio(Shade.BLACK);
+        let whiteRatio = this.getContrastRatio(Shade.WHITE);
+        if (!lm) whiteRatio = whiteRatio * 0.6;
+        if (blackRatio > whiteRatio) {
+            return Shade.BLACK;
+        }
+        else {
+            if (lm) {
+                return Shade.WHITE;
+            }
+            else {
+                return Shade.WHITE_DM;
+            }
+        }
     }
 
     /**
@@ -587,7 +612,7 @@ export class Shade {
            saturation = shade.getSaturation();
         }
         // Step 3: Adjust the shade by contrast ratio
-        return shade.getAdjustedShadeByContrastRatio(minRatio);
+        return shade.getAdjustedShadeByContrastRatio(false, minRatio);
     }
  
     /**
@@ -606,11 +631,11 @@ export class Shade {
      * @returns The adjusted shade meeting the contrast ratio requirements
      */
     public buildLMShade(minRatio?: number): Shade {
-        return this.getAdjustedShadeByContrastRatio(minRatio);
+        return this.getAdjustedShadeByContrastRatio(true, minRatio);
     }
 
     // Color to background is always 3.1 but onColor to text ratio is 4.5
-    public getAdjustedShadeByContrastRatio(minRatio?: number): Shade {
+    public getAdjustedShadeByContrastRatio(lm: boolean, minRatio?: number): Shade {
         minRatio = minRatio || 4.5;
         let darkerShade: Shade = this;
         let lighterShade: Shade = this;
@@ -619,7 +644,12 @@ export class Shade {
             const lighterRatio = lighterShade.getContrastRatio(Shade.BLACK);
             if (darkerRatio > lighterRatio) {
                 if (darkerRatio >= minRatio) {
-                    darkerShade.onHex = Shade.WHITE.hex;
+                    if (lm) {
+                        darkerShade.onHex = Shade.WHITE.hex;
+                    }
+                    else {
+                        darkerShade.onHex = Shade.WHITE_DM.hex;
+                    }
                     log.debug(`Found shade after ${count} darken adjustments (ratio=${darkerRatio})`);
                     return darkerShade;
                 }
