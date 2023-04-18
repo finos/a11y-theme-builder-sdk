@@ -690,12 +690,17 @@ export class CSSGenerator {
 
     private setStateSettingsVars(vk: CSSVariableKind) {
         log.debug(`Begin setting state settings variables`);
-        this.atoms.stateSettings.all.forEach(ss => {
-            this.setVar(ss.name, "", vk, ss.lmShade.hex);
-            this.setVar(`on-${ss.name}`, "", vk, ss.lmShade.getOnShade2(true).getRGBA());
-            this.setVar(`dm-${ss.name}`, "", vk, ss.dmShade.hex);
-            this.setVar(`dm-on-${ss.name}`, "", vk, ss.dmShade.getOnShade2(false).getRGBA());
-        });
+        if (this.atoms.stateSettings.ready) {
+            this.atoms.stateSettings.all.forEach(ss => {
+                this.setVar(ss.name, "", vk, ss.lmShade.hex);
+                this.setVar(`on-${ss.name}`, "", vk, ss.lmShade.getOnShade2(true).getRGBA());
+                this.setVar(`dm-${ss.name}`, "", vk, ss.dmShade.hex);
+                this.setVar(`dm-on-${ss.name}`, "", vk, ss.dmShade.getOnShade2(false).getRGBA());
+            });
+        }
+        else {
+            log.debug(`StateSettings not ready, so don't set state css vars`);
+        }
         log.debug(`Finished setting state settings variables`);
     }
 
@@ -884,11 +889,27 @@ class CSSColor {
     }
 
     private listener(vc: EventValueChange<string>): void {
-        for (const shade of [...this.color.light.shades,...this.color.dark.shades]) {
+        for (const shade of this.color.light.shades) {
             const name = getShadeVarName(shade);
+            log.debug(`Shade listener for light mode shade ${name} = ${shade.toString()}`);
             if (name) {
                 this.cssGenerator.setShadeVar(name, this.varKind, shade);
                 this.cssGenerator.setShadeVar(`on-${name}`, this.varKind, shade.getOnShade2(true));
+            } else {
+                log.warn(`Unable to set CSS variable for shade ${shade.toString()} because no variable name can be determined`);
+            }
+        }
+        for (const shade of this.color.dark.shades) {
+            //const name = getShadeVarName(shade); // This returns dm-color-xxx, should be just color-xxx
+            let name = "";
+            if (shade.hasMode() && shade.index >= 0) {
+                const color = shade.getMode().color;
+                name = `${color.name}-${shade.index*100}`;
+            }
+            log.debug(`Shade listener for dark mode shade ${name} = ${shade.toString()}`);
+            if (name) {
+                this.cssGenerator.setShadeVar(`dm-${name}`, this.varKind, shade);
+                this.cssGenerator.setShadeVar(`dm-on-${name}`, this.varKind, shade.getOnShade2(false));
             } else {
                 log.warn(`Unable to set CSS variable for shade ${shade.toString()} because no variable name can be determined`);
             }
