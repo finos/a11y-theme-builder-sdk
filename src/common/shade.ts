@@ -562,7 +562,7 @@ export class Shade {
         if (numLighterShades > 0) {
             const startScale  = chroma.scale(['#FFFFFF',this.hex]).correctLightness(true).colors(lm ? numLighterShades + 2 : numLighterShades);
             /// since padding is not working I will create a scale and get the first 2nd value and then create another scale ///
-            const scale  = chroma.scale([(startScale[2]),this.hex]).correctLightness(true).colors(numLighterShades)
+            const scale  = chroma.scale([(startScale[lm ? 1 : 2]),this.hex]).correctLightness(true).colors(numLighterShades)
             scale.forEach((hex: string) => shades.push(Shade.fromHex(hex)));
             if (shades.length > 0) shades.splice(-1);
         }
