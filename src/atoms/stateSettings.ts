@@ -89,8 +89,10 @@ export class StateSetting {
 
     public readonly name: string;
     public readonly prop: PropertyString;
-    public lmShade: Shade = Shade.WHITE;
-    public dmShade: Shade = Shade.BLACK;
+    public lmShade: Shade = new Shade({hex: Shade.WHITE.hex});
+    public dmShade: Shade = new Shade({hex: Shade.BLACK.hex});
+    public lmShades = [] as Shade[];
+    public dmShades = [] as Shade[];
     private atoms: IAtoms;
 
     constructor(name: string, defaultValue: string, ss: StateSettings) {
@@ -111,31 +113,49 @@ export class StateSetting {
 
     public setShades() {
         log.debug(`StateSettings.setShades enter: name=${this.name}`);
+        const hex = this.prop.getValue();
+        const shade = new Shade({hex: hex}); 
+        // Build up 10 shades for each lm & dm
+        this.lmShades = shade.buildShades(true);      
+        this.dmShades = shade.buildShades(false);      
+        // Find the lm shade for hex value & get corresponding dm shade
+        let index = -1;
+        for (var i = 0; i < this.lmShades.length; i++) {
+            if (this.lmShades[i].hex == hex) {
+                index = i;
+                break;
+            }
+        }
+        if (index == -1) {
+            log.debug(`StateSettings.setShades could not find ${hex} in built lmShades`);
+            return;
+        }
+        const lmStart = this.lmShades[index];
+        const dmStart = this.dmShades[index];
+
         const theme = this.atoms.colorThemes.getDefaultTheme() as ColorTheme;
         if (!theme) {
             log.debug(`StateSettings.setShades exit (no default theme): name=${this.name}`);
             return;
         }
-        this.setLMShade(theme);
-        this.setDMShade(theme);
+        this.setLMShade(theme, lmStart);
+        this.setDMShade(theme, dmStart);
         log.debug(`StateSettings.setShades exit: name=${this.name}`);
     }
 
-    private setLMShade(theme: ColorTheme) {
+    private setLMShade(theme: ColorTheme, shade: Shade) {
         log.debug(`StateSettings.setLMShade enter - name=${this.name}`);
-        const hex = this.prop.getValue();
-        if (!hex) throw new Error(`StateSettings.setLMShade exit (no hex) - name=${this.name}`);
         const lmbg = theme.lightModeBackground.getValue();
         if (!lmbg) throw new Error(`StateSettings.setLMShade exit (no lightmode background) - name=${this.name}`);
-        this.lmShade = Shade.fromHex(hex).findLMShade(lmbg.secondary, 3.1);
+        this.lmShade = shade.findLMShade(lmbg.secondary, 3.1);
         log.debug(`StateSettings.setLMShade exit: name=${this.name}, shade=${JSON.stringify(this.lmShade)}`);
     }
 
-    private setDMShade(theme: ColorTheme) {
+    private setDMShade(theme: ColorTheme, shade: Shade) {
         log.debug("StateSettings.setDMShade enter");
         const dmbg = theme.darkModeBackground.getValue();
         if (!dmbg) throw new Error("StateSettings.setDMShade exit (no darkmode background)");
-        this.dmShade = this.lmShade.findDMShade(dmbg.primary, 3.1);
+        this.dmShade = shade.findDMShade(dmbg.primary, 3.1);
         log.debug(`StateSettings.setDMShade exit: ${JSON.stringify(this.dmShade)}`);
     }
 
