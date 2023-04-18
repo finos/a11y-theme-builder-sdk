@@ -364,7 +364,7 @@ export class CSSGenerator {
         vk = new CSSVariableKind("modal","",[modal.borderRadius], this);
         this.addPropVar("modal-radius", "", modal.borderRadius);
         this.addPropVar("modal-elevation", "", modal.elevation, elevationToCSS);
-        this.addPropVar("modal-overlay", "", modal.color);
+        this.addPropVar("modal-overlay", "", modal.color, colorToCSS);
         vk.setVars({
             "modal-padding": "2", // TODO: static?
             "modal-border": "var(--spacing-2)",
@@ -1394,4 +1394,9 @@ function bevelToCSS(vk: CSSVariableKind) {
     } else {
         throw new Error(`Invalid bevel: '${val}'`);
     }
+}
+
+function colorToCSS(vk: CSSVariableKind) {
+    const val = vk.props[0].getValue();
+    vk.setVar(vk.name, val.hex);
 }
