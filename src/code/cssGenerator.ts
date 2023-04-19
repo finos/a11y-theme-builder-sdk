@@ -692,10 +692,13 @@ export class CSSGenerator {
         log.debug(`Begin setting state settings variables`);
         if (this.atoms.stateSettings.ready) {
             this.atoms.stateSettings.all.forEach(ss => {
-                this.setVar(ss.name, "", vk, ss.lmShade.hex);
-                this.setVar(`on-${ss.name}`, "", vk, ss.lmShade.getOnShade2(true).getRGBA());
-                this.setVar(`dm-${ss.name}`, "", vk, ss.dmShade.hex);
-                this.setVar(`dm-on-${ss.name}`, "", vk, ss.dmShade.getOnShade2(false).getRGBA());
+                const gen = this;
+                this.addPropVar("ss"+ss.name, "", ss.prop, function(vk1: CSSVariableKind) {
+                    gen.setVar(ss.name, "", vk, ss.lmShade.hex);
+                    gen.setVar(`on-${ss.name}`, "", vk, ss.lmShade.getOnShade2(true).getRGBA());
+                    gen.setVar(`dm-${ss.name}`, "", vk, ss.dmShade.hex);
+                    gen.setVar(`dm-on-${ss.name}`, "", vk, ss.dmShade.getOnShade2(false).getRGBA());
+                })
             });
         }
         else {
