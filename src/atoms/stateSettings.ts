@@ -8,6 +8,7 @@ import { IAtoms, EventValueChange } from "../interfaces";
 import { Shade } from "../common/shade";
 import { PropertyString, PropertyBoolean, PropertyGroupListener } from "../common/props";
 import { Logger } from "../util/logger";
+import { Util } from "../util";
 
 const log = new Logger("ss");
 
@@ -111,19 +112,28 @@ export class StateSetting {
         this.setShades();
     }
 
+    private getDiffColor = function(hex1:string, hex2:string) {
+        const a = Util.hexToRgbArray(hex1);
+        const b = Util.hexToRgbArray(hex2);
+        return Math.sqrt(Math.pow((a[0] - b[0]),2) + Math.pow((a[1] - b[1]),2) + Math.pow((a[2] - b[2]),2));
+      }
+
     public setShades() {
         log.debug(`StateSettings.setShades enter: name=${this.name}`);
-        const hex = this.prop.getValue();
+        const hex = this.prop.getValue() || "";
         const shade = new Shade({hex: hex}); 
         // Build up 10 shades for each lm & dm
         this.lmShades = shade.buildShades(true);      
         this.dmShades = shade.buildShades(false);      
         // Find the lm shade for hex value & get corresponding dm shade
         let index = -1;
+        let min = 9999999;
         for (var i = 0; i < this.lmShades.length; i++) {
-            if (this.lmShades[i].hex == hex) {
+            const diff = this.getDiffColor(this.lmShades[i].hex, hex);
+            if (diff < min) {
+                min = diff;
                 index = i;
-                break;
+                if (diff == 0) break;
             }
         }
         if (index == -1) {
