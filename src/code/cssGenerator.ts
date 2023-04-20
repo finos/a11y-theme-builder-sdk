@@ -942,8 +942,8 @@ class CSSTheme {
         // Listen for changes to the primary, secondary, and tertiary shades
         this.setShadeListener({name: "primary", pcs: this.theme.primary, on: true, dm: true, palette: true, half: true, quarter: true});
         this.setShadeListener({name: "secondary", pcs: this.theme.secondary, on: true, dm: true, palette: true});
-        // this.setShadeListener({name: "tertiary", pcs: this.theme.tertiary, on: true, dm: true, palette: true});
-        this.setShadeListener({name: "tertiary", pcs: this.theme.primary, on: true, dm: true, palette: true});
+        this.setShadeListener({name: "tertiary", pcs: this.theme.tertiary, on: true, dm: true, palette: true});
+        // this.setShadeListener({name: "tertiary", pcs: this.theme.primary, on: true, dm: true, palette: true});
 
         // light and dark mode backgrounds
         log.debug(`CSSTheme.start setting light and dark mode background listeners`);
