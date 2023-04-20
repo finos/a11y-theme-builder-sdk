@@ -562,9 +562,13 @@ export class Shade {
         if (numLighterShades > 0) {
             const startScale  = chroma.scale(['#FFFFFF',this.hex]).correctLightness(true).colors(lm ? numLighterShades + 2 : numLighterShades);
             /// since padding is not working I will create a scale and get the first 2nd value and then create another scale ///
-            const scale  = chroma.scale([(startScale[lm ? 1 : 2]),this.hex]).correctLightness(true).colors(numLighterShades)
-            scale.forEach((hex: string) => shades.push(Shade.fromHex(hex)));
-            if (shades.length > 0) shades.splice(-1);
+            if (startScale.length > (lm ? 1 : 2)) {
+                const scale  = chroma.scale([(startScale[lm ? 1 : 2]),this.hex]).correctLightness(true).colors(numLighterShades)
+                if (scale) {
+                    scale.forEach((hex: string) => shades.push(Shade.fromHex(hex)));
+                    if (shades.length > 0) shades.splice(-1);
+                }
+            }
         }
         for (let i = 0; i < shades.length; i++) {
             shades[i] = shades[i].buildShade(lm);
@@ -583,7 +587,9 @@ export class Shade {
             // since chroma padding didn't work we will set the color by getting the lch and setting the darkness to 3 ///
             const endColor = chroma.lch( 3, endlch[1], endlch[2] ).rgb();
             const scale = chroma.scale([this.hex as any,endColor]).correctLightness(true).colors(numDarkerShades);
-            scale.forEach((hex: string) => shades.push(Shade.fromHex(hex)));
+            if (scale) {
+                scale.forEach((hex: string) => shades.push(Shade.fromHex(hex)));
+            }
         } else {
             shades.push(this);
         }
@@ -698,11 +704,11 @@ export class Shade {
     }
 
     public getElevationShade(opacity: number): Shade {
-        // mix with white background:
-        const A = 1 - opacity;
-        const R = Math.floor(this.R * A + 0xff * opacity);
-        const G = Math.floor(this.G * A + 0xff * opacity);
-        const B = Math.floor(this.B * A + 0xff * opacity);
+        // mix with white background:
+        const A = 1 - opacity;
+        const R = Math.floor(this.R * A + 0xff * opacity);
+        const G = Math.floor(this.G * A + 0xff * opacity);
+        const B = Math.floor(this.B * A + 0xff * opacity);
         const shade = Shade.fromRGB(R,G,B);
         return shade;
     }
