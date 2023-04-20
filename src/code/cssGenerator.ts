@@ -368,7 +368,7 @@ export class CSSGenerator {
         vk.setVars({
             "modal-padding": "2", // TODO: static?
             "modal-border": "var(--spacing-2)",
-            "modal-shadow": "var(--spacing-2)",
+            "modal-shadow": "var(--modal-elevation)",
         });
         vk = new CSSVariableKind("tooltip","",[], this);
         vk.setVars({
