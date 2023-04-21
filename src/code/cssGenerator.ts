@@ -153,7 +153,6 @@ export class CSSGenerator {
             "quiet": "68%",
             "disabled": "38%",
             "hover": "50%",
-            "input-hover": "rgba(255,255,255,.9)",
             "active": "100%",
             "inset-border-0": "0 0 0 0 rgba(0,0,0,0)",
             "inset-border-1": "0 0 0 var(--border-1) var(--icon)",
@@ -661,7 +660,7 @@ export class CSSGenerator {
 
     private generateFocusBlurVariable(vk: CSSVariableKind) {
         const name = "focusBlur";
-        const unit = "";
+        const unit = "px";
         const focusBlur = this.atoms.focusStates.addFocusBlur.getValue();
         const grid = this.atoms.gridSettings.grid.getValue();
         if (focusBlur === undefined || grid === undefined) {
@@ -685,6 +684,7 @@ export class CSSGenerator {
         this.setVar(`dm-input`, "", vk, vars.dmInputDefault.getHexOrRGBA());
         this.setVar(`dm-on-input`, "", vk, vars.dmInputDefault.getOnShade2(false).getHexOrRGBA());
         this.setVar(`dm-input-disabled`, "", vk, vars.dmInputDisabled.getHexOrRGBA());
+        this.setVar("input-hover", "", vk, "rgba(255,255,255,.9)");
         this.setVar("dm-input-hover", "", vk, "rgba(255,255,255,.12)");
     }
 
