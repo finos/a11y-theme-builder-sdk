@@ -241,9 +241,34 @@ The following is a tutorial of how to use this SDK in order to generate code whi
      });
      ```
 
-7. Generating code
+7. Getting generated code
 
-   The following returns the generated CSS root variables:
+   The following returns a snapshot of all generated CSS root variables:
 
    ```
+   myDesignSystem.code.getCSSVars()
+   ```
    
+   Or the following can be used to listen for dynamic CSS variable changes which occur as the design system is updated:
+   
+   ```
+   myDesignSystem.code.setCSSVarListener("your unique listener name", function(name: string, value?: string) {
+      if (value === undefined) {
+          console.log(`CSS variable ${name} was deleted`);
+      } else {
+          console.log(`CSS variable ${name} was set to ${value}`);
+      }
+   });
+   ```
+   
+   The following returns a snapshot of JSON code for light mode:
+   
+   ```
+   myDesignSystem.code.getJSON(true)
+   ```
+   
+   And the following returns a snapshot of JSON code for dark mode:
+   
+   ```
+   myDesignSystem.code.getJSON(false)
+   ```
