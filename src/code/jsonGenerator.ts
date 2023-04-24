@@ -753,11 +753,23 @@ export class JSONGenerator {
             return;
         }
         if (!lm) button = button.getDarkModeShade();
+        const bgVars = theme.getBackgroundVariables(lm ? theme.lightModeBackground : theme.darkModeBackground);
+        if (!bgVars) {
+            log.debug("getButtons exit (no background variables)");
+            return;
+        }
+        const gb = bgVars.groupButton;
+        var groupButtonBG = lm ? this.getShadeName(gb, true, theme, false) : "{Core-Colors.White.Color}1f";
+        var onGroupButtonBG = lm ? this.getShadeName(gb, false, theme, true) : "{Core-Colors.Black.Color}";
         return {
             Colored: {
                 "Color": this.getShadeColor(button, lm, theme),
                 "On-Color": this.getShadeColor(button, lm, theme, true),
                 "Color-Half": this.getColor("{Buttons.Colored.Color}80"),
+            },
+            GroupButton: {
+                Background: this.getColor(groupButtonBG),
+                OnBackground: this.getColor(onGroupButtonBG),
             },
         };
     }
