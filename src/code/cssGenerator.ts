@@ -314,13 +314,9 @@ export class CSSGenerator {
                 "sm-buttonTextTransform": `var(--${ctaSize}TextTransform)`,
                 "sm-buttonLetterSpacing": `var(--${ctaSize}LetterSpacing)`,
             });    
-        })
+        });
         vk.setVars({
             "groupButton-radius": "calc(var(--radius-1) * var(--button-radius) * 1.6)",
-            "groupButtonBG": "#ffffff", // TODO: This should be dynamic.  How is it determined?
-            "on-groupButtonBG": "var(--textDark)",
-            "dm-groupButtonBG": "rgba(0,0,0,.6)",
-            "dm-on-groupButtonBG": "var(--dm-dmwhite)",
         });
         // chip
         const chip = ms.chips;
@@ -1028,7 +1024,8 @@ class CSSTheme {
         vk.setShadeVarRef(`${prefix}chip`, vars.chip);
         vk.setShadeVarRef(`${prefix}on-chip`, vars.onChip);
         vk.setShadeVarRef(`${prefix}color-drop`, vars.colorDrop);
-        vk.setShadeVarRef(`${prefix}group-button-bg`, vars.groupButton);
+        vk.setShadeVarRef(`${prefix}groupButtonBG`, vars.groupButton);
+        vk.setShadeVarRef(`${prefix}on-groupButtonBG`, vars.groupButton.getOnShade2(lm));
         vk.setShadeVarRef(`${prefix}line-color`, vars.lineColor);
         vk.setShadeVarRef(`${prefix}surface`, vars.surface);
         if (lm) {
