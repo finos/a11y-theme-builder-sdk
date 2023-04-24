@@ -218,7 +218,7 @@ export class ColorTheme extends Node implements IColorTheme {
     constructor(name: string, themes: ColorThemes) {
         super(name, themes);
         this.themes = themes;
-        const opts = { selectables: this.getColorShadeSelectables() };
+        const opts = { getSelectables: this.getColorShadeSelectables.bind(this) };
         this.primary = new PropertyColorShade("Primary", true, this, opts);
         this.secondary = new PropertyColorShade("Secondary", true, this, opts);
         this.tertiary = new PropertyColorShade("Tertiary", true, this, opts);
