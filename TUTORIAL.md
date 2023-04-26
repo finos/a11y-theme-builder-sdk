@@ -15,9 +15,9 @@ The following is a tutorial of how to use this SDK in order to generate code whi
    To create a ThemeBuilder with persistent storage, create a class which implements the [Storage interface](./src/storage/interface.ts) and pass an instance of your object to the create method as follows:
    
    ```
-   import { ThemeBuilder } from "a11y-theme-builder-sdk";
+   import { ThemeBuilder, Storage } from "a11y-theme-builder-sdk";
    ...
-   const myStorageObject = new MyStorageObject();  // MyStorageObject implements Storage
+   const myStorageObject = new MyStorageObject();  // MyStorageObject implements the 'Storage' interface
    const myThemeBuilder = await ThemeBuilder.create({storage: myStorageObject});
    ```
 
