@@ -23,7 +23,7 @@ For both a broad overview of accessibility compliance and a user-friendly web ap
 
 If you want to learn more about how to use this SDK directly, see the [SDK Tutorial](./TUTORIAL.md).
 
-For more in-depth information about the APIs, review the the [SDK API documentation](./docs/index.html) locally or [visit the online docs](https://discoverfinancial.github.io/a11y-theme-builder-sdk/modules.html).
+For more in-depth information about the APIs, see the [API documentation](https://discoverfinancial.github.io/a11y-theme-builder-sdk/modules.html).
 
 ## Contributing 
 ### Join us
