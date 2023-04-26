@@ -178,6 +178,10 @@ async function test() {
     console.log(`TEST: CSS VARIABLES: ${JSON.stringify(cssVars,null,4)}`);
     console.log(`TEST: MISSING CSS VARIABLES: total=${missingCssVars.length}, ${JSON.stringify(missingCssVars,null,4)}`);
     console.log(`TEST: EXTRA CSS VARIABLES: total=${extraCssVars.length}, ${JSON.stringify(extraCssVars,null,4)}`);
+    if (missingCssVars.length > 0) {
+        console.log(`ERROR: missing CSS variables: ${JSON.stringify(missingCssVars)}`);
+        //errCnt++;
+    }
 
     console.log(`TEST: JSON lightmode: ${JSON.stringify(ds.code.getJSON(true),null,4)}`);
     console.log(`TEST: JSON darkmode: ${JSON.stringify(ds.code.getJSON(false),null,4)}`);
