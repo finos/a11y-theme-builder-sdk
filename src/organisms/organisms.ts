@@ -39,7 +39,7 @@ export class Organisms extends Node implements IOrganisms {
         this.primaryNav = new PrimaryNav(this);
         this.secondaryNav = new SecondaryNav(this);
         this.footerAndCopyright = new FooterAndCopyright(this);
-        this.addDependency(this.designSystem.atoms);
+        this.addDependency(this.designSystem.molecules);
     }
 
     public getOrganism(key: string): IOrganism {

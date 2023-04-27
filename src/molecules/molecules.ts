@@ -67,7 +67,6 @@ export class Molecules extends Node implements IMolecules {
     constructor(parent: Node) {
         super("molecules", parent);
         this.designSystem = parent.getDesignSystem();
-        this.addDependency(this.designSystem.atoms);
         this.avatars = new Avatars(this);
         this.standardButtons = new StandardButtons(this);
         this.smallButtons = new SmallButtons(this);
@@ -85,6 +84,7 @@ export class Molecules extends Node implements IMolecules {
         this.popovers = new Popovers(this);
         this.sliders = new Sliders(this);
         this.toasts = new Toasts(this);
+        this.addDependency(this.designSystem.atoms);
     }
 
     public deserialize(obj: any) {
