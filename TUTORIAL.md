@@ -140,17 +140,17 @@ The following is a tutorial of how to use this SDK in order to generate code whi
    myTheme.gradient2.to.setValue(myTheme.gradient2.to.getSelectableValues()[1][2]);
 
    // Set the button color shade.
-   myTheme.button.setValue(myTheme.button.getSelectableValules()[0][1]);
+   myTheme.button.setValue(myTheme.button.getSelectableValues()[0][1]);
 
    // Set the icon color shade.
-   myTheme.icon.setValue(myTheme.icon.getSelectableValules()[1][1]);
+   myTheme.icon.setValue(myTheme.icon.getSelectableValues()[1][1]);
 
    // Set the gradient header text from and to colors
-   myTheme.gradientHeaderText.from.setValue(myTheme.gradientHeaderText.from.getSelectableValules()[0][0]);
-   myTheme.gradientHeaderText.to.setValue(myTheme.gradientHeaderText.to.getSelectableValules()[0][2]);
+   myTheme.gradientHeaderText.from.setValue(myTheme.gradientHeaderText.from.getSelectableValues()[0][0]);
+   myTheme.gradientHeaderText.to.setValue(myTheme.gradientHeaderText.to.getSelectableValues()[0][2]);
 
-   // Set the accent color shade.
-   myTheme.accent.setValue(myTheme.accent.getSelectableValules()[2][1]);
+   // Set the accent color shade
+   myTheme.accent.setValue(myTheme.accent.getSelectableValues()[2][1]);
    ```
 
 6. Managing properties of other atoms, molecules, and organisms
