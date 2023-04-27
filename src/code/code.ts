@@ -21,6 +21,7 @@ export class Code extends Node {
         super("code", ds);
         this.cssGenerator = new CSSGenerator(ds);
         this.jsonGenerator = new JSONGenerator(ds);
+        this.addDependency(ds.atoms);
     }
 
     public generate() {
