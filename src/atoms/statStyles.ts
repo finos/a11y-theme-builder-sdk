@@ -18,7 +18,7 @@ export class StatStyles extends Atom {
     constructor(atoms: IAtoms) {
         super("Stat Styles", false, atoms);
         this.addDependency(atoms.colorThemes);
-        this.stat = new TypographyStyling("Stat", this, 48, 700, 110, 6);
+        this.stat = new TypographyStyling("Stat", this, true, atoms.fontsSettings, 48, 700, 110, 6);
     }
 
     public deserialize(obj: any) {
