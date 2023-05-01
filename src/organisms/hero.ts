@@ -4,7 +4,7 @@
  */
 import { IOrganisms } from "../interfaces";
 import { Organism } from "./organism";
-import { PropertyStringSelectable, PropertyPixelSelectable } from "../common/props";
+import { PropertyStringSelectable, PropertyNumberSelectable } from "../common/props";
 
 /**
  * The hero organism.
@@ -12,10 +12,22 @@ import { PropertyStringSelectable, PropertyPixelSelectable } from "../common/pro
  */
 export class Hero extends Organism {
     
+    public static DISPLAY1 = "Display 1";
+    public static DISPLAY2 = "Display 2";
+    public static H1 = "H1";
+    public static BODY1 = "Body 1";
+    public static BODY2 = "Body 2";
+    public static BODY3 = "Body 3";
+    public static BODY1BOLD = "Body 1 - Bold";
+    public static BODY2BOLD = "Body 2 - Bold";
+    public static BODY3BOLD = "Body 3 - Bold";
+
     /** The hero available colors property */
     public availableColors: PropertyStringSelectable;
     /** The hero vertical gap property */
-    public verticalGap: PropertyPixelSelectable;
+    public verticalGap: PropertyNumberSelectable;
+    /** The hero vertical spacing property */
+    public verticalPadding: PropertyNumberSelectable;
     /** The hero title property */
     public title: PropertyStringSelectable;
     /** The hero body property */
@@ -24,10 +36,15 @@ export class Hero extends Organism {
     constructor(organisms: IOrganisms) {
         super("Hero", organisms);
         this.availableColors = new PropertyStringSelectable("Available Colors", false, this, {selectables: ["Colored", "Black", "White"]});
-        this.verticalGap = new PropertyPixelSelectable("Hero Vertical Gap", false, this, [8, 16, 24, 32, 40]);
-        this.title = new PropertyStringSelectable("Hero Title", false, this, {selectables: ["Display 1", "Display 2", "H1"]});
+        this.verticalGap = new PropertyNumberSelectable("Hero Vertical Gap", false, this, [1,2,3,4,5], 2);
+        this.verticalPadding = new PropertyNumberSelectable("Hero Vertical Padding", false, this, [1,2,3,4,5], 2);
+        this.title = new PropertyStringSelectable("Hero Title", false, this, {
+            selectables: [Hero.DISPLAY1, Hero.DISPLAY2, Hero.H1],
+            defaultValue: Hero.DISPLAY1,
+        });
         this.body = new PropertyStringSelectable("Hero Body", false, this, {
-            selectables: ["Body 1", "Body 2", "Body 3", "Body 1 - Bold", "Body 2 - Bold", "Body 3 - Bold"]
+            selectables: [Hero.BODY1, Hero.BODY2, Hero.BODY3, Hero.BODY1BOLD, Hero.BODY2BOLD, Hero.BODY3BOLD],
+            defaultValue: Hero.BODY1,
         });
     }
 

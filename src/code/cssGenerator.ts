@@ -2,9 +2,9 @@
  * Copyright (c) 2023 Discover Financial Services
  * Licensed under MIT License. See License.txt in the project root for license information
  */
-import { Atoms, Shade, ColorTheme, ShadeGroup, ModeShadeGroups, StateSetting, BevelSettingsProps, HotlinkModeVariables, OnHotlink, OnHotlinkWithDecoration, TypographyStyling} from "../atoms/index";
+import { Atoms, Shade, ColorTheme, ShadeGroup, ModeShadeGroups, BevelSettingsProps, HotlinkModeVariables, OnHotlink, OnHotlinkWithDecoration, TypographyStyling} from "../atoms/index";
 import { Molecules, Dropdowns } from "../molecules/index";
-import { Organisms } from "../organisms/index";
+import { Organisms, Hero } from "../organisms/index";
 import { PropertyColorShade, PropertyPercentage, PropertyGroupListener, PropertyColorPair, Property, ListenerSubscription, ColorPair } from "../common/index";
 import { IDesignSystem, EventValueChange, VarListener, IVarGroup, IColor, EventType } from "../interfaces";
 
@@ -287,12 +287,21 @@ export class CSSGenerator {
         const stb = ms.standardButtons;
         vk = new CSSVariableKind("stb","",[stb.buttonText], this);
         stb.buttonText.setListener(this.lkey("stb.buttonText"), function(event) {
-            const ctaSize = (stb.buttonText.getValue() === "CTA Small") ? "CTA-Small" : "CTA"
+            const buttonText = stb.buttonText.getValue();
+            let prefix, transform: string;
+            if (buttonText === "CTA Small") {
+                prefix = "CTA-Small";
+                transform = "lowercase";
+            } else {
+                prefix = "CTA";
+                transform = "uppercase";
+            }
             vk.setVars({
-                "buttonTypography": `var(--${ctaSize}FontWeight) var(--${ctaSize}FontSize) / var(--${ctaSize}LineHeight) var(--${ctaSize}FontFamily)`,
-                "buttonTextDecoration": `var(--${ctaSize}TextDecoration)`,
-                "buttonTextTransform": `var(--${ctaSize}TextTransform)`,
-                "buttonLetterSpacing": `var(--${ctaSize}LetterSpacing)`,
+                "buttonTypography": `var(--${prefix}FontWeight) var(--${prefix}FontSize) / var(--${prefix}LineHeight) var(--${prefix}FontFamily)`,
+                "buttonTextDecoration": `var(--${prefix}TextDecoration)`,
+                "buttonTextTransform": `var(--${prefix}TextTransform)`,
+                "buttonLetterSpacing": `var(--${prefix}LetterSpacing)`,
+                "CTATextTransform": transform,
             });    
         })
         this.addPropVar("button-padding", "", stb.horizontalPadding);
@@ -468,16 +477,36 @@ export class CSSGenerator {
         // hero
         const hero = org.hero;
         vk = new CSSVariableKind("hero","",[hero.verticalGap], this);
-        this.addPropVar("hero-gap", "px", hero.verticalGap);
+        this.addPropVar("hero-gap", "", hero.verticalGap);
+        this.addPropVar("hero-padding", "", hero.verticalPadding);
+        hero.title.setPropertyListener(this.lkey("heroTitle"), function(vc: EventValueChange<string>) {
+            const val = vc.newValue;
+            if (!val) return;
+            let p: string;
+            if (val === Hero.DISPLAY1) p = "Display1";
+            else if (val === Hero.DISPLAY2) p = "Display2";
+            else if (val === Hero.H1) p = "h1";
+            else throw new Error(`Invalid hero title: ${val}`);
+            vk.setVar("hero-titleTypography", `var(--${p}FontWeight) var(--${p}FontSize) / var(--${p}LineHeight) var(--${p}FontFamily)`);
+            vk.setVar("hero-titleTransform", `var(--${p}TextTransform)`);
+            vk.setVar("hero-titleSpacing", `var(--${p}LetterSpacing)`);
+        });
+        hero.body.setPropertyListener(this.lkey("heroBody"), function(vc: EventValueChange<string>) {
+            const val = vc.newValue;
+            if (!val) return;
+            let p: string;
+            if (val === Hero.BODY1) p = "body1";
+            else if (val === Hero.BODY2) p = "body2";
+            else if (val === Hero.BODY3) p = "body3";
+            else if (val === Hero.BODY1BOLD) p = "body1-bold";
+            else if (val === Hero.BODY2BOLD) p = "body2-bold";
+            else if (val === Hero.BODY3BOLD) p = "body3-bold";
+            else throw new Error(`Invalid hero body: ${val}`);
+            vk.setVar("hero-bodyTypography", `var(--${p}FontWeight) var(--${p}FontSize) / var(--${p}LineHeight) var(--${p}FontFamily)`);
+            vk.setVar("hero-bodyTransform", `var(--${p}TextTransform)`);
+            vk.setVar("hero-bodySpacing", `var(--${p}LetterSpacing)`);
+        });
         vk.setVars({
-            "hero-padding": "3",
-            "hero-heroTitleTypography": "var(--Display1FontWeight) var(--Dislay1FontSize) / var(--Display1LineHeight) var(--Display1FontFamily)",
-            "hero-heroTitleTransform": "var(--Display1TextTransform)",
-            "hero-heroTitleSpacing": "var(--Dislay1LetterSpacing)",
-            "hero-heroBodyTypography": "var(--body1FontWeight) var(--body1FontSize) / var(--body1LineHeight) var(--body1FontFamily)",
-            "hero-heroBodyTransform": "var(--body1TextTransform)",
-            "hero-heroBodySpacing": "var(--body1LetterSpacing)",
-            "hero-title-gap": "16px",
             "hero-justify-content": "flex-start",
         });
         // tables

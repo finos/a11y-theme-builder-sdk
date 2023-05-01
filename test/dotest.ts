@@ -161,6 +161,11 @@ async function test() {
     }
     console.log("TEST: END BUTTON SELECTIONS");
 
+    const hero = ds.organisms.hero;
+    hero.verticalGap.setValue(3);
+    hero.verticalPadding.setValue(4);
+    hero.title.setValue("Display 2");
+    hero.body.setValue("Body 2 - Bold");
     console.log("TEST: BEGIN CSS VARIABLES")
     ds2.code.setCSSVarListener("test", cssVar);
     console.log("TEST: END CSS VARIABLES")
@@ -954,14 +959,14 @@ const expectedCssVars = [
     "--navbarPrimary-padding",
     "--navbarSecondary-padding",
     "--navbarSecondary-stickyTop",
+    "--hero-gap",
     "--hero-padding",
-    "--hero-heroTitleTypography",
-    "--hero-heroTitleTransform",
-    "--hero-heroTitleSpacing",
-    "--hero-heroBodyTypography",
-    "--hero-heroBodyTransform",
-    "--hero-heroBodySpacing",
-    "--hero-title-gap",
+    "--hero-titleTypography",
+    "--hero-titleTransform",
+    "--hero-titleSpacing",
+    "--hero-bodyTypography",
+    "--hero-bodyTransform",
+    "--hero-bodySpacing",
     "--hero-justify-content",
     "--tableheaderTypography",
     "--tableheaderSpacing",
@@ -1255,12 +1260,10 @@ const expectedCssVars = [
     "--sm-buttonLetterSpacing",
     "--sliderhandleElevation",
     "--popoverElevation",
-    "--hero-heroTitleTypography"
 ];
 
 const expectedCssVarsPostMVP = [
     "--sliderbarHeight",
-    "--hero-gap",
     "--mobile-bar",
     "--mobile-topNav",
     "--on-mobile-topNav",
