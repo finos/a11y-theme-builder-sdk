@@ -48,22 +48,23 @@ export class SmallTextStyles extends Atom {
     constructor(atoms: IAtoms) {
         super("Small Text Styles", false, atoms);
         this.addDependency(atoms.colorThemes);
-        this.subtitle1 = new TypographyStyling("Subtitle 1", this, 16, 600, 110, 2);
-        this.subtitle2 = new TypographyStyling("Subtitle 2", this, 14, 700, 110, 1.75);
-        this.caption = new TypographyStyling("Caption", this, 12, 600, 110, 1.5);
-        this.captionBold = new TypographyStyling("Caption Bold", this, 12, 700, 110, 1.5);
-        this.overline = new TypographyStyling("Overline", this, 10, 600, 110, 0.12);
-        this.overlineLarge = new TypographyStyling("Overline Large", this, 14, 600, 110, 1.75);
-        this.overlineExtraLarge = new TypographyStyling("Overline Extra Large", this, 16, 700, 110, 2);
-        this.label1 = new TypographyStyling("Label 1", this, 14, 700, 110, 1.75);
-        this.label1AllCaps = new TypographyStyling("LABEL 1 ALL CAPS", this, 14, 700, 110, 1.75);
-        this.label2 = new TypographyStyling("Label 2", this, 12, 700, 110, 1.5);
-        this.label2AllCaps = new TypographyStyling("LABEL 2 ALL CAPS", this, 12, 700, 110, 1.5);
-        this.labelSmall = new TypographyStyling("Label Small", this, 10, 700, 110, 0.12);
-        this.callToAction = new TypographyStyling("Call To Action", this, 16, 500, 110, 2);
-        this.callToActionSmall = new TypographyStyling("Call To Action Small", this, 14, 600, 110, 1.75);
-        this.small = new TypographyStyling("Small", this, 10.8, 500, 110, 0.13);
-        this.smallSemibold = new TypographyStyling("Small Semibold", this, 10.8, 700, 110, 0.13);
+        const fs = atoms.fontsSettings;
+        this.subtitle1 = new TypographyStyling("Subtitle 1", this, true, fs, 16, 600, 110, 2);
+        this.subtitle2 = new TypographyStyling("Subtitle 2", this, true, fs, 14, 700, 110, 1.75);
+        this.caption = new TypographyStyling("Caption", this, true, fs, 12, 600, 110, 1.5);
+        this.captionBold = new TypographyStyling("Caption Bold", this, true, fs, 12, 700, 110, 1.5);
+        this.overline = new TypographyStyling("Overline", this, true, fs, 10, 600, 110, 0.12);
+        this.overlineLarge = new TypographyStyling("Overline Large", this, true, fs, 14, 600, 110, 1.75);
+        this.overlineExtraLarge = new TypographyStyling("Overline Extra Large", this, true, fs, 16, 700, 110, 2);
+        this.label1 = new TypographyStyling("Label 1", this, true, fs, 14, 700, 110, 1.75);
+        this.label1AllCaps = new TypographyStyling("LABEL 1 ALL CAPS", this, true, fs, 14, 700, 110, 1.75);
+        this.label2 = new TypographyStyling("Label 2", this, true, fs, 12, 700, 110, 1.5);
+        this.label2AllCaps = new TypographyStyling("LABEL 2 ALL CAPS", this, true, fs, 12, 700, 110, 1.5);
+        this.labelSmall = new TypographyStyling("Label Small", this, true, fs, 10, 700, 110, 0.12);
+        this.callToAction = new TypographyStyling("Call To Action", this, true, fs, 16, 500, 110, 2);
+        this.callToActionSmall = new TypographyStyling("Call To Action Small", this, true, fs, 14, 600, 110, 1.75);
+        this.small = new TypographyStyling("Small", this, true, fs, 10.8, 500, 110, 0.13);
+        this.smallSemibold = new TypographyStyling("Small Semibold", this, true, fs, 10.8, 700, 110, 0.13);
     }
 
     public deserialize(obj: any) {

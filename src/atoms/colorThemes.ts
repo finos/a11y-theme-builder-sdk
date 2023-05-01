@@ -338,7 +338,7 @@ export class ColorTheme extends Node implements IColorTheme {
                     return undefined;
                 }
                 colorDrop = this.primary100;
-                borderColor = Shade.fromRGBAString('rgba(0,0,0,.15)');
+                borderColor = Shade.fromRGBAString('rgba(0,0,0,.25)');
                 chip = Shade.fromRGBAString('rgba(0,0,0,.25)');
                 onChip = Shade.BLACK;
                 const inputBG = this.themes.atoms.inputBackground.overlayColor.getValue();
@@ -353,7 +353,7 @@ export class ColorTheme extends Node implements IColorTheme {
             case ColorTheme.CP_BLACK_OFFBLACK:
             case ColorTheme.CP_800_900:
                 colorDrop = Shade.BLACK;
-                borderColor = Shade.fromRGBAString('rgba(255,255,255,.15)');
+                borderColor = Shade.fromRGBAString('rgba(255,255,255,.25)');
                 chip = Shade.fromRGBAString('rgba(255,255,255,.25)');
                 onChip = Shade.WHITE;
                 groupButton = Shade.fromRGBAString('rgba(255,255,255,.1)');

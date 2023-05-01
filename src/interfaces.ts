@@ -4,7 +4,7 @@
  */
 import { Storage } from "./storage/index";
 import { Shade } from "./common/shade";
-import { PropertyTitledShade, PropertyStringSelectable } from "./common";
+import { PropertyTitledShade, PropertyStringSelectable, PropertyString } from "./common";
 
 /**
  * The node interface, representing the node of a tree.
@@ -42,6 +42,7 @@ export interface IAtoms extends INode {
     colorThemes: IColorThemes;
     gridSettings: IGridSettings;
     inputBackground: IInputBackground;
+    fontsSettings: IFontsSettings;
     addAtom(atom: IAtom): void;
 }
 
@@ -59,6 +60,11 @@ export interface IGridSettings extends IAtom {}
 
 export interface IInputBackground extends IAtom {
     overlayColor: PropertyTitledShade;
+}
+
+export interface IFontsSettings {
+    primaryFont: PropertyString;
+    secondaryFont: PropertyString;
 }
 
 export interface IAtom extends INode {}

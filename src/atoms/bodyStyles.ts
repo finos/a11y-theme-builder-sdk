@@ -28,12 +28,13 @@ export class BodyStyles extends Atom {
     constructor(atoms: IAtoms) {
         super("Body Styles", false, atoms);
         this.addDependency(atoms.colorThemes);
-        this.body1 = new TypographyStyling("Body 1", this, 16, 500, 160, 2);
-        this.body1Bold = new TypographyStyling("Body 1 - Bold", this, 16, 700, 160, 2);
-        this.body2 = new TypographyStyling("Body 2", this, 14, 600, 160, 1.75);
-        this.body2Bold = new TypographyStyling("Body 2 - Bold", this, 14, 700, 160, 1.75);
-        this.body3 = new TypographyStyling("Body 3", this, 18, 500, 160, 2.25);
-        this.body3Bold = new TypographyStyling("Body 3 - Bold", this, 18, 700, 160, 2.25);
+        const fs = atoms.fontsSettings;
+        this.body1 = new TypographyStyling("Body 1", this, true, fs, 16, 500, 160, 2);
+        this.body1Bold = new TypographyStyling("Body 1 - Bold", this, true, fs, 16, 700, 160, 2);
+        this.body2 = new TypographyStyling("Body 2", this, true, fs, 14, 600, 160, 1.75);
+        this.body2Bold = new TypographyStyling("Body 2 - Bold", this, true, fs, 14, 700, 160, 1.75);
+        this.body3 = new TypographyStyling("Body 3", this, true, fs, 18, 500, 160, 2.25);
+        this.body3Bold = new TypographyStyling("Body 3 - Bold", this, true, fs, 18, 700, 160, 2.25);
     }
 
     public deserialize(obj: any) {
