@@ -100,7 +100,7 @@ export class CSSGenerator {
             "on-gradient-3": "var(--on-gradient3-a)",
             "on-gradient3-a": "var(--on-gray-300)",
             "on-gradient3-b": "var(--dm-on-gray-700)",
-            "gradient3-a": "var(--gray-300)",
+            "gradient3-a": "var(--gray-0)",
             "gradient3-b": "var(--dm-gray-700)",
             "on-gray-0": "var(--black)",
             "on-gray-100": "var(--black)",
