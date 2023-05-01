@@ -30,9 +30,6 @@ export class TypographyStyling extends Node {
     /** The character spacing property */
     public letterSpacing: PropertyPixelRange;
 
-    private static readonly PRIMARY_PREFIX = "Primary Font:";
-    private static readonly SECONDARY_PREFIX = "Secondary Font:";
-
     private readonly primaryFont: boolean;
     private readonly fontsSettings: IFontsSettings;
 
@@ -59,18 +56,6 @@ export class TypographyStyling extends Node {
         this.letterSpacing = new PropertyPixelRange("Character Spacing", false, this, -2, 10, defaultLetterSpacing);
     }
 
-    public getFont(): string {
-        const val = this.fontFamily.getValue();
-        if (!val) throw new Error("No font family was found");
-        if (val.startsWith(TypographyStyling.PRIMARY_PREFIX)) {
-            return this.getFontFamilyValue(true);
-        } else if (val.startsWith(TypographyStyling.SECONDARY_PREFIX)) {
-            return this.getFontFamilyValue(false);
-        } else {
-            throw new Error(`Value of font family (${JSON.stringify(val)}) is not one of the selectable values (${JSON.stringify(this.getFontFamilySelectables())})`);
-        }
-    }
-
     private getFontFamilySelectables(): string[] {
         const primary = this.getFontFamilySelectableValue(true);
         const secondary = this.getFontFamilySelectableValue(false);
@@ -83,9 +68,9 @@ export class TypographyStyling extends Node {
 
     private getFontFamilySelectableValue(getPrimary: boolean): string {
         if (getPrimary) {
-            return `${TypographyStyling.PRIMARY_PREFIX}: ${this.fontsSettings.primaryFont.getValue()}`;
+            return `${this.fontsSettings.primaryFont.getValue()}`;
         } else {
-            return `${TypographyStyling.SECONDARY_PREFIX}: ${this.fontsSettings.secondaryFont.getValue()}`;
+            return `${this.fontsSettings.secondaryFont.getValue()}`;
         }
     }
 
