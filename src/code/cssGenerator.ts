@@ -177,8 +177,6 @@ export class CSSGenerator {
     private setAtomVars() {
         const atoms = this.atoms;
 
-        const vk = new CSSVariableKind("atoms","",[], this);
-
         // Listen for the addition of colors or removal of colors from the color palette.
         atoms.colorPalette.setColorListener(this.lkey("colorPalette"), this.colorListener.bind(this));
 
@@ -219,7 +217,8 @@ export class CSSGenerator {
         for (var i=0; i<dhs.headerStyles.length; i++) {
             this.generateTypographyVars(dhs.headerStyles[i], "h"+(i+1));
         }
-        vk.setVars({
+        const dhsVK = new CSSVariableKind("_tb.dhs", "", [dhs.headingDisplayFontWeight], this);
+        dhsVK.setVars({
             "headerFamily": "var(--secondaryFont)", // TODO: static?  If not, where from?
             "bodyFamily": "var(--primaryFont)", // TODO: static?  If not, where from?
         });
@@ -263,20 +262,19 @@ export class CSSGenerator {
         this.addPropVar(prefix+"FontFamily", "", typography.fontFamily);
         this.addPropVar(prefix+"LetterSpacing", "%", typography.letterSpacing);
         this.addPropVar(prefix+"LineHeight", "%", typography.lineHeight);
-        const vk = new CSSVariableKind("molecules.topograpy","",[], this);
+        const vk = new CSSVariableKind("molecules.topograpy","",[typography.fontSize], this);
         vk.setVar(`${prefix}TextDecoration`,"none");   // TODO: if not static, where does this come from?
         vk.setVar(`${prefix}TextTransform`,"none");   // TODO: if not static, where does this come from?
     }
 
     private setMoleculeVars() {
         const ms = this.molecules;
-        let vk = new CSSVariableKind("molecules","",[], this);
         // dropdowns
         const dd = ms.dropdowns;
-        vk = new CSSVariableKind("dropdowns","",[dd.menuElevation], this);
+        const dropdownVk = new CSSVariableKind("dropdowns","",[dd.menuElevation], this);
         this.addPropVar("dropdown-elevation", "", dd.menuElevation, elevationToCSS);
         this.addPropVar("dropdown-radius", "", dd.borderRadius);
-        vk.setVars({
+        dropdownVk.setVars({
             "dropdown-focus-bg": "linear-gradient(90deg, var(--button) var(--dropdown-focus-theme), var(--transparent) var(--dropdown-focus-theme))",
             "dm-dropdown-focus-bg": "linear-gradient(90deg, var(--dm-button) var(--dropdown-focus-theme), var(--transparent) var(--dropdown-focus-theme))",
             "dropdown-hover-style": "100%",
@@ -285,7 +283,7 @@ export class CSSGenerator {
         });
         // standard button
         const stb = ms.standardButtons;
-        vk = new CSSVariableKind("stb","",[stb.buttonText], this);
+        const buttonVk = new CSSVariableKind("stb","",[stb.buttonText], this);
         stb.buttonText.setListener(this.lkey("stb.buttonText"), function(event) {
             const buttonText = stb.buttonText.getValue();
             let prefix, transform: string;
@@ -296,7 +294,7 @@ export class CSSGenerator {
                 prefix = "CTA";
                 transform = "uppercase";
             }
-            vk.setVars({
+            buttonVk.setVars({
                 "buttonTypography": `var(--${prefix}FontWeight) var(--${prefix}FontSize) / var(--${prefix}LineHeight) var(--${prefix}FontFamily)`,
                 "buttonTextDecoration": `var(--${prefix}TextDecoration)`,
                 "buttonTextTransform": `var(--${prefix}TextTransform)`,
@@ -311,29 +309,29 @@ export class CSSGenerator {
         this.addPropVar("button-height", "", stb.height);
         this.addPropVar("button-elevation", "", stb.buttonElevation, elevationToCSS);
         this.addPropVar("button-bevel", "", stb.buttonBevel, bevelToCSS);
-        vk.setVars({
+        buttonVk.setVars({
             "button-shadow": "var(--button-elevation), var(--button-bevel)",
         });
         // small button
         const smb = ms.smallButtons;
-        vk = new CSSVariableKind("smb","",[smb.visibleHeight], this);
+        const smbVK = new CSSVariableKind("smb","",[smb.visibleHeight], this);
         this.addPropVar("sm-button-height", "", smb.visibleHeight);
         this.addPropVar("sm-button-padding", "", smb.horizontalPadding);
         smb.buttonText.setListener(this.lkey("smb.buttonText"), function(event) {
             const ctaSize = (smb.buttonText.getValue() == "CTA Small") ? "CTA-Small" : "CTA"
-            vk.setVars({
+            smbVK.setVars({
                 "sm-buttonTypography": `var(--${ctaSize}FontWeight) var(--${ctaSize}FontSize) / var(--${ctaSize}LineHeight) var(--${ctaSize}FontFamily)`,
                 "sm-buttonTextDecoration": `var(--${ctaSize}TextDecoration)`,
                 "sm-buttonTextTransform": `var(--${ctaSize}TextTransform)`,
                 "sm-buttonLetterSpacing": `var(--${ctaSize}LetterSpacing)`,
             });    
         });
-        vk.setVars({
+        smbVK.setVars({
             "groupButton-radius": "calc(var(--radius-1) * var(--button-radius) * 1.6)",
         });
         // chip
         const chip = ms.chips;
-        vk = new CSSVariableKind("chip","",[chip.minWidth], this);
+        const chipVK = new CSSVariableKind("chip","",[chip.minWidth], this);
         this.addPropVar("chip-minwidth", "px", chip.minWidth);
         this.addPropVar("chip-height", "", chip.visibleHeight);
         this.addPropVar("chip-radius", "", chip.radius);
@@ -342,13 +340,13 @@ export class CSSGenerator {
         this.addPropVar("chip-bevel", "", chip.bevel, bevelToCSS);
         this.addPropVar("chip-text", "", chip.text, function(vk: CSSVariableKind) {
             const typography = (chip.text.getValue() === "Caption") ? "caption" : "caption-bold";
-            vk.setVars({
+            chipVK.setVars({
                 "chipTypography": `var(--${typography}FontWeight) var(--${typography}FontSize) / var(--${typography}LineHeight) var(--${typography}FontFamily)`,
                 "chipTextTransform": `var(--${typography}TextTransform)`,
                 "chipLetterSpacing": `var(--${typography}LetterSpacing)`,
             });    
         });
-        vk.setVars({
+        chipVK.setVars({
            "switch-height": "var(--spacing-3)",  // TODO: should be dynamic?
            "switch-radius": "3", // TODO: should be dynamic?
            "switch-bar-height": "0.5", // TODO: should be dynamic?
@@ -356,30 +354,30 @@ export class CSSGenerator {
         });
         // cards
         const card = ms.standardCards;
-        vk = new CSSVariableKind("card","",[card.padding], this);
+        const cardsVK = new CSSVariableKind("card","",[card.padding], this);
         this.addPropVar("card-padding", "", card.padding);
         this.addPropVar("card-gap", "", card.contentGap);
         this.addPropVar("card-radius", "", card.borderRadius);
         this.addPropVar("card-elevation", "", card.elevation, elevationToCSS);
         this.addPropVar("card-bevel", "", card.bevel, bevelToCSS);
-        vk.setVars({
+        cardsVK.setVars({
             "card-border": "var(--border-1)",
             "card-border-color": "var(--border)",
             "card-shadow": "var(--card-elevation), var(--card-bevel)",
         });
         // modals
         const modal = ms.modal;
-        vk = new CSSVariableKind("modal","",[modal.borderRadius], this);
+        const modalVK = new CSSVariableKind("modal","",[modal.borderRadius], this);
         this.addPropVar("modal-radius", "", modal.borderRadius);
         this.addPropVar("modal-elevation", "", modal.elevation, elevationToCSS);
         this.addPropVar("modal-overlay", "", modal.color, colorToCSS);
-        vk.setVars({
+        modalVK.setVars({
             "modal-padding": "2", // TODO: static?
             "modal-border": "var(--spacing-2)",
             "modal-shadow": "var(--modal-elevation)",
         });
-        vk = new CSSVariableKind("tooltip","",[], this);
-        vk.setVars({
+        const ttVK = new CSSVariableKind("tooltip","",[], this);
+        ttVK.setVars({
             // TODO: Do I need to set tooltip-color & tooltip-oncolor for lm & dm?  If yes, how to determine them?
             "dmtooltip": "",
             "tooltip-padding": "2",
@@ -388,34 +386,33 @@ export class CSSGenerator {
         });
         // Toasts
         const toast = ms.toasts;
-        vk = new CSSVariableKind("toast","",[toast.handleBorderRadius], this);
+        const toastVK = new CSSVariableKind("toast","",[toast.handleBorderRadius], this);
         this.addPropVar("toast-radius", "", toast.handleBorderRadius);
         this.addPropVar("toast-padding", "", toast.padding);
         this.addPropVar("toast-elevation", "", toast.elevation, elevationToCSS);
-        vk.setVars({
+        toastVK.setVars({
             "toast-bevel": "var(--bevel-0)",
             "toast-boxshadow": "var(--toast-elevation), var(--toast-bevel)",
         });
         // Images
         const image = ms.images;
-        vk = new CSSVariableKind("images","",[image.imageElevation], this);
+        const imageVK = new CSSVariableKind("images","",[image.imageElevation], this);
         this.addPropVar("image-elevation", "", image.imageElevation, elevationToCSS);
         this.addPropVar("image-radius", "", image.generalImageBorderRadius);
         this.addPropVar("inline-image-height", "", image.listImageHeight);
         this.addPropVar("inline-image-radius", "", image.listImageBorderRadius);
-        vk.setVars({
+        imageVK.setVars({
             "image-shadow": "var(--image-elevation)",
         })
         // Avatar Images
         const avatar = ms.avatars;
-        vk = new CSSVariableKind("avatar","",[avatar.mediumBorder], this);
+        const imagesVK = new CSSVariableKind("avatar","",[avatar.mediumBorder], this);
         this.addPropVar("avatar-border", "", avatar.mediumBorder);
         this.addPropVar("avatar-border-lg", "", avatar.extraLargeBorder);
         this.addPropVar("avatar-elevation", "", avatar.elevation, elevationToCSS);
-        vk.setVar("avatar-shadow", "var(--avatar-elevation)");
+        imagesVK.setVar("avatar-shadow", "var(--avatar-elevation)");
         // sliders
         const slider = ms.sliders;
-        vk = new CSSVariableKind("slider","",[slider.visibleHeight], this);
         this.addPropVar("sliderhandleHeight", "", slider.visibleHeight);
         this.addPropVar("sliderhandleRadius", "", slider.handleBorderRadius);
         this.addPropVar("sliderhandleElevation", "", slider.handleElevation, elevationToCSS);
@@ -423,32 +420,28 @@ export class CSSGenerator {
         this.addPropVar("barInBevel", "", slider.barInsetShadow);
         // popover
         const popover = ms.popovers;
-        vk = new CSSVariableKind("popover","",[popover.borderRadius], this);
+        const poVK = new CSSVariableKind("popover","",[popover.borderRadius], this);
         this.addPropVar("popoverRadius", "", popover.borderRadius);
         this.addPropVar("popoverElevation", "", popover.elevation, elevationToCSS);
         this.addPropVar("popoverBevel", "", popover.bevel, bevelToCSS);
-        vk.setVar("popoverShadow", "var(--popoverElevation), var(--popoverBevel)");
+        poVK.setVar("popoverShadow", "var(--popoverElevation), var(--popoverBevel)");
         // Spacing
         const spacing = ms.spacing;
-        vk = new CSSVariableKind("spacing","",[spacing.sectionPadding], this);
         this.addPropVar("section-padding", "", spacing.sectionPadding);
         this.addPropVar("p-padding", "", spacing.paragraphPadding);
     }
 
     private setOrganismVars() {
         const org = this.organisms;
-        let vk = new CSSVariableKind("organism","",[], this);
         const fc = org.footerAndCopyright;
-        vk = new CSSVariableKind("fc","",[fc.footerVerticalPadding], this);
+        const footer = new CSSVariableKind("fc","",[fc.footerVerticalPadding], this);
         this.addPropVar("footer-padding", "", fc.footerVerticalPadding);
         this.addPropVar("copyright-padding", "", fc.copyrightVerticalPadding);
-        vk.setVars({
+        footer.setVars({
             "footer": "var(--gray-900)",
             "on-footer": "var(--on-gray-900)",
             "dm-footer": "var(--dm-gray-900)",
             "dm-on-footer": "var(--dm-on-gray-900)",
-        });
-        vk.setVars({
             "copyright": "var(--nearblack)",
             "on-copyright": "var(--on-nearblack)",
             "dm-copyright": "var(--nearblack)",
@@ -456,27 +449,26 @@ export class CSSGenerator {
         });
         // navbar primary
         const pnav = org.primaryNav;
-        vk = new CSSVariableKind("pnav","",[pnav.verticalPadding], this);
         this.addPropVar("navbarPrimary-padding", "", pnav.verticalPadding);
         this.addPropVar("navbarPrimary-position", "", pnav.fixed, function(vk: CSSVariableKind) {
             vk.setVar(vk.name, pnav.fixed.getValue() ? "fixed" : "relative");
         });
         // navbar secondary /
         const snav = org.secondaryNav;
-        vk = new CSSVariableKind("snav","",[snav.verticalPadding], this);
         this.addPropVar("navbarSecondary-padding", "", snav.verticalPadding);
         this.addPropVar("navbarSecondary-position", "", snav.sticky, function(vk: CSSVariableKind) {
             vk.setVar(vk.name, snav.sticky.getValue() ? "sticky" : "fixed");
         });
-        vk.setVar("navbarSecondary-stickyTop", "0"); // TODO: should be dynamic
-        vk.setVars({
+        const nbsVk = new CSSVariableKind("hero","",[snav.horizontalTabPadding], this);
+        nbsVk.setVars({
+          "navbarSecondary-stickyTop": "0",
           "leftNav": "var(--gray-100)",
           "on-leftNav": "var(--on-gray-100)",
           "leftNavPadding": "var(--spacing-2)",
         });
         // hero
         const hero = org.hero;
-        vk = new CSSVariableKind("hero","",[hero.verticalGap], this);
+        const heroVk = new CSSVariableKind("hero","",[hero.verticalGap], this);
         this.addPropVar("hero-gap", "", hero.verticalGap);
         this.addPropVar("hero-padding", "", hero.verticalPadding);
         hero.title.setPropertyListener(this.lkey("heroTitle"), function(vc: EventValueChange<string>) {
@@ -487,9 +479,9 @@ export class CSSGenerator {
             else if (val === Hero.DISPLAY2) p = "Display2";
             else if (val === Hero.H1) p = "h1";
             else throw new Error(`Invalid hero title: ${val}`);
-            vk.setVar("hero-titleTypography", `var(--${p}FontWeight) var(--${p}FontSize) / var(--${p}LineHeight) var(--${p}FontFamily)`);
-            vk.setVar("hero-titleTransform", `var(--${p}TextTransform)`);
-            vk.setVar("hero-titleSpacing", `var(--${p}LetterSpacing)`);
+            heroVk.setVar("hero-titleTypography", `var(--${p}FontWeight) var(--${p}FontSize) / var(--${p}LineHeight) var(--${p}FontFamily)`);
+            heroVk.setVar("hero-titleTransform", `var(--${p}TextTransform)`);
+            heroVk.setVar("hero-titleSpacing", `var(--${p}LetterSpacing)`);
         });
         hero.body.setPropertyListener(this.lkey("heroBody"), function(vc: EventValueChange<string>) {
             const val = vc.newValue;
@@ -502,16 +494,16 @@ export class CSSGenerator {
             else if (val === Hero.BODY2BOLD) p = "body2-bold";
             else if (val === Hero.BODY3BOLD) p = "body3-bold";
             else throw new Error(`Invalid hero body: ${val}`);
-            vk.setVar("hero-bodyTypography", `var(--${p}FontWeight) var(--${p}FontSize) / var(--${p}LineHeight) var(--${p}FontFamily)`);
-            vk.setVar("hero-bodyTransform", `var(--${p}TextTransform)`);
-            vk.setVar("hero-bodySpacing", `var(--${p}LetterSpacing)`);
+            heroVk.setVar("hero-bodyTypography", `var(--${p}FontWeight) var(--${p}FontSize) / var(--${p}LineHeight) var(--${p}FontFamily)`);
+            heroVk.setVar("hero-bodyTransform", `var(--${p}TextTransform)`);
+            heroVk.setVar("hero-bodySpacing", `var(--${p}LetterSpacing)`);
         });
-        vk.setVars({
+        heroVk.setVars({
             "hero-justify-content": "flex-start",
         });
         // tables
-        vk = new CSSVariableKind("tables","",[], this);
-        vk.setVars({
+        const tableVk = new CSSVariableKind("tables","",[], this);
+        tableVk.setVars({
             "tableheaderTypography": "var(--label-1FontWeight) var(--label-1FontSize) / var(--label-1LineHeight) var(--label-1FontFamily)",
             "tableheaderSpacing": "var(--label-1LetterSpacing)",
             "tableheaderTransform": "var(--label-1TextTransform)",
@@ -737,36 +729,35 @@ export class CSSGenerator {
     }
 
     public generateHotlinkVariables(vk: CSSVariableKind) {
-        const vars = this.atoms.hotlinks.getHotlinkVariables();
+        this.generateHotlinkVariables2(true, vk);
+        this.generateHotlinkVariables2(false, vk);
+    }
+
+    private generateHotlinkVariables2(lm: boolean, vk: CSSVariableKind) {
+        const vars = this.atoms.hotlinks.getHotlinkVariables(lm);
         if (vars) {
             log.debug(`CSS: hotlink variables: found`);
-            this.generateHotlinkModeVariables(vars.lm, "", vk);
-            this.generateHotlinkModeVariables(vars.dm, "dm-", vk);
-            this.generateOnHotlinkWithDecorationVariables("White", vk, vars.onWhite);
-            this.generateOnHotlinkWithDecorationVariables("Black", vk, vars.onBlack);
-            this.generateOnHotlinkWithDecorationVariables("Tertiary", vk, vars.onTertiary);
-            this.generateOnHotlinkVariables("Gradient3", vk, vars.onGradient3);
+            this.generateHotlinkModeVariables(vars.default, lm, "", vk);
+            this.generateHotlinkModeVariables(vars.onWhite, lm, "OnWhite", vk);
+            this.generateHotlinkModeVariables(vars.onBlack, lm, "OnBlack", vk);
+            this.generateHotlinkModeVariables(vars.onTertiary, lm, "OnTertiary", vk);
+            this.generateOnHotlinkVariables("Gradient3", lm ? "" : "dm-", vk, vars.onGradient3);
         } else {
             log.debug(`CSS: hotlink variables: not found`);
         }
     }
 
-    private generateHotlinkModeVariables(vars: HotlinkModeVariables, prefix: string, vk: CSSVariableKind) {
-        vk.setShadeVar(`${prefix}hotlink`, vars.unvisited.shade);
-        vk.setShadeVar(`${prefix}hotlink-visited`, vars.visited.shade);
-        vk.setVar(`${prefix}hotlink-decoration`, vars.unvisited.decoration);
-        vk.setVar(`${prefix}hotlink-hover-decoration`, vars.unvisited.hoverDecoration);
+    private generateHotlinkModeVariables(vars: HotlinkModeVariables, lm: boolean, onName: string, vk: CSSVariableKind) {
+        const prefix = lm ? "" : "dm-";
+        vk.setShadeVar(`${prefix}hotlink${onName}`, vars.unvisited.shade);
+        vk.setShadeVar(`${prefix}hotlink${onName}-visited`, vars.visited.shade);
+        vk.setVar(`${prefix}hotlink${onName}-decoration`, vars.unvisited.decoration);
+        vk.setVar(`${prefix}hotlink${onName}-hover-decoration`, vars.unvisited.hoverDecoration);
     }
 
-    private generateOnHotlinkWithDecorationVariables(color: string, vk: CSSVariableKind, vars: OnHotlinkWithDecoration) {
-        this.generateOnHotlinkVariables(color, vk, vars);
-        vk.setVar(`hotlinkOn${color}-decoration`, vars.decoration);
-        vk.setVar(`hotlinkOn${color}-hover-decoration`, vars.hoverDecoration);
-    }
-
-    private generateOnHotlinkVariables(color: string, vk: CSSVariableKind, vars: OnHotlink) {
-        vk.setShadeVar(`hotlinkOn${color}`, vars.unvisited);
-        vk.setShadeVar(`hotlinkOn${color}-visited`, vars.visited);
+    private generateOnHotlinkVariables(color: string, prefix: string, vk: CSSVariableKind, vars: OnHotlink) {
+        vk.setShadeVar(`${prefix}hotlinkOn${color}`, vars.unvisited);
+        vk.setShadeVar(`${prefix}hotlinkOn${color}-visited`, vars.visited);
     }
 
     public setShadeListener(args: ShadeListenerArgs): ListenerSubscription {
@@ -1366,19 +1357,26 @@ export class CSSVarGroup implements IVarGroup {
     }
 
     public setVar(name: string, value?: string): void {
+        log.debug(`CSSVarGroup ${this.name}: setVar ${name}=${value}`);
         if (value !== undefined) {
             this.vars[name] = value;
         } else {
             delete this.vars[name];
         }
+        this.notifyListeners();
+    }
+
+    public notifyListeners() {
         // Notify the listeners that something has changed in this var group
-        Object.values(this.listeners).forEach(listener => {
+        const listeners = Object.values(this.listeners);
+        log.debug(`CSSVarGroup notifying ${listeners.length} listeners`);
+        listeners.forEach(listener => {
             try {
                 listener(this);
             } catch(e) {
                 console.log(`ERROR: failed calling VarGroup listener`, e);
             }
-        })
+        });
     }
 }
 

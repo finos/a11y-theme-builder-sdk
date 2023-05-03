@@ -415,6 +415,18 @@ export class Shade {
     }
 
     /**
+     * Find a shade which meets the contrast ratio requirements on this background shade.
+     * @param lm true for light mode and false for dark mode.
+     * @param bgShade The background shade
+     * @param ratio The contrast ratio requirement
+     * @returns 
+     */
+    public getShade(lm: boolean, bgShade: Shade, ratio: number): Shade | undefined {
+        if (lm) return this.getLMShade(bgShade, ratio);
+        else return this.getDMShade(bgShade, ratio);
+    }
+
+    /**
      * Find a light mode shade which meets the contrast ratio on this background shade
      * @param bgShade The background shade
      * @param ratio The required contrast ratio
@@ -641,7 +653,7 @@ export class Shade {
         return this.getAdjustedShadeByContrastRatio(true, minRatio);
     }
 
-    // Color to background is always 3.1 but onColor to text ratio is 4.5
+    // Color to background is always 4.5 but onColor to text ratio is 3.1
     public getAdjustedShadeByContrastRatio(lm: boolean, minRatio?: number): Shade {
         minRatio = minRatio || 4.5;
         let darkerShade: Shade = this;
@@ -894,6 +906,22 @@ export class Shade {
 
     public isSameColor(shade: Shade): boolean {
         return this.getMode().color.name === shade.getMode().color.name;
+    }
+
+    /**
+     * Get all shades ordered by the nearest to the current shade.
+     */
+    public getShadesOrderedByNearness(): Shade[] {
+        const rtn: Shade[] = [];
+        rtn.push(this);
+        let idx1 = this.index;
+        let idx2 = this.index;
+        const shades = this.getMode().shades;
+        while(idx1 > 0 || idx2 < shades.length-1) {
+            if (idx1 > 0) rtn.push(shades[--idx1]);
+            if (idx2 < shades.length-1) rtn.push(shades[++idx2]);
+        }
+        return rtn;
     }
 
     public toJSON(): Object {
