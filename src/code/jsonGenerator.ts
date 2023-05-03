@@ -173,8 +173,8 @@ export class JSONGenerator {
         }
         const buttonVars = theme.getShadeGroups(buttonShade);
         const buttonSG = lm ? buttonVars.lm : buttonVars.dm;
-        const hotlinkVars = this.atoms.hotlinks.findHotlinkVariables();
-        const hotlinkShade = lm ? hotlinkVars.lm.unvisited.shade : hotlinkVars.dm.unvisited.shade;
+        const hotlinkVars = this.atoms.hotlinks.findHotlinkVariables(lm);
+        const hotlinkShade = hotlinkVars.default.unvisited.shade;
         if (!hotlinkShade) {
             log.debug("getSolidBackgrounds exit (no hotlink shade)");
             return {};
@@ -228,7 +228,7 @@ export class JSONGenerator {
             } else {
                 tertiaryIcon = '{Icons.White.Color}';
             }
-            const hotlinkOnTertiary = hotlinkVars.onTertiary.unvisited;
+            const hotlinkOnTertiary = hotlinkVars.onTertiary.unvisited.shade;
             if (hotlinkOnTertiary.equals(hotlinkShade)) {
                 tertiaryHotlink = '{Hotlinks.Colored.Link}';
             }  else if (hotlinkOnTertiary === Shade.BLACK) {
@@ -293,9 +293,9 @@ export class JSONGenerator {
             button = self.getPropShadeName(theme.button, lm, theme);
             onButton = self.getPropShadeName(theme.button, lm, theme, true);
             icon = self.getPropShadeName(theme.icon, lm, theme);
-            const hlVars = self.atoms.hotlinks.getHotlinkVariables();
+            const hlVars = self.atoms.hotlinks.getHotlinkVariables(lm);
             if (hlVars) {
-                hotlink = self.getShadeName(lm ? hlVars.lm.unvisited.shade : hlVars.dm.unvisited.shade, lm, theme);
+                hotlink = self.getShadeName(hlVars.default.unvisited.shade, lm, theme);
             }
             return {
                 "Color": self.getColor(color),
@@ -558,12 +558,12 @@ export class JSONGenerator {
 
     private getHotlinks(theme: ColorTheme, lm: boolean): any {
         log.debug(`getHotlinks enter`);
-        const vars = this.atoms.hotlinks.getHotlinkVariables();
+        const vars = this.atoms.hotlinks.getHotlinkVariables(lm);
         if (!vars) {
             log.debug(`getHotlinks exit (no variables)`);
             return;
         }
-        const shade = lm ? vars.lm.unvisited.shade : vars.dm.unvisited.shade;
+        const shade = vars.default.unvisited.shade;
         const rtn = {
             Colored: {
                 Link: this.getShadeColor(shade, lm, theme),

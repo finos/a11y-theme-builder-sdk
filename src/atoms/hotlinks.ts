@@ -2,7 +2,6 @@
  * Copyright (c) 2023 Discover Financial Services
  * Licensed under MIT License. See License.txt in the project root for license information
  */
-import { Color } from "./colorPalette";
 import { ColorTheme } from "./colorThemes";
 import { Atom } from "./atom";
 import { IAtoms } from "../interfaces";
@@ -11,11 +10,13 @@ import { PropertyBoolean } from "../common/index";
 import { Logger } from "../util/index";
 
 const log = new Logger("hl");
+
 export interface ShadeAndDecoration {
     shade: Shade;
     decoration: string;
     hoverDecoration: string;
 }
+
 export interface HotlinkModeVariables {
     unvisited: ShadeAndDecoration;
     visited: ShadeAndDecoration;
@@ -27,18 +28,18 @@ export interface OnHotlink {
     unvisited: Shade;
     visited: Shade;
 }
+
 export interface OnHotlinkWithDecoration extends OnHotlink {
     decoration: string,
     hoverDecoration: string,
 }
+
 export interface HotlinkVariables {
-    lm: HotlinkModeVariables;
-    dm: HotlinkModeVariables;
-    onWhite: OnHotlinkWithDecoration;
-    onBlack: OnHotlinkWithDecoration;
-    onTertiary: OnHotlinkWithDecoration;
+    default: HotlinkModeVariables;
+    onWhite: HotlinkModeVariables;
+    onBlack: HotlinkModeVariables;
+    onTertiary: HotlinkModeVariables;
     onGradient3: OnHotlink;
-    onDMGradient3: OnHotlink;
 }
 
 /**
@@ -57,15 +58,15 @@ export class Hotlinks extends Atom {
         this.underlineHotlinksInLightMode = new PropertyBoolean("Underline hotlinks in light mode", false, this, {defaultValue: true});
     }
 
-    public findHotlinkVariables(): HotlinkVariables {
-        const vars = this.getHotlinkVariables();
+    public findHotlinkVariables(lm: boolean): HotlinkVariables {
+        const vars = this.getHotlinkVariables(lm);
         if (!vars) {
             throw new Error("Failed to get hotlink variables");
         }
         return vars;
     }
 
-    public getHotlinkVariables(): HotlinkVariables | undefined {
+    public getHotlinkVariables(lm: boolean): HotlinkVariables | undefined {
         log.debug(`Hotlinks.getHotlinkVariables enter`)
         const underline = this.underlineHotlinksInLightMode.getValue();
         if (underline === undefined) {
@@ -73,8 +74,8 @@ export class Hotlinks extends Atom {
             return undefined;
         }
         const ct = this.getDefaultColorTheme();
-        const button = ct.button.getValue();
-        if (!button) {
+        const shade = ct.button.getValue();
+        if (!shade) {
             log.debug(`Hotlinks.getHotlinkVariables exit (button not set)`)
             return undefined;
         }
@@ -88,52 +89,50 @@ export class Hotlinks extends Atom {
             log.debug(`Hotlinks.getHotlinkVariables exit (darkModeBackground not set)`)
             return undefined;
         }
-        const primary = ct.primary.getValue();
+        let primary = ct.primary.getValue();
         if (primary === undefined) {
             log.debug(`Hotlinks.getHotlinkVariables exit (primary not set)`)
             return undefined;
         }
-        const lmBackground = lmbg.primary;
-        const dmBackground = dmbg.primary;
-        const lm = this.getHotlinkModeVariables(button, lmBackground, underline, true);
-        const dm = this.getHotlinkModeVariables(button, dmBackground, underline, false);
-        const onWhite = this.getOnHotlinkWithDecoration(lm, Shade.WHITE);
-        const onBlack = this.getOnHotlinkWithDecoration(lm, Shade.BLACK);
-        const onTertiary = this.getOnHotlinkWithDecoration(lm, primary);
-        const onGradient3 = this.getOnGradient3(lm, 138, Shade.BLACK, Shade.HALF_BLACK);
-        const onDMGradient3 = this.getOnGradient3(dm, 24, Shade.WHITE_DM, Shade.HALF_WHITE_DM);
-        this.variables = {
-            lm,
-            dm,
-            onWhite,
-            onBlack,
-            onTertiary,
-            onGradient3,
-            onDMGradient3,
-        };
+        const background = lm ? lmbg.primary : dmbg.secondary;
+        log.debug("getHotlinkModeVariables (default)");
+        const def = this.getHotlinkModeVariables("default", shade, background, underline, lm);
+        if (!def) {
+            log.debug(`Hotlinks.getHotlinkVariables exit (default variables not set)`)
+            return undefined;
+        }
+        log.debug("getHotlinkModeVariables (onWhite)");
+        const onWhite = this.getHotlinkModeVariables("onWhite", shade, Shade.WHITE, underline, lm);
+        if (!onWhite) {
+            log.debug(`Hotlinks.getHotlinkVariables exit (onWhite variables not set)`)
+            return undefined;
+        }
+        log.debug("getHotlinkModeVariables (onBlack)");
+        const onBlack = this.getHotlinkModeVariables("onBlack", shade, Shade.BLACK, underline, lm);
+        if (!onBlack) {
+            log.debug(`Hotlinks.getHotlinkVariables exit (onBlack variables not set)`)
+            return undefined;
+        }
+        log.debug("getHotlinkModeVariables (onTertiary)");
+        if (!lm) {
+            // Use the dark primary 700 shade in dark mode
+            primary = primary.getMode()?.color.dark.shades[7];
+        }
+        const onTertiary = this.getHotlinkModeVariables("onTertiary", shade, primary.getOnShade2(lm), underline, lm);
+        if (!def) {
+            log.debug(`Hotlinks.getHotlinkVariables exit (onBlack variables not set)`)
+            return undefined;
+        }
+        log.debug("getHotlinkModeVariables (onTertiary)");
+        let onGradient3: OnHotlink;
+        if (lm) {
+            onGradient3 = this.getOnGradient3(def, 138, Shade.BLACK, Shade.HALF_BLACK);
+        } else {
+            onGradient3 = this.getOnGradient3(def, 24, Shade.WHITE_DM, Shade.HALF_WHITE_DM);
+        }
+        this.variables = { default: def, onWhite, onBlack, onTertiary, onGradient3 };
         return this.variables;
     } 
-
-    private getOnHotlinkWithDecoration(vars: HotlinkModeVariables, comp: Shade): OnHotlinkWithDecoration {
-        let unvisited, visited: Shade;
-        let decorate: boolean;
-        const shade = vars.unvisited.shade;
-        const underline = vars.underline;
-        const onComp = comp.getOnShade2(true);
-        let contrast = shade.getContrastRatio(comp);
-        if (contrast >= 3.1) {
-            unvisited = shade;      
-            visited = vars.visited.shade;       
-            decorate = !underline || shade.getContrastRatio(onComp) < 3.1;
-        } else {
-            unvisited = onComp;
-            visited = onComp.clone().setOpacity(0.8);
-            decorate = !underline;
-        }
-        const decoration = decorate ? "underline" : "none";
-        const hoverDecoration = decorate ? "none" : "underline";
-        return { unvisited, visited, decoration, hoverDecoration};
-    }
 
     private getOnGradient3(vars: HotlinkModeVariables, rgb: number, elseShade: Shade, elseHalfShade: Shade): OnHotlink {
         const shade = vars.unvisited.shade;
@@ -149,41 +148,38 @@ export class Hotlinks extends Atom {
         return { unvisited, visited };
     }
 
-    private getHotlinkModeVariables(button: Shade, background: Shade, underline: boolean, lm: boolean): HotlinkModeVariables {
+    private getHotlinkModeVariables(type: string, shade: Shade, background: Shade, underline: boolean, lm: boolean): HotlinkModeVariables {
         const onBackground = background.getOnShade2(lm);
         let shade1:Shade | undefined;
         let shade2:Shade | undefined;
-        log.debug(`Hotlinks.getHotlinkModeVariables enter: button=${button.toString()}, underline=${underline}, lm=${lm}`);
-        const shades = button.getMode().shades;
-        let cmpShade: Shade | undefined = button;
+        log.debug(`hotlink begin search: type=${type}, shade=${shade.hex}, underline=${underline}, lm=${lm}`);
+        const shades = shade.getShadesOrderedByNearness();
         let count = 0;
-        while (cmpShade) {
+        while (count < shades.length) {
+            const cmpShade = shades[count];
             count++;
             let contrast = cmpShade.getContrastRatio(background);
-            log.debug(`Hotlinks.getHotlinkModeVariables backgroundContrast=${contrast}, index=${cmpShade.index}`);
+            log.debug(`hotlink comparison1: count=${count}, index=${cmpShade.index}, shade=${cmpShade.hex}, background=${background.hex}, contrast=${contrast}`);
             if (contrast >= 4.5) {
                 // Found a shade meeting the minimum requirements which is acceptable with underline
                 if (!shade1) shade1 = cmpShade;
                 const contrast2 = cmpShade.getContrastRatio(onBackground);
-                log.debug(`Hotlinks.getHotlinkModeVariables onBackgroundContrast=${contrast2}, index=${cmpShade.index}`);
+                log.debug(`hotlink comparison2: count=${count}, index=${cmpShade.index}, shade=${cmpShade.hex}, onBackground=${onBackground.hex}, contrast=${contrast2}`);
                 if (contrast2 >= 3.1) {
                     // Found a shade meeting both requirements which is allows no underline
                     if (!shade2) shade2 = cmpShade;
                     break;
                 }
             }
-            // Advance to the next shade, to higher indices (darker) for light mode and lower indices (lighter) for dark mode.
-            if (lm) cmpShade = shades.length > cmpShade.index+1 ? shades[cmpShade.index+1] : undefined;
-            else cmpShade = cmpShade.index > 0 ? shades[cmpShade.index-1] : undefined;
         }
         // Underlining is required if we couldn't find a shade which meets both contrast requirements
         const underlineRequired = shade2 === undefined;
         // Switch to underline if they requested no underline but underline is required
         underline = underline || underlineRequired;
         const unvisitedShade = underline ? shade1 : shade2;
-        if (!unvisitedShade) throw new Error(`No hotlink shade was found for ${lm?"light":"dark"} mode`);
-        const visitedShade = unvisitedShade.clone().setOpacity(0.9);
-        log.debug(`Hotlinks.getHotlinkModeVariables exit count=${count}, shade1=${shade1}, shade2=${shade2}`);
+        if (!unvisitedShade) throw new Error(`No hotlink shade was found for ${type} ${lm?"light":"dark"} mode`);
+        const visitedShade = unvisitedShade.clone().setOpacity(0.7);
+        log.debug(`hotlink end search: exit count=${count}, shade1=${shade1}, shade2=${shade2}`);
         return {
             unvisited: {
                 shade: unvisitedShade,

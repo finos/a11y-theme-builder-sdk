@@ -229,10 +229,9 @@ export class ColorTheme extends Node implements IColorTheme {
         // Gradient color selections
         this.gradient1 = new GradientColors(this, "Gradient 1");
         this.gradient2 = new GradientColors(this, "Gradient 2");
-        // Button, icon, and gradient header text all dependent upon the primary, secondary, tertiary,
-        // and light mode background selections.
+        // Shade selections depend upon the primary, secondary, tertiary, and light mode background selections.
         const selOpts = {
-            getSelectables: this.getButtonSelectables.bind(this),
+            getSelectables: this.getShadeSelections.bind(this),
             dependentProps: [this.primary, this.secondary, this.tertiary, this.lightModeBackground],
         };
         this.button = new PropertyColorShade("Button", true, this, selOpts);
@@ -251,6 +250,9 @@ export class ColorTheme extends Node implements IColorTheme {
 
     public start() {
         this.primary.setPropertyListener(this.lname, this.primaryListener.bind(this));
+        for (let prop of [this.primary, this.secondary, this.tertiary]) {
+            prop.setPropertyListener(`${this.lname}.colorChange`, this.clearColorDependentProps.bind(this));
+        }
     }
 
     public stop() {
@@ -259,6 +261,9 @@ export class ColorTheme extends Node implements IColorTheme {
         this.icon.stop();
         this.gradientHeaderText.from.stop();
         this.gradientHeaderText.to.stop();
+        for (let prop of [this.primary, this.secondary, this.tertiary]) {
+            prop.removeListener(`${this.lname}.colorChange`);
+        }
     }
 
     public getColorShadeSelectables(filter?: ShadeFilter): Shade[][] {
@@ -313,6 +318,19 @@ export class ColorTheme extends Node implements IColorTheme {
         // Update dark background selectable values
         this.darkModeBackground.setSelectableValues([blackOffBlack, primary800900 ]);
         log.debug(`ColorTheme.setPrimary: exit: name=${this.name}, value=${primary.hex}`);
+    }
+
+    private clearColorDependentProps(vc: EventValueChange<Shade>) {
+        this.darkModeBackground.setValue(undefined);
+        this.gradient1.from.setValue(undefined);
+        this.gradient1.to.setValue(undefined);
+        this.gradient2.from.setValue(undefined);
+        this.gradient2.to.setValue(undefined);
+        this.button.setValue(undefined);
+        this.icon.setValue(undefined);
+        this.gradientHeaderText.from.setValue(undefined);
+        this.gradientHeaderText.to.setValue(undefined);
+        this.accent.setValue(undefined);
     }
 
     public getBackgroundVariables(pcp: PropertyColorPair): BackgroundVariables | undefined {
@@ -423,7 +441,7 @@ export class ColorTheme extends Node implements IColorTheme {
         throw new Error(`Did not find a dark mode shade with a contrast >= 3.1`);
     }
 
-    private getButtonSelectables(): Shade[][] {
+    private getShadeSelections(): Shade[][] {
         // Generation of the button selectables depends upon the primary, secondary, tertiary colors,
         // plus the light mode selectable background
         const val1 = this.primary.getValue();
@@ -440,18 +458,23 @@ export class ColorTheme extends Node implements IColorTheme {
         const rtn: Shade[][] = [];
         // For each of primary, secondary, and tertiary selected shades, find all shades
         // associated with that color whose contrast to the background shade is >= 3.1
+        const processed: Shade[][] = [];
         for (const prop of [this.primary, this.secondary, this.tertiary]) {
             // For each shade associated with the selected shade
             const row: Shade[] = [];
-            prop.getValue()?.getMode().shades.forEach((shade: Shade) => {
-                // If the contrast >= 3.1, add it to the selectable list
-                const contrast = shade.getContrastRatio(bgShade);
-                log.debug(`Button selectable contrast is ${contrast}`);
-                if (contrast >= 3.1) {
-                    row.push(shade);
-                }
-            });
-            rtn.push(row);
+            const shades = prop.getValue()?.getMode().shades as Shade[];
+            if (processed.indexOf(shades) < 0) {
+                shades.forEach((shade: Shade) => {
+                    // If the contrast >= 3.1, add it to the selectable list
+                    const contrast = shade.getContrastRatio(bgShade);
+                    log.debug(`Button selectable contrast is ${contrast}`);
+                    if (contrast >= 3.1) {
+                        row.push(shade);
+                    }
+                });
+                rtn.push(row);
+                processed.push(shades);
+            }
         }
         return rtn;
     }

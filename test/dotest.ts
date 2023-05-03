@@ -57,7 +57,8 @@ async function test() {
         }
     }, [EventType.NodeEnabled]);
     console.log("TEST: Adding cobalt to the color palette");
-    const blue = colorPalette.addColor("cobalt","#0047AB");
+    //const blue = colorPalette.addColor("cobalt","#0047AB");
+    const blue = colorPalette.addColor("cobalt","#AB5D5D");
     //const blue = colorPalette.addColor("cobalt","#3ac324");
     console.log("TEST: Added blue to the color palette");
     assert(colorThemesAtomEnabled, "ColorThemes atom should be enabled after adding a color");
@@ -98,6 +99,9 @@ async function test() {
     assert(states.isEnabled(), "States atom should be editable");
     assert(themeInitializedCount === 1, "Theme initialized should be one");
 
+    const hlVars = ds.atoms.hotlinks.getHotlinkVariables(true);
+    console.log(`HERE: HOTLINK: ${JSON.stringify(hlVars)}`);
+
     const bgVars = ct.getBackgroundVariables(ct.lightModeBackground);
     console.log(`TEST: Background variables: ${JSON.stringify(bgVars)}`);
     selectTitledShade(ds.atoms.inputBackground.overlayColor, 1);
@@ -121,15 +125,21 @@ async function test() {
 
     // test var groups
     console.log(`TEST: VarGroupKeys: ${JSON.stringify(ds.code.getCSSVarGroupKeys())}`);
-    const bsg = ds.code.getCSSVarGroup(ds.atoms.borderSettings);
+    const bsg = ds.code.getCSSVarGroup(ds.organisms.hero);
     let bsCount = 0;
     bsg.setListener("test", function(vg: CSSVarGroup) {
-        console.log("TEST: BSG listener")
+        console.log(`TEST: BSG listener ${vg.name} was called`);
         bsCount++; 
     });
-    ds.atoms.borderSettings.baseBorderWidth.setValue(10);
-    assert(bsCount === 1, "bsCount should be 1");
-    console.log(`TEST: Border settings: ${JSON.stringify(bsg)}`);
+    console.log(`TEST: BSG: setting hero.verticalGap`);
+    ds.organisms.hero.verticalGap.setValue(2);
+    console.log(`TEST: BSG: setting hero.title`);
+    ds.organisms.hero.title.setValue("H1");
+    console.log(`TEST: BSG: setting hero.body`);
+    ds.organisms.hero.body.setValue("Body 3");
+    console.log(`TEST: BSG: bsCount=${bsCount}`);
+    assert(bsCount === 7, `Should have received 7 BSG notifications but received ${bsCount}`);
+    console.log(`TEST: BSG: ${JSON.stringify(bsg)}`);
 
     console.log(`TEST: create design system from string: ${JSON.stringify(dsObj,null,4)}`);
     const ds2 = await ds.copy("ds2");
