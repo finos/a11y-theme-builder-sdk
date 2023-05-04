@@ -734,7 +734,7 @@ export class CSSGenerator {
     }
 
     private generateHotlinkVariables2(lm: boolean, vk: CSSVariableKind) {
-        const vars = this.atoms.hotlinks.getHotlinkVariables(lm);
+        const vars = this.atoms.hotlinks.getHotlinkVariables2(lm);
         if (vars) {
             log.debug(`CSS: hotlink variables: found`);
             this.generateHotlinkModeVariables(vars.default, lm, "", vk);

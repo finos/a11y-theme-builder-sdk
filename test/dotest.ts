@@ -99,7 +99,7 @@ async function test() {
     assert(states.isEnabled(), "States atom should be editable");
     assert(themeInitializedCount === 1, "Theme initialized should be one");
 
-    const hlVars = ds.atoms.hotlinks.getHotlinkVariables(true);
+    const hlVars = ds.atoms.hotlinks.getHotlinkVariables2(true);
     console.log(`HERE: HOTLINK: ${JSON.stringify(hlVars)}`);
 
     const bgVars = ct.getBackgroundVariables(ct.lightModeBackground);
