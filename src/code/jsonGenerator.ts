@@ -173,7 +173,7 @@ export class JSONGenerator {
         }
         const buttonVars = theme.getShadeGroups(buttonShade);
         const buttonSG = lm ? buttonVars.lm : buttonVars.dm;
-        const hotlinkVars = this.atoms.hotlinks.findHotlinkVariables(lm);
+        const hotlinkVars = this.atoms.hotlinks.findHotlinkVariables2(lm);
         const hotlinkShade = hotlinkVars.default.unvisited.shade;
         if (!hotlinkShade) {
             log.debug("getSolidBackgrounds exit (no hotlink shade)");
@@ -293,7 +293,7 @@ export class JSONGenerator {
             button = self.getPropShadeName(theme.button, lm, theme);
             onButton = self.getPropShadeName(theme.button, lm, theme, true);
             icon = self.getPropShadeName(theme.icon, lm, theme);
-            const hlVars = self.atoms.hotlinks.getHotlinkVariables(lm);
+            const hlVars = self.atoms.hotlinks.getHotlinkVariables2(lm);
             if (hlVars) {
                 hotlink = self.getShadeName(hlVars.default.unvisited.shade, lm, theme);
             }
@@ -558,7 +558,7 @@ export class JSONGenerator {
 
     private getHotlinks(theme: ColorTheme, lm: boolean): any {
         log.debug(`getHotlinks enter`);
-        const vars = this.atoms.hotlinks.getHotlinkVariables(lm);
+        const vars = this.atoms.hotlinks.getHotlinkVariables2(lm);
         if (!vars) {
             log.debug(`getHotlinks exit (no variables)`);
             return;

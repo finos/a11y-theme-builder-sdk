@@ -58,15 +58,23 @@ export class Hotlinks extends Atom {
         this.underlineHotlinksInLightMode = new PropertyBoolean("Underline hotlinks in light mode", false, this, {defaultValue: true});
     }
 
-    public findHotlinkVariables(lm: boolean): HotlinkVariables {
-        const vars = this.getHotlinkVariables(lm);
+    public findHotlinkVariables(): HotlinkVariables {
+        return this.findHotlinkVariables2(true);
+    }
+
+    public getHotlinkVariables(): HotlinkVariables | undefined {
+        return this.getHotlinkVariables2(true);
+    }
+
+    public findHotlinkVariables2(lm: boolean): HotlinkVariables {
+        const vars = this.getHotlinkVariables2(lm);
         if (!vars) {
             throw new Error("Failed to get hotlink variables");
         }
         return vars;
     }
 
-    public getHotlinkVariables(lm: boolean): HotlinkVariables | undefined {
+    public getHotlinkVariables2(lm: boolean): HotlinkVariables | undefined {
         log.debug(`Hotlinks.getHotlinkVariables enter`)
         const underline = this.underlineHotlinksInLightMode.getValue();
         if (underline === undefined) {
