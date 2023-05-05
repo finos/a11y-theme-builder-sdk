@@ -351,92 +351,65 @@ export class PropertyPixelSelectable extends PropertySelectable<number[],number>
 
 }
 
-export class PropertyElevationSelectable extends PropertyStringSelectable {
+export class PropertyIndexSelectable extends PropertyStringSelectable {
+
+    private readonly none: string;
+    private readonly prefix: string;
+    private readonly inversePrefix: string;
+
+    constructor(name: string, required: boolean, parent: Node, min: number, max: number, none: string, prefix: string, inversePrefix: string, defIdx?: number) {
+        super(name, required, parent, { 
+            selectables: PropertyIndexSelectable.toStrings(min, max, none, prefix, inversePrefix),
+            defaultValue: PropertyIndexSelectable.indexToString(defIdx || 0, none, prefix, inversePrefix),
+        });
+        this.none = none;
+        this.prefix = prefix;
+        this.inversePrefix = inversePrefix;
+    }
+
+    public toIndex(): number {
+        const val = this.getValue() || this.none;
+        if (val === this.none) return 0;
+        if (val.startsWith(this.prefix)) return parseInt(val.substring(this.prefix.length));
+        if (val.startsWith(this.inversePrefix)) return -parseInt(val.substring(this.inversePrefix.length));
+        throw new Error(`Invalid ${this.name} value: '${val}'`);
+    }
+
+    private static indexToString(idx: number, none: string, prefix: string, inversePrefix: string): string {
+        if (idx == 0) return none;
+        if (idx > 0) return `${prefix}${idx}`;
+        return `${inversePrefix}${-idx}`;
+    }
+
+    private static toStrings(min: number, max: number, none: string, prefix: string, inversePrefix: string): string[] {
+        const strs = [none];
+        for (let i = 1; i <= max; i++) strs.push(PropertyIndexSelectable.indexToString(i, none, prefix, inversePrefix));
+        for (let i = 1; i <= min; i++) strs.push(PropertyIndexSelectable.indexToString(-i, none, prefix, inversePrefix));
+        return strs;
+    }
+
+}
+
+export class PropertyElevationSelectable extends PropertyIndexSelectable {
 
     constructor(name: string, required: boolean, parent: Node, min: number, max: number, def?: number) {
-        super(name, required, parent, { 
-            selectables: PropertyElevationSelectable.toStrings(min, max),
-            defaultValue: def ? `Elevation-${def}`: "No Elevation",
-        });
-    }
-
-    public toIndex(): number {
-        const val = this.getValue() || "No Elevation";
-        if (val === "No Elevation") return 0;
-        if (val.startsWith("Elevation-")) return parseInt(val.substring("Elevation-".length));
-        if (val.startsWith("Reverse-Elevation-")) return parseInt(val.substring("Reverse-Elevation-".length));
-        throw new Error(`Invalid elevation: '${val}'`);
-    }
-
-    private static toStrings(min: number, max: number): string[] {
-        const elevations = ["No Elevation"];
-        for (let i = 1; i <= max; i++) {
-            elevations.push(`Elevation-${i}`);
-        }
-        for (let i = 1; i <= min; i++) {
-            elevations.push(`Reverse-Elevation-${i}`);
-        }
-        return elevations;
+        super(name, required,  parent, min, max, "No Elevation", "Elevation-", "Reverse-Elevation-", def);
     }
 
 }
 
-export class PropertyBevelSelectable extends PropertyStringSelectable {
+export class PropertyBevelSelectable extends PropertyIndexSelectable {
 
     constructor(name: string, required: boolean, parent: Node, min: number, max: number) {
-        super(name, required, parent, { 
-            selectables: PropertyBevelSelectable.toStrings(min, max),
-            defaultValue: "No Bevel",
-        });
-    }
-
-    public toIndex(): number {
-        const val = this.getValue() || "No Bevel";
-        if (val === "No Bevel") return 0;
-        if (val.startsWith("Bevel-")) return parseInt(val.substring("Bevel-".length));
-        if (val.startsWith("Reverse-Bevel-")) return parseInt(val.substring("Reverse-Bevel-".length));
-        throw new Error(`Invalid bevel: '${val}'`);
-    }
-
-    private static toStrings(min: number, max: number): string[] {
-        const bevels = ["No Bevel"];
-        for (let i = 1; i <= max; i++) {
-            bevels.push(`Bevel-${i}`);
-        }
-        for (let i = 1; i <= min ; i++) {
-            bevels.push(`Reverse-Bevel-${i}`);
-        }
-        return bevels;
+        super(name, required,  parent, min, max, "No Bevel", "Bevel-", "Reverse-Bevel-");
     }
 
 }
 
-export class PropertyShadowSelectable extends PropertyStringSelectable {
+export class PropertyShadowSelectable extends PropertyIndexSelectable {
 
     constructor(name: string, required: boolean, parent: Node, min: number, max: number) {
-        super(name, required, parent, { 
-            selectables: PropertyShadowSelectable.toStrings(min, max),
-            defaultValue: "None",
-        });
-    }
-
-    public toIndex(): number {
-        const val = this.getValue() || "No Bevel";
-        if (val === "None") return 0;
-        if (val.startsWith("Shadow-")) return parseInt(val.substring("Shadow-".length));
-        if (val.startsWith("Inverse-Shadow-")) return parseInt(val.substring("Inverse-Shadow-".length));
-        throw new Error(`Invalid shadow: '${val}'`);
-    }
-
-    private static toStrings(min: number, max: number): string[] {
-        const shadows = ["None"];
-        for (let i = 1; i <= max; i++) {
-            shadows.push(`Shadow-${i}`);
-        }
-        for (let i = 1; i <= min ; i++) {
-            shadows.push(`Inverse-Shadow-${i}`);
-        }
-        return shadows;
+        super(name, required,  parent, min, max, "None", "Bevel-Shadow-", "Inverse-Bevel-Shadow-");
     }
 
 }

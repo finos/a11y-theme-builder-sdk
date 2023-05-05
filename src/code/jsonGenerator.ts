@@ -95,7 +95,7 @@ export class JSONGenerator {
         const fcn = function(prop: PropertyColorShade, lm: boolean) {
             let shade = prop.getValue();
             if (!shade) return;
-            if (!lm) shade = shade.getDarkModeShade();
+            if (!lm) shade = theme.findDarkModeShade(shade);
             // Set theme colors
             if (!shade.hasMode()) return;
             const color: any = {};
@@ -167,9 +167,9 @@ export class JSONGenerator {
             return {};
         }
         if (!lm) {
-            tertiaryShade = tertiaryShade.getDarkModeShade();
-            buttonShade = buttonShade.getDarkModeShade();
-            iconShade = iconShade.getDarkModeShade();
+            tertiaryShade = theme.findDarkModeShade(tertiaryShade);
+            buttonShade = theme.findDarkModeShade(buttonShade);
+            iconShade = theme.findDarkModeShade(iconShade);
         }
         const buttonVars = theme.getShadeGroups(buttonShade);
         const buttonSG = lm ? buttonVars.lm : buttonVars.dm;
@@ -752,7 +752,7 @@ export class JSONGenerator {
             log.debug("getButtons exit (no button)");
             return;
         }
-        if (!lm) button = button.getDarkModeShade();
+        if (!lm) button = theme.findDarkModeShade(button);
         const bgVars = theme.getBackgroundVariables(lm ? theme.lightModeBackground : theme.darkModeBackground);
         if (!bgVars) {
             log.debug("getButtons exit (no background variables)");
@@ -787,10 +787,8 @@ export class JSONGenerator {
         const vars = this.atoms.inputBackground.getVariables();
         if (!vars) return {};
         const inputDefault = lm ? vars.inputDefault : vars.dmInputDefault;
-        const inputDisabled = lm ? vars.inputDisabled : vars.dmInputDisabled;
         return {
             Default: this.getColor(inputDefault.getRGBA()),
-            Disabled: this.getColor(inputDisabled.getRGBA()),
         }; 
     }
 

@@ -104,10 +104,6 @@ export class StateSetting {
         ss.all.push(this);
     }
 
-    public init() {
-
-    }
-
     private setShadesListener(_: EventValueChange<string>) {
         this.setShades();
     }
@@ -142,7 +138,6 @@ export class StateSetting {
         }
         const lmStart = this.lmShades[index];
         const dmStart = this.dmShades[index];
-
         const theme = this.atoms.colorThemes.getDefaultTheme() as ColorTheme;
         if (!theme) {
             log.debug(`StateSettings.setShades exit (no default theme): name=${this.name}`);
@@ -155,17 +150,13 @@ export class StateSetting {
 
     private setLMShade(theme: ColorTheme, shade: Shade) {
         log.debug(`StateSettings.setLMShade enter - name=${this.name}`);
-        const lmbg = theme.lightModeBackground.getValue();
-        if (!lmbg) throw new Error(`StateSettings.setLMShade exit (no lightmode background) - name=${this.name}`);
-        this.lmShade = shade.findLMShade(lmbg.secondary, 3.1);
+        this.lmShade = theme.findLightModeShade(shade);
         log.debug(`StateSettings.setLMShade exit: name=${this.name}, shade=${JSON.stringify(this.lmShade)}`);
     }
 
     private setDMShade(theme: ColorTheme, shade: Shade) {
         log.debug("StateSettings.setDMShade enter");
-        const dmbg = theme.darkModeBackground.getValue();
-        if (!dmbg) throw new Error("StateSettings.setDMShade exit (no darkmode background)");
-        this.dmShade = shade.findDMShade(dmbg.primary, 3.1);
+        this.dmShade = theme.findDarkModeShade(shade);
         log.debug(`StateSettings.setDMShade exit: ${JSON.stringify(this.dmShade)}`);
     }
 
