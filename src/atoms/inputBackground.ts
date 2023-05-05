@@ -12,11 +12,8 @@ import { Logger } from "../util/logger";
 
 export interface InputBackgroundVariables {
     inputDefault: Shade;
-    inputDisabled: Shade;
     onInputDefault: Shade;
-    onInputDisabled: Shade;
     dmInputDefault: Shade;
-    dmInputDisabled: Shade;
 }
 
 const log = new Logger("ib");
@@ -78,51 +75,37 @@ export class InputBackground extends Atom implements IInputBackground {
         const rgb = background.shade.rgbArray;
         // Set light mode variables
         let inputDefault: Shade;
-        let inputDisabled: Shade;
         let onInputDefault: Shade;
-        let onInputDisabled: Shade;
         if (lmbg.lighter) {
             if (whiteBackgroundWasSelected) {
                 inputDefault = this.avgShade([pHex, 'rgba(255,255,255,.1)']);
-                inputDisabled = this.avgShade([pHex, 'rgba(0,0,0,.07)']);
             } else {
                 inputDefault = this.avgShade([pHex, 'rgba('+rgb+',.3)']);
-                inputDisabled = this.avgShade([pHex, 'rgba(0,0,0,.03)']);
             }
             onInputDefault = Shade.BLACK;
-            onInputDisabled = Shade.BLACK;
         } else {
             if (whiteBackgroundWasSelected) {
                 inputDefault = this.avgShade([pHex, 'rgba('+rgb+',.03)']);
-                inputDisabled = this.avgShade([pHex, 'rgba(0,0,0,.03)']);
             } else {
                 inputDefault = this.avgShade([pHex, 'rgba('+rgb+',.1)']);
-                inputDisabled = this.avgShade([pHex, 'rgba(255,255,255,.07)']);
             }
             onInputDefault = Shade.WHITE;
-            onInputDisabled = Shade.WHITE;
         }
         // Set dark mode variables
         let dmInputDefault: Shade;
-        let dmInputDisabled: Shade;
         if (dmbg.lighter) {
             dmInputDefault = this.avgShade([pHex, 'rgba('+rgb+',.2)']);
-            dmInputDisabled = this.avgShade([pHex, 'rgba(0,0,0,.3)']);
         } else {
             if (whiteBackgroundWasSelected) {
                 dmInputDefault  = this.avgShade([dmbgPrimary, 'rgba('+primaryDark+',.08)']);
             } else {
                 dmInputDefault  = this.avgShade([dmbgPrimary, 'rgba('+primaryDark+',.2)']);
             }
-            dmInputDisabled = this.avgShade([dmbgPrimary, 'rgba(0,0,0,.03)']);
         }
         const vars: InputBackgroundVariables = {
             inputDefault,
-            inputDisabled,
             onInputDefault,
-            onInputDisabled,
             dmInputDefault,
-            dmInputDisabled,
         };
         log.debug(`InputBackground variables: ${JSON.stringify(vars,null,4)}`);
         return vars;

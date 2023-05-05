@@ -100,7 +100,6 @@ async function test() {
     assert(themeInitializedCount === 1, "Theme initialized should be one");
 
     const hlVars = ds.atoms.hotlinks.getHotlinkVariables2(true);
-    console.log(`HERE: HOTLINK: ${JSON.stringify(hlVars)}`);
 
     const bgVars = ct.getBackgroundVariables(ct.lightModeBackground);
     console.log(`TEST: Background variables: ${JSON.stringify(bgVars)}`);
@@ -114,6 +113,13 @@ async function test() {
     ds.atoms.minimumTarget.minHeight.setValue(9);
     ds.molecules.avatars.mediumBorder.setValue(8);
     assert(ds.molecules.avatars.mediumBorder.getValue() === 8, "Avatar medium border is not 8");
+
+    selectColorPair(ct.lightModeBackground, 2);
+
+    console.log("TEST: Adding new color after primary was selected");
+    colorPalette.addColor("newColor","#0047AB");
+    assert(ct.primary.getValue() !== undefined, `Adding a color to the theme should not change the primary color`);
+    console.log("TEST: Added new color after primary was selected");
 
     // list all properties
     console.log("TEST: BEGIN properties");

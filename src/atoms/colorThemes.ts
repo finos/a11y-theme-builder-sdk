@@ -48,6 +48,11 @@ export interface ShadeGroups {
     dm: ModeShadeGroups;
 }
 
+export interface DarkBGShades {
+    primary: Shade;
+    secondary: Shade;
+}
+
 const log = new Logger("colorThemes");
 
 /**
@@ -308,11 +313,9 @@ export class ColorTheme extends Node implements IColorTheme {
         const primaryQuarter = Shade.fromHex(bgScale[2]).setMode(mode);
         const primaryHalfQuarter = new ColorPair(ColorTheme.CP_HALF_QUARTER, primaryHalf, primaryQuarter, true);
         // Get primary-800/primary-900
-        const shade900 = mode.shades[9];
-        const bgScale2 = chroma.scale([shade900.hex,'#000000']).correctLightness(true).colors(5);
-        const primaryDarkBG = Shade.fromHex(bgScale2[3]).setMode(mode);
-        const secondaryDarkBG = Shade.fromHex(bgScale2[4]).setMode(mode);
-        const primary800900 = new ColorPair(ColorTheme.CP_800_900, primaryDarkBG, secondaryDarkBG, false);
+        const darkBGShades = this.getDarkBGShades();
+        if (!darkBGShades) throw new Error(`Could not get dark background shades`);
+        const primary800900 = new ColorPair(ColorTheme.CP_800_900, darkBGShades.primary, darkBGShades.secondary, false);
         // Update light background selectable values
         this.lightModeBackground.setSelectableValues([whiteOffWhite, blackOffBlack, primaryHalfQuarter, primary800900 ]);
         // Update dark background selectable values
@@ -320,7 +323,52 @@ export class ColorTheme extends Node implements IColorTheme {
         log.debug(`ColorTheme.setPrimary: exit: name=${this.name}, value=${primary.hex}`);
     }
 
+    public getDarkBGShades(): DarkBGShades | undefined {
+        const primary = this.primary.getValue();
+        if (!primary) return undefined;
+        const mode = primary.getMode();
+        const shade900 = mode.shades[9];
+        const bgScale = chroma.scale([shade900.hex,'#000000']).correctLightness(true).colors(5);
+        return {
+            primary: Shade.fromHex(bgScale[3]).setMode(mode),
+            secondary: Shade.fromHex(bgScale[3]).setMode(mode),
+        };
+    }
+
+    public findLightModeShade(shade: Shade): Shade {
+        const lmShade = this.getLightModeShade(shade);
+        if (!lmShade) throw new Error(`No light mode shade found for ${shade.hex}`);
+        return lmShade;
+    }
+
+    public getLightModeShade(shade: Shade): Shade | undefined {
+        log.debug(`getLightModeShade enter shade=${shade.hex}`);
+        const lmbg = this.lightModeBackground.getValue();
+        if (!lmbg) {
+            log.debug(`getLightModeShade exit (no light mode background)`);
+            return undefined;
+        }
+        return shade.getLMShade([lmbg.primary,lmbg.secondary], 3.1);
+    }
+
+    public findDarkModeShade(shade: Shade): Shade {
+        const dmShade = this.getDarkModeShade(shade);
+        if (!dmShade) throw new Error(`No dark mode shade found for ${shade.hex}`);
+        return dmShade;
+    }
+
+    public getDarkModeShade(shade: Shade): Shade | undefined {
+        log.debug(`getDarkModeShade enter shade=${shade.hex}`);
+        const dmbg = this.darkModeBackground.getValue();
+        if (!dmbg) {
+            log.debug(`getDarkModeShade exit (no dark background)`);
+            return undefined;
+        }
+        return shade.getDMShade([dmbg.primary,dmbg.secondary], 3.1);
+    }
+
     private clearColorDependentProps(vc: EventValueChange<Shade>) {
+        log.debug("Begin clearing color dependent properties");
         this.darkModeBackground.setValue(undefined);
         this.gradient1.from.setValue(undefined);
         this.gradient1.to.setValue(undefined);
@@ -331,6 +379,7 @@ export class ColorTheme extends Node implements IColorTheme {
         this.gradientHeaderText.from.setValue(undefined);
         this.gradientHeaderText.to.setValue(undefined);
         this.accent.setValue(undefined);
+        log.debug("End clearing color dependent properties");
     }
 
     public getBackgroundVariables(pcp: PropertyColorPair): BackgroundVariables | undefined {

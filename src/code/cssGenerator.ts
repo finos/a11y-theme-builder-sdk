@@ -2,10 +2,10 @@
  * Copyright (c) 2023 Discover Financial Services
  * Licensed under MIT License. See License.txt in the project root for license information
  */
-import { Atoms, Shade, ColorTheme, ShadeGroup, ModeShadeGroups, BevelSettingsProps, HotlinkModeVariables, OnHotlink, OnHotlinkWithDecoration, TypographyStyling} from "../atoms/index";
+import { Atoms, Shade, ColorTheme, ShadeGroup, ModeShadeGroups, BevelSettingsProps, HotlinkModeVariables, OnHotlink, TypographyStyling} from "../atoms/index";
 import { Molecules, Dropdowns } from "../molecules/index";
 import { Organisms, Hero } from "../organisms/index";
-import { PropertyColorShade, PropertyPercentage, PropertyGroupListener, PropertyColorPair, Property, ListenerSubscription, ColorPair } from "../common/index";
+import { PropertyColorShade, PropertyPercentage, PropertyGroupListener, PropertyIndexSelectable, PropertyColorPair, Property, ListenerSubscription, ColorPair } from "../common/index";
 import { IDesignSystem, EventValueChange, VarListener, IVarGroup, IColor, EventType } from "../interfaces";
 
 import { Logger } from "../util/logger";
@@ -133,8 +133,6 @@ export class CSSGenerator {
             "dm-on-gray-700": "var(--white)",
             "dm-on-gray-800": "var(--white)",
             "dm-on-gray-900": "var(--white)",
-            "primaryDarkBG": "var(--black)",
-            "secondaryDarkBG": "var(--black)",
             "on-background-secondary":  "var(--on-gray-0)",
             "dm-on-background-secondary":  "var(--dm-white)",
             "background-tertiary": "var(--primary)",
@@ -417,7 +415,7 @@ export class CSSGenerator {
         this.addPropVar("sliderhandleRadius", "", slider.handleBorderRadius);
         this.addPropVar("sliderhandleElevation", "", slider.handleElevation, elevationToCSS);
         this.addPropVar("sliderbarHeight", "", slider.barHeight);
-        this.addPropVar("barInBevel", "", slider.barInsetShadow);
+        this.addPropVar("barInBevel", "", slider.barInsetShadow, shadowToCSS);
         // popover
         const popover = ms.popovers;
         const poVK = new CSSVariableKind("popover","",[popover.borderRadius], this);
@@ -699,12 +697,9 @@ export class CSSGenerator {
         const vars = this.atoms.inputBackground.getVariables();
         if (!vars) return;
         this.setVar(`input`, "", vk, vars.inputDefault.getHexOrRGBA());
-        this.setVar(`input-disabled`, "", vk, vars.inputDisabled.getHexOrRGBA());
         this.setVar(`on-input`, "", vk, vars.onInputDefault.getHexOrRGBA());
-        this.setVar(`on-input-disabled`, "", vk, vars.onInputDisabled.getHexOrRGBA());
         this.setVar(`dm-input`, "", vk, vars.dmInputDefault.getHexOrRGBA());
         this.setVar(`dm-on-input`, "", vk, vars.dmInputDefault.getOnShade2(false).getHexOrRGBA());
-        this.setVar(`dm-input-disabled`, "", vk, vars.dmInputDisabled.getHexOrRGBA());
         this.setVar("input-hover", "", vk, "rgba(255,255,255,.9)");
         this.setVar("dm-input-hover", "", vk, "rgba(255,255,255,.12)");
     }
@@ -760,49 +755,6 @@ export class CSSGenerator {
         vk.setShadeVar(`${prefix}hotlinkOn${color}-visited`, vars.visited);
     }
 
-    public setShadeListener(args: ShadeListenerArgs): ListenerSubscription {
-        return args.pcs.setListener(this.lkey(args.name), this.shadeListener.bind(this, args));
-    }
-
-    private shadeListener(args: ShadeListenerArgs, vc: EventValueChange<Shade>) {
-        log.debug(`shadeListener entry: ${args.name}`);
-        const shade = vc.newValue;
-        if (shade) {
-            const name = args.name;
-            const pcs = args.pcs;
-            const vk = new CSSVariableKind(name,"", [pcs], this);
-            const dmPrefix = args.dmPrefix || "dm-";
-            this.setShadeVars(name, true, "", args, shade, vk);
-            if (args.dm) {
-                const dmShade = shade.getDarkModeShade(); // TODO: Need to search existing dark mode shades here, but what do I contrast it against
-                this.setShadeVars(name, false, dmPrefix, args, dmShade, vk);
-            }
-            if (args.palette) {
-                const color = shade.getMode().color;
-                this.setPaletteVars(name, true, "", args, color.light.shades, vk);
-                if (args.dm) this.setPaletteVars(name, false, dmPrefix, args, color.dark.shades, vk);
-            }
-        }
-    }
-
-    private setShadeVars(name: string, lm: boolean, prefix: string, args: ShadeListenerArgs, shade: Shade, vk: CSSVariableKind) {
-        vk.setShadeVar(`${prefix}${name}`, shade);
-        if (args.half) vk.setShadeVar(`${prefix}${name}-half`, shade.getHalfShade());
-        if (args.quarter) vk.setShadeVar(`${prefix}${name}-quarter`, shade.getQuarterShade());
-        if (args.on) {
-            const onShade = shade.getOnShade2(lm);
-            vk.setShadeVar(`${prefix}on-${name}`, onShade);
-            if (args.half) vk.setShadeVar(`${prefix}on-${name}-half`, onShade.getHalfShade());
-            if (args.quarter) vk.setShadeVar(`${prefix}on-${name}-quarter`, onShade.getQuarterShade());
-        }
-    }
-
-    private setPaletteVars(name: string, lm: boolean, prefix: string, args: ShadeListenerArgs, shades: Shade[], vk: CSSVariableKind) {
-        shades.forEach(shade => {
-            vk.setShadeVar(`${prefix}${name}-${shade.id}`, shade);
-            if (args.on) vk.setShadeVar(`${prefix}on-${name}-${shade.id}`, shade.getOnShade2(lm));
-        });
-    }
     public setShadeVar(name: string, kind: CSSVariableKind, shade?: Shade) {
         if (shade) {
             this.setVar(name, "", kind, shade.getHexOrRGBA());
@@ -923,7 +875,6 @@ class CSSColor {
             }
         }
         for (const shade of this.color.dark.shades) {
-            //const name = getShadeVarName(shade); // This returns dm-color-xxx, should be just color-xxx
             let name = "";
             if (shade.hasMode() && shade.index >= 0) {
                 const color = shade.getMode().color;
@@ -960,10 +911,17 @@ class CSSTheme {
         const self = this;
 
         // Listen for changes to the primary, secondary, and tertiary shades
-        this.setShadeListener({name: "primary", pcs: this.theme.primary, on: true, dm: true, palette: true, half: true, quarter: true});
-        this.setShadeListener({name: "secondary", pcs: this.theme.secondary, on: true, dm: true, palette: true});
-        this.setShadeListener({name: "tertiary", pcs: this.theme.tertiary, on: true, dm: true, palette: true});
-        // this.setShadeListener({name: "tertiary", pcs: this.theme.primary, on: true, dm: true, palette: true});
+        const dm: DMShadeListenerArgs  = { corresponding: true };
+        this.setShadeListener({name: "primary", pcs: this.theme.primary, on: true, dm, palette: true, half: true, quarter: true});
+        this.cssGenerator.addPropVar("cssColorThemePrimary", "", this.theme.primary, function(vk: CSSVariableKind) {
+            const vars = self.theme.getDarkBGShades();
+            if (vars) {
+                vk.setShadeVar("primaryDarkBG", vars.primary);
+                vk.setShadeVar("secondaryDarkBG", vars.secondary);
+            }
+        });
+        this.setShadeListener({name: "secondary", pcs: this.theme.secondary, on: true, dm, palette: true});
+        this.setShadeListener({name: "tertiary", pcs: this.theme.tertiary, on: true, dm, palette: true});
 
         // light and dark mode backgrounds
         log.debug(`CSSTheme.start setting light and dark mode background listeners`);
@@ -976,10 +934,10 @@ class CSSTheme {
 
         // gradients
         log.debug(`CSSTheme.start setting gradients listeners`);
-        this.setShadeListener({name: "gradient1-a", pcs: this.theme.gradient1.from, on: true, dm: true});
-        this.setShadeListener({name: "gradient1-b", pcs: this.theme.gradient1.to, on: true, dm: true});
-        this.setShadeListener({name: "gradient2-a", pcs: this.theme.gradient2.from, on: true, dm: true});
-        this.setShadeListener({name: "gradient2-b", pcs: this.theme.gradient2.to, on: true, dm: true});
+        this.setShadeListener({name: "gradient1-a", pcs: this.theme.gradient1.from, on: true, dm: {}});
+        this.setShadeListener({name: "gradient1-b", pcs: this.theme.gradient1.to, on: true, dm: {}});
+        this.setShadeListener({name: "gradient2-a", pcs: this.theme.gradient2.from, on: true, dm: {}});
+        this.setShadeListener({name: "gradient2-b", pcs: this.theme.gradient2.to, on: true, dm: {}});
 
         // button
         log.debug(`CSSTheme.start setting button listener`);
@@ -991,12 +949,12 @@ class CSSTheme {
 
         // text gradient
         log.debug(`CSSTheme.start setting text gradient listeners`);
-        this.setShadeListener({name: "text-gradient-a", pcs: this.theme.gradientHeaderText.from, on: true, dm: true});
-        this.setShadeListener({name: "text-gradient-b", pcs: this.theme.gradientHeaderText.to, on: true, dm: true});
+        this.setShadeListener({name: "text-gradient-a", pcs: this.theme.gradientHeaderText.from, on: true, dm: {}});
+        this.setShadeListener({name: "text-gradient-b", pcs: this.theme.gradientHeaderText.to, on: true, dm: {}});
 
         // accent
         log.debug(`CSSTheme.start setting accent listener`);
-        this.setShadeListener({name: "accent", pcs: this.theme.accent, dm: true, palette: true, on: true});
+        this.setShadeListener({name: "accent", pcs: this.theme.accent, dm: {}, palette: true, on: true});
 
         // dropdown related variables
         log.debug(`CSSTheme.start setting dropdown listeners`);
@@ -1022,8 +980,54 @@ class CSSTheme {
     }
 
     private setShadeListener(args: ShadeListenerArgs) {
-        const ls = this.cssGenerator.setShadeListener(args);
+        const ls = args.pcs.setListener(this.lkey(args.name), this.shadeListener.bind(this, args));
         this.listenerSubscriptions.push(ls);
+    }
+
+    private shadeListener(args: ShadeListenerArgs, vc: EventValueChange<Shade>) {
+        log.debug(`shadeListener entry: ${args.name}`);
+        const shade = vc.newValue;
+        if (shade) {
+            const name = args.name;
+            const pcs = args.dm !== undefined ? [args.pcs,this.theme.darkModeBackground] : [args.pcs];
+            const vk = new CSSVariableKind(name,"", pcs, this.cssGenerator);
+            const dmPrefix = args.dm ? args.dm.prefix || "dm-" : undefined;
+            this.setShadeVars(name, true, "", args, shade, vk);
+            if (dmPrefix) {
+                log.debug(`Getting dark mode shade for ${args.name}`);
+                let dmShade = args.dm?.corresponding ? shade.getCorrespondingDarkModeShade() : this.theme.getDarkModeShade(shade);
+                if (dmShade) {
+                    log.debug(`Got dark mode shade for ${args.name}: ${dmShade.getHexOrRGBA()}`);
+                    this.setShadeVars(name, false, dmPrefix, args, dmShade, vk);
+                } else {
+                   log.debug(`Did not find dark mode shade for ${args.name}; therefore, not setting CSS variable ${name}`);
+                }
+            }
+            if (args.palette) {
+                const color = shade.getMode().color;
+                this.setPaletteVars(name, true, "", args, color.light.shades, vk);
+                if (dmPrefix) this.setPaletteVars(name, false, dmPrefix, args, color.dark.shades, vk);
+            }
+        }
+    }
+
+    private setShadeVars(name: string, lm: boolean, prefix: string, args: ShadeListenerArgs, shade: Shade, vk: CSSVariableKind) {
+        vk.setShadeVar(`${prefix}${name}`, shade);
+        if (args.half) vk.setShadeVar(`${prefix}${name}-half`, shade.getHalfShade());
+        if (args.quarter) vk.setShadeVar(`${prefix}${name}-quarter`, shade.getQuarterShade());
+        if (args.on) {
+            const onShade = shade.getOnShade2(lm);
+            vk.setShadeVar(`${prefix}on-${name}`, onShade);
+            if (args.half) vk.setShadeVar(`${prefix}on-${name}-half`, onShade.getHalfShade());
+            if (args.quarter) vk.setShadeVar(`${prefix}on-${name}-quarter`, onShade.getQuarterShade());
+        }
+    }
+
+    private setPaletteVars(name: string, lm: boolean, prefix: string, args: ShadeListenerArgs, shades: Shade[], vk: CSSVariableKind) {
+        shades.forEach(shade => {
+            vk.setShadeVar(`${prefix}${name}-${shade.id}`, shade);
+            if (args.on) vk.setShadeVar(`${prefix}on-${name}-${shade.id}`, shade.getOnShade2(lm));
+        });
     }
 
     private setShadeGroupListener(type: string, prop: PropertyColorShade) {
@@ -1309,14 +1313,18 @@ export class CSSDynamicVariableKind extends CSSVariableKind {
 
 }
 
+interface DMShadeListenerArgs {
+    prefix?: string;
+    corresponding?: boolean;
+}
+
 interface ShadeListenerArgs {
     name: string;
     pcs: PropertyColorShade;
     half?: boolean;
     quarter?: boolean;   
     on?: boolean;   
-    dm?: boolean;
-    dmPrefix?: string;
+    dm?: DMShadeListenerArgs;
     palette?: boolean;
 }
 
@@ -1398,33 +1406,22 @@ function getCoreShadeVarName(shade: Shade): string | undefined {
 }
 
 function elevationToCSS(vk: CSSVariableKind) {
-    const val = vk.props[0].getValue();
-    if (val === "No Elevation") {
-        vk.setVar(vk.name, "var(--elevation-0)");
-    } else if (val.startsWith("Elevation-")) {
-        const idx = parseInt(val.substring("Elevation-".length));
-        vk.setVar(vk.name,`var(--elevation-${idx})`);
-    } else if (val.startsWith("Reverse-Elevation-")) {
-        const idx = parseInt(val.substring("Reverse-Elevation-".length));
-        vk.setVar(vk.name, `var(--reverse-elevation-${idx})`);
-    } else {
-        throw new Error(`Invalid elevation: '${val}'`);
-    }
+    levelToCSS(vk, "elevation");
 }
 
 function bevelToCSS(vk: CSSVariableKind) {
-    const val = vk.props[0].getValue();
-    if (val === "No Bevel") {
-        vk.setVar(vk.name, "var(--bevel-0)");
-    } else if (val.startsWith("Bevel-")) {
-        const idx = parseInt(val.substring("Bevel-".length));
-        vk.setVar(vk.name,`var(--bevel-${idx})`);
-    } else if (val.startsWith("Reverse-Bevel-")) {
-        const idx = parseInt(val.substring("Reverse-Bevel-".length));
-        vk.setVar(vk.name, `var(--reverse-bevel-${idx})`);
-    } else {
-        throw new Error(`Invalid bevel: '${val}'`);
-    }
+    levelToCSS(vk, "bevel");
+}
+
+function shadowToCSS(vk: CSSVariableKind) {
+    levelToCSS(vk, "bevel");
+}
+
+function levelToCSS(vk: CSSVariableKind, type: string) {
+    const prop = vk.props[0] as PropertyIndexSelectable;
+    const idx = prop.toIndex();
+    if (idx >= 0) vk.setVar(vk.name, `var(--${type}-${idx})`);
+    else vk.setVar(vk.name, `var(--reverse-bevel-${-idx})`);
 }
 
 function colorToCSS(vk: CSSVariableKind) {

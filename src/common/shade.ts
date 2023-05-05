@@ -38,6 +38,12 @@ interface ColorMode {
     color: Color;
 }
 
+export interface SearchShadesArgs {
+    condition: (shade: Shade) => boolean;
+    add1: number;
+    add2: number;
+}
+
 /**
  * A color shade.
  * 
@@ -269,14 +275,6 @@ export class Shade {
         return this.getMode().color.light.shades[this.index];
     }
 
-    /**
-     * Get the dark mode shade for this shade.
-     * @returns The corresponding dark mode shade for this shade.
-     */
-    public getDarkModeShade(): Shade {
-        return this.getMode().color.dark.shades[this.index];
-    }
-  
     public getOnShade(): Shade {
         return this.getOnShade2(true);
     }
@@ -421,9 +419,9 @@ export class Shade {
      * @param ratio The contrast ratio requirement
      * @returns 
      */
-    public getShade(lm: boolean, bgShade: Shade, ratio: number): Shade | undefined {
-        if (lm) return this.getLMShade(bgShade, ratio);
-        else return this.getDMShade(bgShade, ratio);
+    public getShade(lm: boolean, bgShades: Shade[], ratio: number): Shade | undefined {
+        if (lm) return this.getLMShade(bgShades, ratio);
+        else return this.getDMShade(bgShades, ratio);
     }
 
     /**
@@ -432,9 +430,9 @@ export class Shade {
      * @param ratio The required contrast ratio
      * @returns A light mode shade meeting the contrast ratio requirement, or throws an exception if not found.
      */
-    public findLMShade(bgShade: Shade, ratio: number): Shade {
-        const lmShade = this.getLMShade(bgShade, ratio);
-        if (!lmShade) throw new Error(`No lightmode shade found for ${JSON.stringify(this)} on ${JSON.stringify(bgShade)}`)
+    public findLMShade(bgShades: Shade[], ratio: number): Shade {
+        const lmShade = this.getLMShade(bgShades, ratio);
+        if (!lmShade) throw new Error(`No lightmode shade found for ${JSON.stringify(this)}`)
         return lmShade;
     }
 
@@ -445,27 +443,25 @@ export class Shade {
      * @param ratio The required contrast ratio
      * @returns A light mode shade meeting the contrast ratio requirement, or undefined if not found
      */
-    public getLMShade(bgShade: Shade, ratio: number): Shade | undefined {
-        log.debug(`Getting lightmode shade for ${JSON.stringify(this)} on ${JSON.stringify(bgShade)}`);
-        const curRatio = this.getContrastRatio(bgShade);
-        if (curRatio >= ratio) {
-            log.debug(`No searching required; shade ${JSON.stringify(this)} on ${JSON.stringify(bgShade)} (${curRatio} >= ${ratio})`);
+    public getLMShade(bgShades: Shade[], ratio: number): Shade | undefined {
+        log.debug(`Getting lightmode shade for ${JSON.stringify(this)}`);
+        if (this.meetsContrastRequirements(bgShades, ratio)) {
+            log.debug(`No lightmode searching required; shade ${JSON.stringify(this)}`);
             return this;
         }
-        log.debug(`Searching required; shade ${JSON.stringify(this)} on ${JSON.stringify(bgShade)} (${curRatio} < ${ratio})`);
+        log.debug(`Lightmode searching required; shade ${JSON.stringify(this)}`);
         const lmShades = this.getDarkerShades(true);
         // Search forwards for the first one of these built shades which has a contrast ratio to the selected shade >=
         // the required ratio.
         for (let i = 0; i < lmShades.length; i++) {
             const shade = lmShades[i];
-            const curRatio = shade.getContrastRatio(bgShade);
-            log.debug(`Ratio of lightmode shade ${JSON.stringify(shade)} (i=${i}) is ${curRatio}`);
-            if (curRatio >= ratio) {
-                log.debug(`Found lightmode shade ${i} for ${JSON.stringify(this)} on ${JSON.stringify(bgShade)} with ratio ${curRatio}: ${JSON.stringify(shade)}`);
+            log.debug(`Check shade ${shade.hex}`);
+            if (shade.meetsContrastRequirements(bgShades, ratio)) {
+                log.debug(`Found lightmode shade ${i} for ${JSON.stringify(this)}: ${JSON.stringify(shade)}`);
                 return shade;
             }
         }
-        log.debug(`Could not find lightmode shade for ${JSON.stringify(bgShade)} on ${JSON.stringify(this)}`);
+        log.debug(`Could not find lightmode shade for ${JSON.stringify(this)}`);
         return undefined;
     }
 
@@ -488,44 +484,75 @@ export class Shade {
     }
 
     /**
-     * Find a dark mode shade which meets the contrast ratio on this background shade
-     * @param bgShade The background shade
+     * Find a dark mode shade which meets the contrast ratio on these background shades
+     * @param bgShades The background shades
      * @param ratio The required contrast ratio
      * @returns A dark mode shade meeting the contrast ratio requirement, or throws an exception if not found.
      */
-    public findDMShade(bgShade: Shade, ratio: number): Shade {
-        const dmShade = this.getDMShade(bgShade, ratio);
-        if (!dmShade) throw new Error(`No darkmode shade found for lm ${JSON.stringify(this)} on ${JSON.stringify(bgShade)}`)
+    public findDMShade(bgShades: Shade[], ratio: number): Shade {
+        const dmShade = this.getDMShade(bgShades, ratio);
+        if (!dmShade) throw new Error(`No darkmode shade found for lm ${JSON.stringify(this)}`)
         return dmShade;
     }
 
     /**
-     * Get a dark mode shade which meets the contrast ratio on this background shade
-     * @param bgShade The background shade
+     * Get a dark mode shade which meets the contrast ratio on these background shades
+     * @param bgShades The background shades
      * @param ratio The required contrast ratio
-     * @returns A dark mode shade meeting the contrast ratio requirement, or undefined if not found
+     * @returns A dark mode shade meeting the contrast ratio requirements, or undefined if not found
      */
-    public getDMShade(bgShade: Shade, ratio: number): Shade | undefined {
-        log.debug(`Getting darkmode shade for ${JSON.stringify(this)} on ${JSON.stringify(bgShade)}`);
-        const curRatio = this.getContrastRatio(bgShade);
-        if (curRatio >= ratio) {
-            log.debug(`No searching required; shade ${JSON.stringify(this)} on ${JSON.stringify(bgShade)} (${curRatio} >= ${ratio})`);
+    public getDMShade(bgShades: Shade[], ratio: number): Shade | undefined {
+        log.debug(`getDMShade enter: hex=${this.hex}, ratio=${ratio}`);
+        if (this.meetsContrastRequirements(bgShades, ratio)) {
+            log.debug(`No searching required; shade ${JSON.stringify(this)}`);
             return this;
         }
-        log.debug(`Searching required; shade ${JSON.stringify(this)} on ${JSON.stringify(bgShade)} (${curRatio} < ${ratio})`);
+        log.debug(`Dark mode search required for ${JSON.stringify(this)})`);
         const shades = this.getLighterShades(false);
-        // Search backwards for the first one of these built shades which has a contrast ratio to the selected shade >=
-        // the required ratio.
+        // Search backwards for the first one of these built shades which meets the contrast ratio requirements
+        // to the background shades
         for (let i = Math.min(this.index,4); i >= 0; i--) {
             const shade = shades[i];
-            const curRatio = shade.getContrastRatio(bgShade);
-            log.debug(`Ratio of darkmode shade ${JSON.stringify(shade)} to ${JSON.stringify(bgShade)} (i=${i}) is ${curRatio}`);
-            if (curRatio >= ratio) {
-                log.debug(`Found darkmode shade ${i} for ${JSON.stringify(this)} on ${JSON.stringify(bgShade)} with ratio ${curRatio}: ${JSON.stringify(shade)}`);
+            if (shade.meetsContrastRequirements(bgShades, ratio)) {
+                log.debug(`getDMShade exit: i=${i}, shade=${JSON.stringify(shade)}`);
                 return shade;
             }
         }
-        log.debug(`Could not find darkmode shade for ${JSON.stringify(this)} on ${JSON.stringify(bgShade)}`);
+        log.debug(`getDMShade exit: not found`);
+        return undefined;
+    }
+
+    /**
+     * Get the corresponding dark mode shade (i.e. at the same index) for a light mode shade.
+     * @returns The corresponding dark mode shade
+     */
+    public getCorrespondingDarkModeShade(): Shade {
+        return this.getMode().color.dark.shades[this.index];
+    }
+
+    /**
+     * Return true if the contrast ratio of this shade to all 'bgShades' meets or exceeds 'ratio';
+     * otherwise, return false.
+     * @param bgShades 
+     * @param ratio 
+     */
+    public meetsContrastRequirements(bgShades: Shade[], ratio: number): boolean {
+        for (let i = 0; i < bgShades.length; i++) {
+            if (this.getContrastRatio(bgShades[i]) < ratio) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public searchShades(args: SearchShadesArgs): Shade | undefined {
+        log.debug(`Begin search shades: ${JSON.stringify(args)}`);
+        this.getShadesOrderedByNearness2(args.add1, args.add2).forEach(shade => {
+            if (args.condition(shade)) {
+                log.debug(`Found shade: ${shade.hex}`);
+                return shade;
+            }
+        });
         return undefined;
     }
 
@@ -557,7 +584,7 @@ export class Shade {
         const lighterShades = this.getLighterShades(lm);
         const darkerShades = this.getDarkerShades(lm);
         const shades = [...lighterShades,...darkerShades];
-        log.debug(`lighter and darker shades: ${JSON.stringify(shades)}`);
+        log.debug(`Got lighter and darker shades: ${JSON.stringify(shades)}`);
         return shades;
     }
 
@@ -573,7 +600,7 @@ export class Shade {
         const numLighterShades = this.numLighterShades();
         if (numLighterShades > 0) {
             const startScale  = chroma.scale(['#FFFFFF',this.hex]).correctLightness(true).colors(lm ? numLighterShades + 2 : numLighterShades);
-            /// since padding is not working I will create a scale and get the first 2nd value and then create another scale ///
+            /// since padding is not working I will create a scale and get the first 2nd value and then create another scale
             if (startScale.length > (lm ? 1 : 2)) {
                 const scale  = chroma.scale([(startScale[lm ? 1 : 2]),this.hex]).correctLightness(true).colors(numLighterShades)
                 if (scale) {
@@ -596,7 +623,7 @@ export class Shade {
         if (numDarkerShades > 0) {
             const rgbArray = this.rgbArray;
             const endlch  = chroma.rgb(rgbArray[0], rgbArray[1],rgbArray[2]).lch();
-            // since chroma padding didn't work we will set the color by getting the lch and setting the darkness to 3 ///
+            // since chroma padding didn't work we will set the color by getting the lch and setting the darkness to 3
             const endColor = chroma.lch( 3, endlch[1], endlch[2] ).rgb();
             const scale = chroma.scale([this.hex as any,endColor]).correctLightness(true).colors(numDarkerShades);
             if (scale) {
@@ -909,17 +936,29 @@ export class Shade {
     }
 
     /**
-     * Get all shades ordered by the nearest to the current shade.
+     * Get shades ordered by the nearest to the current shade.
      */
     public getShadesOrderedByNearness(): Shade[] {
+        return this.getShadesOrderedByNearness2(1,-1);
+    }
+
+    public getShadesOrderedByNearness2(add1: number, add2: number): Shade[] {
         const rtn: Shade[] = [];
         rtn.push(this);
         let idx1 = this.index;
         let idx2 = this.index;
         const shades = this.getMode().shades;
-        while(idx1 > 0 || idx2 < shades.length-1) {
-            if (idx1 > 0) rtn.push(shades[--idx1]);
-            if (idx2 < shades.length-1) rtn.push(shades[++idx2]);
+        while (add1 || add2) {
+            if (add1) {
+               idx1 += add1;
+               if (idx1 >= 0 && idx1 < shades.length) rtn.push(shades[idx1]);
+               else add1 = 0;
+            }
+            if (add2) {
+               idx2 += add2;
+               if (idx2 >= 0 && idx2 < shades.length) rtn.push(shades[idx2]);
+               else add2 = 0;
+            }
         }
         return rtn;
     }
