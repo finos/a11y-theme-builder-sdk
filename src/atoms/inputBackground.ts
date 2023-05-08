@@ -48,12 +48,11 @@ export class InputBackground extends Atom implements IInputBackground {
     }
 
     public getVariables(): InputBackgroundVariables | undefined {
-        const background = this.overlayColor.getValue();
-        if (!background) {
-            log.debug(`InputBackground.getVariables: no background`);
+        const overlay = this.overlayColor.getValue();
+        if (!overlay) {
+            log.debug(`InputBackground.getVariables: no overlay`);
             return undefined;
         }
-        const whiteBackgroundWasSelected = background === this.whiteBackground;
         const theme = this.getDefaultColorTheme();
         if (!theme) {
             log.debug(`InputBackground.getVariables: no default theme`);
@@ -72,35 +71,44 @@ export class InputBackground extends Atom implements IInputBackground {
         const dmbgPrimary = dmbg.primary.hex;
         const primaryDark = dmbg.primary.getMode().shades[4].rgbArray;
         const pHex = lmbg.primary.hex;
-        const rgb = background.shade.rgbArray;
+        const overlayRGB = overlay.shade.rgbArray;
         // Set light mode variables
         let inputDefault: Shade;
         let onInputDefault: Shade;
-        if (lmbg.lighter) {
-            if (whiteBackgroundWasSelected) {
+        const inputOverlayIsWhite = overlay === this.whiteBackground;
+        if (lmbg.title === ColorTheme.CP_BLACK_OFFBLACK || lmbg.title === ColorTheme.CP_800_900) {
+            if (inputOverlayIsWhite) {
+                inputDefault = this.avgShade([pHex, 'rgba('+overlayRGB+',.03)']);
+            } else {
+                inputDefault = this.avgShade([pHex, 'rgba('+overlayRGB+',.1)']);
+            }
+            onInputDefault = Shade.WHITE;
+        } else if (lmbg.title === ColorTheme.CP_WHITE_OFFWHITE || lmbg.title === ColorTheme.CP_HALF_QUARTER) {
+            if (inputOverlayIsWhite) {
                 inputDefault = this.avgShade([pHex, 'rgba(255,255,255,.1)']);
             } else {
-                inputDefault = this.avgShade([pHex, 'rgba('+rgb+',.3)']);
+                inputDefault = this.avgShade([pHex, 'rgba('+overlayRGB+',.3)']);
             }
             onInputDefault = Shade.BLACK;
         } else {
-            if (whiteBackgroundWasSelected) {
-                inputDefault = this.avgShade([pHex, 'rgba('+rgb+',.03)']);
-            } else {
-                inputDefault = this.avgShade([pHex, 'rgba('+rgb+',.1)']);
-            }
-            onInputDefault = Shade.WHITE;
+            throw new Error(`Invalid light mode background title: ${lmbg.title}`);
         }
         // Set dark mode variables
         let dmInputDefault: Shade;
-        if (dmbg.lighter) {
-            dmInputDefault = this.avgShade([pHex, 'rgba('+rgb+',.2)']);
-        } else {
-            if (whiteBackgroundWasSelected) {
+        if (dmbg.title === ColorTheme.CP_BLACK_OFFBLACK) {
+            if (inputOverlayIsWhite) {
                 dmInputDefault  = this.avgShade([dmbgPrimary, 'rgba('+primaryDark+',.08)']);
             } else {
                 dmInputDefault  = this.avgShade([dmbgPrimary, 'rgba('+primaryDark+',.2)']);
             }
+        } else if (dmbg.title === ColorTheme.CP_800_900) {
+            if (inputOverlayIsWhite) {
+                dmInputDefault = this.avgShade([pHex, 'rgba('+overlayRGB+',.2)']);
+            } else {
+                dmInputDefault = this.avgShade([pHex, 'rgba('+overlayRGB+',.2)']);
+            }
+        } else {
+            throw new Error(`Invalid title for dark mode background: ${dmbg.title}`)
         }
         const vars: InputBackgroundVariables = {
             inputDefault,
