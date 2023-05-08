@@ -2,7 +2,7 @@
  * Copyright (c) 2023 Discover Financial Services
  * Licensed under MIT License. See License.txt in the project root for license information
  */
-import { ThemeBuilder, DesignSystem, EventType, Event, PropertyColorShade, PropertyColorPair, PropertyTitledShade, CSSVarGroup } from "../index";
+import { ThemeBuilder, ColorTheme, ColorPair, EventType, Event, EventValueChange, PropertyColorShade, PropertyColorPair, PropertyTitledShade, Shade, CSSVarGroup } from "../index";
 
 let errCnt = 0;
 let buttonSelectablesChangedCount = 0;
@@ -79,25 +79,17 @@ async function test() {
     ct.button.setListener("colorTheme", buttonEventListener);
     ct.addTheme.setListener("colorThemeInitialized", themeInitializedEventListener);
     assert(!ct.isInitialized(), "Color theme should not be initialized");
-    selectColorShade(ct.primary, 5);
-    selectColorShade(ct.secondary, 3);
-    selectColorShade(ct.tertiary, 6);
-    assert(buttonSelectablesChangedCount === 0, `Button selectables should be 0 but is ${buttonSelectablesChangedCount}`);
-    selectColorPair(ct.lightModeBackground, 0);
+
+    initTheme(ct);
+
     assert(buttonSelectablesChangedCount === 1, `Button selectables should be 1 but is ${buttonSelectablesChangedCount}`);
-    selectColorPair(ct.darkModeBackground, 0);
-    selectColorShade(ct.gradient1.from, 6);
-    selectColorShade(ct.gradient1.to, 1);
-    selectColorShade(ct.gradient2.from, 7);
-    selectColorShade(ct.gradient2.to, 2);
-    selectColorShade(ct.button, 2);
-    selectColorShade(ct.icon, 2);
-    selectColorShade(ct.gradientHeaderText.from, 4);
-    selectColorShade(ct.gradientHeaderText.to, 0);
-    selectColorShade(ct.accent, 3);
     assert(ct.isInitialized(), "Color theme should be initialized");
     assert(states.isEnabled(), "States atom should be editable");
     assert(themeInitializedCount === 1, "Theme initialized should be one");
+
+    testChangingPrimary(ct);
+
+    initTheme(ct);
 
     const hlVars = ds.atoms.hotlinks.getHotlinkVariables2(true);
 
@@ -219,6 +211,43 @@ async function test() {
     } else {
         console.log("PASSED");
     }
+}
+
+function initTheme(ct: ColorTheme) {
+    selectColorShade(ct.primary, 5);
+    selectColorShade(ct.secondary, 3);
+    selectColorShade(ct.tertiary, 6);
+    selectColorPair(ct.lightModeBackground, 0);
+    selectColorPair(ct.darkModeBackground, 0);
+    selectColorShade(ct.gradient1.from, 6);
+    selectColorShade(ct.gradient1.to, 1);
+    selectColorShade(ct.gradient2.from, 7);
+    selectColorShade(ct.gradient2.to, 2);
+    selectColorShade(ct.button, 2);
+    selectColorShade(ct.icon, 2);
+    selectColorShade(ct.gradientHeaderText.from, 4);
+    selectColorShade(ct.gradientHeaderText.to, 0);
+    selectColorShade(ct.accent, 3);
+}
+
+/*
+ * Changing the theme primary shade should reset most of the other theme properties and send
+ * corresponding notifications.  Test that this takes place.
+ */
+function testChangingPrimary(ct: ColorTheme) {
+    let resetLMBG = false;
+    let resetAccent = false;
+    ct.lightModeBackground.setPropertyListener("testChangingPrimary", function(vc: EventValueChange<ColorPair>) {
+        console.log(`TEST: value reset: ${JSON.stringify(vc)}`);
+        if (vc.newValue == undefined) resetLMBG = true;
+    });
+    ct.accent.setPropertyListener("testChangingPrimary", function(vc: EventValueChange<Shade>) {
+        console.log(`TEST: value reset: ${JSON.stringify(vc)}`);
+        if (vc.newValue == undefined) resetAccent = true;
+    });
+    selectColorShade(ct.primary, 1);
+    assert(resetLMBG, `The lightmode background property value was not reset`);
+    assert(resetLMBG, `The accent property value was not reset`);
 }
 
 function notify(event: Event) {

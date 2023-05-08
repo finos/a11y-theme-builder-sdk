@@ -255,8 +255,11 @@ export class ColorTheme extends Node implements IColorTheme {
 
     public start() {
         this.primary.setPropertyListener(this.lname, this.primaryListener.bind(this));
-        for (let prop of [this.primary, this.secondary, this.tertiary]) {
-            prop.setPropertyListener(`${this.lname}.colorChange`, this.clearColorDependentProps.bind(this));
+        for (let prop of [this.secondary, this.tertiary]) {
+            prop.setPropertyListener(`${this.lname}.colorChange`, this.secondaryAndTertiaryListener.bind(this));
+        }
+        for (let prop of [this.lightModeBackground, this.darkModeBackground]) {
+            prop.setPropertyListener(`${this.lname}.backgroundChange`, this.backgroundListener.bind(this));
         }
     }
 
@@ -318,8 +321,12 @@ export class ColorTheme extends Node implements IColorTheme {
         const primary800900 = new ColorPair(ColorTheme.CP_800_900, darkBGShades.primary, darkBGShades.secondary, false);
         // Update light background selectable values
         this.lightModeBackground.setSelectableValues([whiteOffWhite, blackOffBlack, primaryHalfQuarter, primary800900 ]);
+        this.lightModeBackground.setValue(undefined);
         // Update dark background selectable values
         this.darkModeBackground.setSelectableValues([blackOffBlack, primary800900 ]);
+        this.darkModeBackground.setValue(undefined);
+        // Clear the values of all other props
+        this.clearColorDependentProps();
         log.debug(`ColorTheme.setPrimary: exit: name=${this.name}, value=${primary.hex}`);
     }
 
@@ -367,9 +374,16 @@ export class ColorTheme extends Node implements IColorTheme {
         return shade.getDMShade([dmbg.primary,dmbg.secondary], 3.1);
     }
 
-    private clearColorDependentProps(vc: EventValueChange<Shade>) {
+    private secondaryAndTertiaryListener(vc: EventValueChange<Shade>) {
+        this.clearColorDependentProps();
+    }
+
+    private backgroundListener(vc: EventValueChange<ColorPair>) {
+        this.clearColorDependentProps();
+    }
+
+    private clearColorDependentProps() {
         log.debug("Begin clearing color dependent properties");
-        this.darkModeBackground.setValue(undefined);
         this.gradient1.from.setValue(undefined);
         this.gradient1.to.setValue(undefined);
         this.gradient2.from.setValue(undefined);
