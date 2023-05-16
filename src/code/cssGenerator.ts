@@ -1389,7 +1389,7 @@ export class CSSVarGroup implements IVarGroup {
 }
 
 function getShadeVarName(shade: Shade): string | undefined {
-    if (shade.hasMode() && shade.index >= 0) {
+    if (shade.hasMode() && shade.index >= 0 && shade.opacity === 1) {
         const mode = shade.getMode();
         const prefix = mode.name === 'dm' ? 'dm-' : '';
         const color = mode.color;
