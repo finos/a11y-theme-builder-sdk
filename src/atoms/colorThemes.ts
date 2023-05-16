@@ -337,7 +337,7 @@ export class ColorTheme extends Node implements IColorTheme {
         const shade900 = mode.shades[9];
         const bgScale = chroma.scale([shade900.hex,'#000000']).correctLightness(true).colors(5);
         return {
-            primary: Shade.fromHex(bgScale[3]).setMode(mode),
+            primary: Shade.fromHex(bgScale[2]).setMode(mode),
             secondary: Shade.fromHex(bgScale[3]).setMode(mode),
         };
     }
