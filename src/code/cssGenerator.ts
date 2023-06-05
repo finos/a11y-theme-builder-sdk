@@ -135,8 +135,8 @@ export class CSSGenerator {
             "dm-on-gray-700": "var(--white)",
             "dm-on-gray-800": "var(--white)",
             "dm-on-gray-900": "var(--white)",
-            "on-background-secondary":  "var(--on-gray-0)",
-            "dm-on-background-secondary":  "var(--dm-white)",
+            //"on-background-secondary":  "var(--on-gray-0)",
+            //"dm-on-background-secondary":  "var(--dm-white)",
             "background-tertiary": "var(--primary)",
             "on-background-tertiary":  "var(--on-primary)",
             "dm-background-tertiary": "var(--dm-primary-800)",
@@ -1050,6 +1050,7 @@ class CSSTheme {
         const prefix = lm ? "" : "dm-";
         vk.setShadeVarRef(`${prefix}background`, vars.primary);
         vk.setShadeVarRef(`${prefix}background-secondary`, vars.secondary);
+        vk.setShadeVarRef(`${prefix}on-background-secondary`, vars.secondary.getOnShade2(lm));
         vk.setShadeVarRef(`${prefix}border`, vars.borderColor);
         vk.setShadeVarRef(`${prefix}chip`, vars.chip);
         vk.setShadeVarRef(`${prefix}on-chip`, vars.onChip);
