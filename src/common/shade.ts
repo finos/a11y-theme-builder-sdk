@@ -752,6 +752,15 @@ export class Shade {
         return shade;
     }
 
+    public mixShade(shade: Shade, opacity: number): Shade {
+        const A = 1 - opacity;
+        const R = Math.floor(this.R * A + shade.R * opacity);
+        const G = Math.floor(this.G * A + shade.G * opacity);
+        const B = Math.floor(this.B * A + shade.B * opacity);
+        const rtnShade = Shade.fromRGB(R,G,B);
+        return rtnShade;
+    }
+
     public numLighterShades(): number {
         return this.getLabel()/100 + 1;
     }
@@ -891,7 +900,8 @@ export class Shade {
     public mix(shade: Shade, ratio: number): Shade {
         if (ratio < 0 || ratio > 1) throw new Error(`Expecting a ratio between [0,1] but found ${ratio}`);
         const hex: any = chroma.mix(this.hex, shade.hex, ratio, "rgb");
-        return Shade.fromHex(hex);
+        const rtn = Shade.fromHex(hex);
+        return rtn;
     }
 
     /**

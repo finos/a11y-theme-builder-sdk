@@ -1362,6 +1362,7 @@ export class CSSVarGroup implements IVarGroup {
     public setListener(key: string, listener?: CSSVarGroupListener) {
         if (listener) {
             this.listeners[key] = listener;
+            listener(this);
         } else {
             delete this.listeners[key];
         }
