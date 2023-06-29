@@ -453,7 +453,7 @@ export class ColorTheme extends Node implements IColorTheme {
         return { lm, dm };
     }
 
-    private getModeShadeGroups(button: Shade, lm: boolean): ModeShadeGroups {
+    private getModeShadeGroups(shade: Shade, lm: boolean): ModeShadeGroups {
         let primaryShade = this.primary.getValue();
         const gradient1Shade = this.gradient1.from.getValue();
         const gradient2Shade = this.gradient2.from.getValue();
@@ -461,19 +461,19 @@ export class ColorTheme extends Node implements IColorTheme {
         if (!gradient1Shade) throw new Error(`No gradient 1 color has been set`);
         if (!gradient2Shade) throw new Error(`No gradient 1 color has been set`);
         const buttonShadeGroup = {
-            shade: button,
-            halfShade: Shade.fromHex(button.hex).setOpacity(0.5).setMode(button.getMode()),
-            onShade: button.getOnShade2(lm),
+            shade: shade,
+            halfShade: Shade.fromHex(shade.hex).setOpacity(0.5).setMode(shade.getMode()),
+            onShade: shade.getOnShade2(lm),
         };
-        const white = this.getShadeGroup(button, Shade.WHITE, lm, lm? 1: 0.6);
-        const black = this.getShadeGroup(button, Shade.BLACK, lm, 1);
+        const white = this.getShadeGroup(shade, Shade.WHITE, lm, lm? 1: 0.6);
+        const black = this.getShadeGroup(shade, Shade.BLACK, lm, 1);
         const tertiary = lm ? 
-            this.getShadeGroup(button, primaryShade, lm, 1) : 
+            this.getShadeGroup(shade, primaryShade, lm, 1) : 
             // For dark mode, we get the 700 dark mode shade of the primary.
             primaryShade.getMode().color.dark.shades[7].getShadeGroup(lm);
         const gradient1 = gradient1Shade.getOnShade().getShadeGroup(lm);
         const gradient2 = gradient2Shade.getOnShade().getShadeGroup(lm);
-        let gradient3 = this.getShadeGroup(button, lm ? Shade.fromHex("#CDCDCD") : Shade.fromRGB(18,18,18), lm, 1);
+        let gradient3 = this.getShadeGroup(shade, lm ? Shade.fromHex("#CDCDCD") : Shade.fromRGB(18,18,18), lm, 1);
         // The following line is a temp work around to force a white button to be black until we figure out why it is happening.
         //if (gradient3.shade.equals(Shade.WHITE)) gradient3 = Shade.NEAR_BLACK.getShadeGroup(lm);
         return {
