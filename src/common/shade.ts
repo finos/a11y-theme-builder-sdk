@@ -332,11 +332,8 @@ export class Shade {
     }
 
     public getContrastShade(lm: boolean): Shade {
-        if (!lm) {
-            console.log("darkmode")
-        }
         if (this.onHex) {
-            const shade = this.fromHex();
+            const shade = this.fromHex().setHex(this.onHex);
             if (!lm) {
                 if (this.onHex === "#FFFFFF") {
                     shade.setOpacity(0.6);
