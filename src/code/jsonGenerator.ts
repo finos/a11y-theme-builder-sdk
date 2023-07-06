@@ -5,7 +5,7 @@
 import { Atoms, Shade, Color, ColorTheme, GradientColors, StateSetting, BevelSettingsProps } from "../atoms/index";
 import { Molecules } from "../molecules/index";
 import { Organisms } from "../organisms/index";
-import { PropertyColorShade, PropertyElevationSelectable, PropertyBevelSelectable, PropertyShadowSelectable} from "../common/index";
+import { PropertyColorShade, PropertyElevationSelectable, PropertyBevelSelectable, PropertyShadowSelectable } from "../common/index";
 import { IDesignSystem } from "../interfaces";
 
 import { Logger } from "../util/logger";
@@ -70,18 +70,308 @@ export class JSONGenerator {
         if (lm) json["Bevel-Info"] = this.getBevelInfo();
         if (lm) json["Inverse-Bevel-Info"] = this.getInverseBevelInfo();
         if (!lm) json["Alert"] = this.getAlert();
-        log.debug(`getJSON exit - ${JSON.stringify(json,null,4)}`);
+        log.debug(`getJSON exit - ${JSON.stringify(json, null, 4)}`);
         return json;
+    }
+
+    public getDyslexiaAsObject(): Object {
+        return {
+            "fontFamilies": {
+                "primary": {
+                    "value": "OpenDyslexic",
+                    "type": "fontFamilies"
+                },
+                "secondary": {
+                    "value": "OpenDyslexic",
+                    "type": "fontFamilies"
+                }
+            },
+            "Headers": {
+                "H1": {
+                    "value": {
+                        "fontFamily": "{fontFamilies.secondary}",
+                        "fontWeight": "{fontWeights.font-weight-4}",
+                        "lineHeight": "{lineHeights.sm}",
+                        "fontSize": "$fontSize.14",
+                        "letterSpacing": "{letterSpacing.0}",
+                        "paragraphSpacing": "{paragraphSpacing.none}",
+                        "textCase": "$textCase.none",
+                        "textDecoration": "$textDecoration.none"
+                    },
+                    "type": "typography"
+                },
+                "H2": {
+                    "value": {
+                        "fontFamily": "{fontFamilies.secondary}",
+                        "fontWeight": "{fontWeights.font-weight-4}",
+                        "lineHeight": "{lineHeights.sm}",
+                        "fontSize": "$fontSize.13",
+                        "letterSpacing": "{letterSpacing.2}",
+                        "paragraphSpacing": "{paragraphSpacing.none}",
+                        "textCase": "$textCase.none",
+                        "textDecoration": "$textDecoration.none"
+                    },
+                    "type": "typography"
+                },
+                "H3": {
+                    "value": {
+                        "fontFamily": "{fontFamilies.secondary}",
+                        "fontWeight": "{fontWeights.font-weight-4}",
+                        "lineHeight": "{lineHeights.sm}",
+                        "fontSize": "$fontSize.11",
+                        "letterSpacing": "{letterSpacing.2}",
+                        "paragraphSpacing": "{paragraphSpacing.none}",
+                        "textCase": "$textCase.none",
+                        "textDecoration": "$textDecoration.none"
+                    },
+                    "type": "typography"
+                },
+                "H4": {
+                    "value": {
+                        "fontFamily": "{fontFamilies.secondary}",
+                        "fontWeight": "{fontWeights.font-weight-4}",
+                        "lineHeight": "{lineHeights.sm}",
+                        "fontSize": "$fontSize.10",
+                        "letterSpacing": "{letterSpacing.2}",
+                        "paragraphSpacing": "{paragraphSpacing.none}",
+                        "textCase": "$textCase.none",
+                        "textDecoration": "$textDecoration.none"
+                    },
+                    "type": "typography"
+                },
+                "H5": {
+                    "value": {
+                        "fontFamily": "{fontFamilies.secondary}",
+                        "fontWeight": "{fontWeights.font-weight-4}",
+                        "lineHeight": "{lineHeights.sm}",
+                        "fontSize": "$fontSize.7",
+                        "letterSpacing": "{letterSpacing.6}",
+                        "paragraphSpacing": "{paragraphSpacing.none}",
+                        "textCase": "$textCase.none",
+                        "textDecoration": "$textDecoration.none"
+                    },
+                    "type": "typography"
+                },
+                "H6": {
+                    "value": {
+                        "fontFamily": "{fontFamilies.secondary}",
+                        "fontWeight": "{fontWeights.font-weight-4}",
+                        "lineHeight": "{lineHeights.sm}",
+                        "fontSize": "$fontSize.6",
+                        "letterSpacing": "{letterSpacing.3}",
+                        "paragraphSpacing": "{paragraphSpacing.none}",
+                        "textCase": "$textCase.none",
+                        "textDecoration": "$textDecoration.none"
+                    },
+                    "type": "typography"
+                }
+            },
+            "Stats": {
+                "Stat": {
+                    "value": {
+                        "fontFamily": "{fontFamilies.primary}",
+                        "fontWeight": "{fontWeights.font-weight-4}",
+                        "lineHeight": "$lineHeights.lg",
+                        "fontSize": "$fontSize.13",
+                        "letterSpacing": "{letterSpacing.11}",
+                        "paragraphSpacing": "$paragraphSpacing.none",
+                        "textCase": "$textCase.none",
+                        "textDecoration": "$textDecoration.none"
+                    },
+                    "type": "typography"
+                }
+            },
+            "BreadCrumbs": {
+                "Historic": {
+                    "value": {
+                        "fontFamily": "{fontFamilies.secondary}",
+                        "fontWeight": "{fontWeights.font-weight-1}",
+                        "lineHeight": "$lineHeights.lg",
+                        "fontSize": "$fontSize.1",
+                        "letterSpacing": "{letterSpacing.3}",
+                        "paragraphSpacing": "$paragraphSpacing.none",
+                        "textCase": "$textCase.none",
+                        "textDecoration": "$textDecoration.underline"
+                    },
+                    "type": "typography"
+                },
+                "Current": {
+                    "value": {
+                        "fontFamily": "{fontFamilies.primary}",
+                        "fontWeight": "$fontWeights.font-weight-1",
+                        "lineHeight": "$lineHeights.lg",
+                        "fontSize": "$fontSize.1",
+                        "letterSpacing": "{letterSpacing.3}",
+                        "paragraphSpacing": "$paragraphSpacing.none",
+                        "textCase": "$textCase.none",
+                        "textDecoration": "$textDecoration.none"
+                    },
+                    "type": "typography"
+                }
+            },
+            "Display": {
+                "Display 1": {
+                    "value": {
+                        "fontFamily": "{fontFamilies.secondary}",
+                        "fontWeight": "{fontWeights.font-weight-4}",
+                        "lineHeight": "$lineHeights.sm",
+                        "fontSize": "$fontSize.15",
+                        "letterSpacing": "$letterSpacing.11",
+                        "paragraphSpacing": "$paragraphSpacing.none",
+                        "textCase": "$textCase.none",
+                        "textDecoration": "$textDecoration.none"
+                    },
+                    "type": "typography"
+                },
+                "Display 2": {
+                    "value": {
+                        "fontFamily": "{fontFamilies.secondary}",
+                        "fontWeight": "{fontWeights.font-weight-4}",
+                        "lineHeight": "$lineHeights.lg",
+                        "fontSize": "$fontSize.14",
+                        "letterSpacing": "{letterSpacing.1}",
+                        "paragraphSpacing": "$paragraphSpacing.none",
+                        "textCase": "$textCase.none",
+                        "textDecoration": "$textDecoration.none"
+                    },
+                    "type": "typography"
+                }
+            },
+            "Body": {
+                "Body1": {
+                    "value": {
+                        "fontFamily": "{fontFamilies.secondary}",
+                        "fontWeight": "{fontWeights.font-weight-1}",
+                        "lineHeight": "{lineHeights.lg}",
+                        "fontSize": "$fontSize.5",
+                        "letterSpacing": "{letterSpacing.9}",
+                        "paragraphSpacing": "{paragraphSpacing.md}",
+                        "textCase": "$textCase.none",
+                        "textDecoration": "$textDecoration.none"
+                    },
+                    "type": "typography"
+                },
+                "Body1 - Bold": {
+                    "value": {
+                        "fontFamily": "{fontFamilies.secondary}",
+                        "fontWeight": "{fontWeights.font-weight-4}",
+                        "lineHeight": "{lineHeights.lg}",
+                        "fontSize": "$fontSize.5",
+                        "letterSpacing": "{letterSpacing.9}",
+                        "paragraphSpacing": "{paragraphSpacing.md}",
+                        "textCase": "$textCase.none",
+                        "textDecoration": "$textDecoration.none"
+                    },
+                    "type": "typography"
+                },
+                "Body2": {
+                    "value": {
+                        "fontFamily": "{fontFamilies.secondary}",
+                        "fontWeight": "{fontWeights.font-weight-1}",
+                        "lineHeight": "{lineHeights.lg}",
+                        "fontSize": "$fontSize.4",
+                        "letterSpacing": "{letterSpacing.7}",
+                        "paragraphSpacing": "{paragraphSpacing.sm}",
+                        "textCase": "$textCase.none",
+                        "textDecoration": "$textDecoration.none"
+                    },
+                    "type": "typography"
+                },
+                "Body2 - Bold": {
+                    "value": {
+                        "fontFamily": "{fontFamilies.secondary}",
+                        "fontWeight": "{fontWeights.font-weight-4}",
+                        "lineHeight": "$lineHeights.lg",
+                        "fontSize": "$fontSize.4",
+                        "letterSpacing": "{letterSpacing.7}",
+                        "paragraphSpacing": "{paragraphSpacing.sm}",
+                        "textCase": "$textCase.none",
+                        "textDecoration": "$textDecoration.none"
+                    },
+                    "type": "typography"
+                },
+                "Body 3": {
+                    "value": {
+                        "fontFamily": "{fontFamilies.secondary}",
+                        "fontWeight": "{fontWeights.font-weight-1}",
+                        "lineHeight": "{lineHeights.lg}",
+                        "fontSize": "$fontSize.6",
+                        "letterSpacing": "{letterSpacing.9}",
+                        "paragraphSpacing": "{paragraphSpacing.md}",
+                        "textCase": "$textCase.none",
+                        "textDecoration": "$textDecoration.none"
+                    },
+                    "type": "typography"
+                },
+                "Body3 - Bold": {
+                    "value": {
+                        "fontFamily": "{fontFamilies.secondary}",
+                        "fontWeight": "{fontWeights.font-weight-4}",
+                        "lineHeight": "{lineHeights.lg}",
+                        "fontSize": "$fontSize.6",
+                        "letterSpacing": "{letterSpacing.9}",
+                        "paragraphSpacing": "{paragraphSpacing.md}",
+                        "textCase": "$textCase.none",
+                        "textDecoration": "$textDecoration.none"
+                    },
+                    "type": "typography"
+                }
+            },
+            "fontWeights": {
+                "font-weight-0": {
+                    "value": "400",
+                    "type": "fontWeights"
+                },
+                "font-weight-1": {
+                    "value": "400",
+                    "type": "fontWeights"
+                },
+                "font-weight-2": {
+                    "value": "400",
+                    "type": "fontWeights"
+                },
+                "font-weight-3": {
+                    "value": "400",
+                    "type": "fontWeights"
+                },
+                "font-weight-4": {
+                    "value": "700",
+                    "type": "fontWeights"
+                }
+            },
+            "lineHeights": {
+                "sm": {
+                    "value": "150%",
+                    "type": "lineHeights"
+                },
+                "lg": {
+                    "value": "170%",
+                    "type": "lineHeights"
+                }
+            }
+        };
+    }
+
+    public getMotionSensitivityAsObject(): Object {
+        return {};
+    }
+
+    public getDyslexiaAsString(): string {
+        return JSON.stringify(this.getDyslexiaAsObject(),null,2);
+    }
+
+    public getMotionSensitivityAsString(): string {
+        return JSON.stringify(this.getMotionSensitivityAsObject(),null,2);
     }
 
     private getAllColors(lm: boolean): any {
         const rtn: any = {};
-        this.atoms.colorPalette.getColors().forEach( color => {
+        this.atoms.colorPalette.getColors().forEach(color => {
             const colorObj: any = {};
             const onColorObj: any = {};
             rtn[this.getColorId(color)] = { "Color": colorObj, "On-Color": onColorObj };
             const shades = lm ? color.light.shades : color.dark.shades;
-            shades.forEach( shade => {
+            shades.forEach(shade => {
                 const id = this.getShadeId(shade);
                 colorObj[id] = this.getColor(shade.getRGB());
                 onColorObj[id] = this.getColor(shade.getOnShade2(lm).getRGBA());
@@ -92,7 +382,7 @@ export class JSONGenerator {
 
     private getThemeColors(theme: ColorTheme, lm: boolean): any {
         const self = this;
-        const fcn = function(prop: PropertyColorShade, lm: boolean) {
+        const fcn = function (prop: PropertyColorShade, lm: boolean) {
             let shade = prop.getValue();
             if (!shade) return;
             if (!lm) shade = theme.findDarkModeShade(shade);
@@ -120,7 +410,7 @@ export class JSONGenerator {
 
     private getTheme(theme: ColorTheme, lm: boolean): any {
         const self = this;
-        const fcn = function(prop: PropertyColorShade, lm: boolean, name: string): any {
+        const fcn = function (prop: PropertyColorShade, lm: boolean, name: string): any {
             let shade = prop.getValue();
             if (!shade) return;
             const id = self.getShadeId(shade);
@@ -223,7 +513,7 @@ export class JSONGenerator {
             const iconOnTertiary = iconShade.getShadeOrOnShadeBasedOnContrast(tertiaryShade, lm);
             if (iconOnTertiary.equals(iconShade)) {
                 tertiaryIcon = '{Icons.Colored.Color}';
-            }  else if (iconOnTertiary.equals(Shade.BLACK)) {
+            } else if (iconOnTertiary.equals(Shade.BLACK)) {
                 tertiaryIcon = '{Icons.Dark.Color}';
             } else {
                 tertiaryIcon = '{Icons.White.Color}';
@@ -231,7 +521,7 @@ export class JSONGenerator {
             const hotlinkOnTertiary = hotlinkVars.onTertiary.unvisited.shade;
             if (hotlinkOnTertiary.equals(hotlinkShade)) {
                 tertiaryHotlink = '{Hotlinks.Colored.Link}';
-            }  else if (hotlinkOnTertiary === Shade.BLACK) {
+            } else if (hotlinkOnTertiary === Shade.BLACK) {
                 tertiaryHotlink = '{Hotlinks.Dark.Link}';
             } else {
                 tertiaryHotlink = '{Hotlinks.White.Link}';
@@ -278,13 +568,13 @@ export class JSONGenerator {
 
     private getGradientBackgrounds(theme: ColorTheme, lm: boolean): any {
         const self = this;
-        const getShadeName = function(prop: PropertyColorShade, lm: boolean): string | undefined {
+        const getShadeName = function (prop: PropertyColorShade, lm: boolean): string | undefined {
             const shade = prop.getValue();
             if (shade) {
                 return self.getShadeName(shade, lm, theme);
             }
         };
-        const fcn2 = function(lm: boolean, fromName?: string, toName?: string): any {
+        const fcn2 = function (lm: boolean, fromName?: string, toName?: string): any {
             let color, onColor, button, onButton, icon, hotlink: string | undefined;
             if (fromName && toName) {
                 color = `linear-gradient(90deg, ${fromName} 0%, ${toName} 100%)`;
@@ -306,11 +596,11 @@ export class JSONGenerator {
                 "Hotlink": self.getColor(hotlink),
             }
         };
-        const fcn = function(gc: GradientColors, lm: boolean): any {
+        const fcn = function (gc: GradientColors, lm: boolean): any {
             return fcn2(lm, getShadeName(gc.from, lm), getShadeName(gc.to, lm));
         };
-        const gradient3FromName = lm ? "{Core-Colors.White.Color}": "{Core-Colors.Gray.Color.900}";
-        const gradient3ToName = lm ? "{Core-Colors.Gray.Color.200}": "{Core-Colors.Gray.Color.900}";
+        const gradient3FromName = lm ? "{Core-Colors.White.Color}" : "{Core-Colors.Gray.Color.900}";
+        const gradient3ToName = lm ? "{Core-Colors.Gray.Color.200}" : "{Core-Colors.Gray.Color.900}";
         return {
             "Gradient-1": fcn(theme.gradient1, lm),
             "Gradient-2": fcn(theme.gradient2, lm),
@@ -321,7 +611,7 @@ export class JSONGenerator {
     private getFontFamilies(): any {
         const primary = this.atoms.fontsSettings.primaryFont.getValue();
         const secondary = this.atoms.fontsSettings.secondaryFont.getValue();
-        const fcn = function(value?: string) { return { type: "fontFamilies", value: value || "" }};
+        const fcn = function (value?: string) { return { type: "fontFamilies", value: value || "" } };
         return {
             primary: fcn(primary),
             secondary: fcn(secondary),
@@ -353,7 +643,7 @@ export class JSONGenerator {
 
     private getTypographyInfo(): any {
         let headerChange = this.atoms.displayAndHeaderStyles.percentChangeInHeaderDisplaySizes.getValue() || 0;
-        if (headerChange > 0) headerChange /= 100; 
+        if (headerChange > 0) headerChange /= 100;
         return {
             "Header-Change": {
                 type: "other",
@@ -372,10 +662,10 @@ export class JSONGenerator {
         const chipMinWidth = this.molecules.chips.minWidth.getValue() || 0;
         const sliderHandleHeight = this.molecules.sliders.visibleHeight.getValue() || 0;
         const imageHeight = this.molecules.images.listImageHeight.getValue() || 0;
-        const fcn = function(size: number) { return {type, value: `{Sizing.Size-1} * ${size}`}; };
+        const fcn = function (size: number) { return { type, value: `{Sizing.Size-1} * ${size}` }; };
         return {
-            "Size-1": {type, value: `${sizing}px`},
-            "min-target": {type: "sizing", value: `${minTarget}px`},
+            "Size-1": { type, value: `${sizing}px` },
+            "min-target": { type: "sizing", value: `${minTarget}px` },
             "Button-MinWidth": `${buttonMinWidth}px`,
             "Sm-Button-Height": fcn(smallButtonHeight),
             "Chip-Height": fcn(chipHeight),
@@ -399,9 +689,9 @@ export class JSONGenerator {
         const tableHeaderPadding = this.organisms.dataTables.padding.getValue() || 0;
         const primaryNavPadding = this.organisms.primaryNav.horizontalTabPadding.getValue() || 0;
         const secondaryNavPadding = this.organisms.secondaryNav.horizontalTabPadding.getValue() || 0;
-        const fcn = function(size: number) { return {type, value: `{Spacing.spacing-1} * ${size}`}; };
+        const fcn = function (size: number) { return { type, value: `{Spacing.spacing-1} * ${size}` }; };
         return {
-            "Spacing-1": {type, value: `${spacing}px`},
+            "Spacing-1": { type, value: `${spacing}px` },
             "Button-Padding": fcn(buttonPadding),
             "Sm-Button-Padding": fcn(smallButtonPadding),
             "Chip-Padding": fcn(chipPadding),
@@ -432,9 +722,9 @@ export class JSONGenerator {
         const sliderHandleRadius = this.molecules.sliders.handleBorderRadius.getValue() || 0;
         const modalRadius = this.molecules.modal.borderRadius.getValue() || 0;
         const toastRadius = this.molecules.toasts.handleBorderRadius.getValue() || 0;
-        const fcn = function(size: number) { return {type, value: `{Radius.Border-Radius-1} * ${size}`}; };
+        const fcn = function (size: number) { return { type, value: `{Radius.Border-Radius-1} * ${size}` }; };
         return {
-            "Border-Radius-1": {type, value: `${radius}px`},
+            "Border-Radius-1": { type, value: `${radius}px` },
             "Button-Radius": fcn(buttonRadius),
             "Chip-Radius": fcn(chipRadius),
             "Card-Radius": fcn(cardRadius),
@@ -456,9 +746,9 @@ export class JSONGenerator {
         const smallAvatarBorder = this.molecules.avatars.mediumBorder.getValue() || 0;
         const imageBorder = this.molecules.images.generalImageBorderRadius.getValue() || 0;
         const cardBorder = this.molecules.standardCards.minWidth.getValue() || 0;
-        const fcn = function(size: number) { return {type, value: `{Border.border-1} * ${size}`}; };
+        const fcn = function (size: number) { return { type, value: `{Border.border-1} * ${size}` }; };
         return {
-            "border-1": {type, value: `${border}px`},
+            "border-1": { type, value: `${border}px` },
             "Button-Border": fcn(buttonBorder),
             "Lg-Avatar-Border": fcn(largeAvatarBorder),
             "Sm-Avatar-Border": fcn(smallAvatarBorder),
@@ -471,7 +761,7 @@ export class JSONGenerator {
         const defaultColor = lm ? "ffffff40" : "";
         const bottomLine = `linear-gradient(0deg, , 1px, ${defaultColor} 1px)`;
         return {
-            "Default": this.getColor(defaultColor), 
+            "Default": this.getColor(defaultColor),
             "Bottom Line": this.getColor(bottomLine),
         };
     }
@@ -480,7 +770,7 @@ export class JSONGenerator {
         log.debug(`getStates enter`);
         const self = this;
         const ss = this.atoms.stateSettings;
-        const fcn = function(ss: StateSetting, lm: boolean) {
+        const fcn = function (ss: StateSetting, lm: boolean) {
             const shade = lm ? ss.lmShade : ss.dmShade;
             if (!shade) return undefined;
             const rtn = self.getColorPair(shade.getRGB(), shade.getOnShade2(lm).getRGB());
@@ -507,7 +797,7 @@ export class JSONGenerator {
         }
         const shades = theme.getElevationShades(lm);
         for (let i = 0; i < shades.length; i++) {
-            rtn[`Elevation-${i+1}`] = this.getShadeColor(shades[i], lm);
+            rtn[`Elevation-${i + 1}`] = this.getShadeColor(shades[i], lm);
         }
         log.debug(`getElevations exit`);
         return rtn;
@@ -523,9 +813,9 @@ export class JSONGenerator {
         log.debug(`getChips title=${val.title}, lighter=${val.lighter}, lm=${lm}`);
         const color = lm && val.lighter ? "Black" : "White";
         const rtn = {
-            "Color": this.getColor("{Core-Colors."+color+".Color-Half}"),
-            "Colorhalf": this.getColor("{Core-Colors."+color+".Color-Quarter}"),
-            "On-Color": this.getColor("{Core-Colors."+color+".On-Color}"),
+            "Color": this.getColor("{Core-Colors." + color + ".Color-Half}"),
+            "Colorhalf": this.getColor("{Core-Colors." + color + ".Color-Quarter}"),
+            "On-Color": this.getColor("{Core-Colors." + color + ".On-Color}"),
         };
         log.debug(`getChips exit`);
         return rtn;
@@ -544,7 +834,7 @@ export class JSONGenerator {
         }
         if (lm) {
             const bg = theme.lightModeBackground.getValue();
-            colorDropshadow = bg && bg.lighter ?  "{Theme-Colors.Primary.Color.100}" : "{Core-Colors.Black.Color}80";
+            colorDropshadow = bg && bg.lighter ? "{Theme-Colors.Primary.Color.100}" : "{Core-Colors.Black.Color}80";
         } else {
             colorDropshadow = "transparent";
         }
@@ -598,7 +888,7 @@ export class JSONGenerator {
             surface = bgVal.primary.getRGB();
             onSurface = '{Text.White}';
         } else if (title === ColorTheme.CP_HALF_QUARTER) {
-            surface =  '{Core-Colors.White.Color}';
+            surface = '{Core-Colors.White.Color}';
             onSurface = '{Core-Colors.White.On-Color}';
         } else {
             throw new Error(`Invalid title: ${title}`);
@@ -620,22 +910,22 @@ export class JSONGenerator {
         const modalElevation = this.molecules.modal.elevation;
         const toastElevation = this.molecules.toasts.elevation;
         const dropDownElevation = this.molecules.dropdowns.menuElevation;
-        const fcn = function(elevationIdx: number, bevelIdx?: number): any {
+        const fcn = function (elevationIdx: number, bevelIdx?: number): any {
             let value: string = "{Elevation-Shadows.elevation-" + elevationIdx + "}";
             if (bevelIdx !== undefined) {
                 if (bevelIdx >= 0) value = value + ",{Bevels.bevel-" + bevelIdx + "}";
                 else value = value + ",{Inverse-Bevels.bevel-" + -bevelIdx + "}";
             }
-            return { type: "boxShadow", value  };
+            return { type: "boxShadow", value };
         };
-        const fcn1 = function(elevation: PropertyElevationSelectable, bevel?: PropertyBevelSelectable): any {
+        const fcn1 = function (elevation: PropertyElevationSelectable, bevel?: PropertyBevelSelectable): any {
             if (bevel) return fcn(elevation.toIndex(), bevel.toIndex());
             return fcn(elevation.toIndex());
         };
-        const fcn2 = function(shadow: PropertyShadowSelectable): any {
+        const fcn2 = function (shadow: PropertyShadowSelectable): any {
             const idx = shadow.toIndex();
-            const value = idx >= 0 ? "{Bevels.bevel-" + idx + "}": "{Inverse-Bevels.inbevel-" + -idx + "}";
-            return { type: "boxShadow", value  };
+            const value = idx >= 0 ? "{Bevels.bevel-" + idx + "}" : "{Inverse-Bevels.inbevel-" + -idx + "}";
+            return { type: "boxShadow", value };
         };
         return {
             "Button-Shadow": fcn1(buttonElevation, buttonBevel),
@@ -646,8 +936,8 @@ export class JSONGenerator {
             "SliderHandle-Shadow": fcn1(sliderHandleElevation),
             "SliderBar-Shadow": fcn2(sliderBarShadow),
             "Modal-Shadow": fcn1(modalElevation),
-            "Tooltip-Shadow": fcn(0,0),
-            "Toast-Shadow": fcn(toastElevation.toIndex(),0),
+            "Tooltip-Shadow": fcn(0, 0),
+            "Toast-Shadow": fcn(toastElevation.toIndex(), 0),
             "Dropdown-Shadow": fcn1(dropDownElevation),
         };
     }
@@ -789,7 +1079,7 @@ export class JSONGenerator {
         const inputDefault = lm ? vars.inputDefault : vars.dmInputDefault;
         return {
             Default: this.getColor(inputDefault.getRGBA()),
-        }; 
+        };
     }
 
     private getShadeColor(shade: Shade, lm: boolean, theme?: ColorTheme, onShade?: boolean): string {
@@ -840,13 +1130,13 @@ export class JSONGenerator {
     }
 
     private getColor(value?: string): any {
-        const color: any = {type: "color"};
+        const color: any = { type: "color" };
         if (value) color.value = value;
         return color;
     }
 
     private getOther(value?: string): any {
-        const other: any = {type: "other"};
+        const other: any = { type: "other" };
         if (value) other.value = value;
         return other;
     }
@@ -856,7 +1146,7 @@ export class JSONGenerator {
     }
 
     private getColorId(color: Color): string {
-        return `Color-${color.index+1}`;
+        return `Color-${color.index + 1}`;
     }
 
     private getShadeId(shade: Shade): string {
@@ -866,156 +1156,156 @@ export class JSONGenerator {
 
     private getCoreColors(): any {
         return {
-              "White": {
+            "White": {
                 "Color": {
-                  "value": "rgba(255,255,255,0.6)",
-                  "type": "color"
+                    "value": "rgba(255,255,255,0.6)",
+                    "type": "color"
                 }
-              },
-              "Gray": {
+            },
+            "Gray": {
                 "Color": {
-                  "100": {
-                    "value": "#C8C8C8",
-                    "type": "color"
-                  },
-                  "200": {
-                    "value": "#B1B1B1",
-                    "type": "color"
-                  },
-                  "300": {
-                    "value": "#9B9B9B",
-                    "type": "color"
-                  },
-                  "400": {
-                    "value": "#858585",
-                    "type": "color"
-                  },
-                  "500": {
-                    "value": "#6A6A6A",
-                    "type": "color"
-                  },
-                  "600": {
-                    "value": "#505050",
-                    "type": "color"
-                  },
-                  "700": {
-                    "value": "#383838",
-                    "type": "color"
-                  },
-                  "800": {
-                    "value": "#212121",
-                    "type": "color"
-                  },
-                  "900": {
-                    "value": "#070707",
-                    "type": "color"
-                  },
-                  "050": {
-                    "value": "#DFDFDF",
-                    "type": "color"
-                  }
+                    "100": {
+                        "value": "#C8C8C8",
+                        "type": "color"
+                    },
+                    "200": {
+                        "value": "#B1B1B1",
+                        "type": "color"
+                    },
+                    "300": {
+                        "value": "#9B9B9B",
+                        "type": "color"
+                    },
+                    "400": {
+                        "value": "#858585",
+                        "type": "color"
+                    },
+                    "500": {
+                        "value": "#6A6A6A",
+                        "type": "color"
+                    },
+                    "600": {
+                        "value": "#505050",
+                        "type": "color"
+                    },
+                    "700": {
+                        "value": "#383838",
+                        "type": "color"
+                    },
+                    "800": {
+                        "value": "#212121",
+                        "type": "color"
+                    },
+                    "900": {
+                        "value": "#070707",
+                        "type": "color"
+                    },
+                    "050": {
+                        "value": "#DFDFDF",
+                        "type": "color"
+                    }
                 },
                 "On-Color": {
-                  "100": {
-                    "value": "{Text.Dark}",
-                    "type": "color",
-                    "description": "Contrast ratio: 13.24"
-                  },
-                  "200": {
-                    "value": "{Text.Dark}",
-                    "type": "color",
-                    "description": "Contrast ratio: 10.59"
-                  },
-                  "300": {
-                    "value": "{Text.Dark}",
-                    "type": "color",
-                    "description": "Contrast ratio: 8.39"
-                  },
-                  "400": {
-                    "value": "{Text.Dark}",
-                    "type": "color",
-                    "description": "Contrast ratio: 6.44"
-                  },
-                  "500": {
-                    "value": "{Text.Dark}",
-                    "type": "color",
-                    "description": "Contrast ratio: 4.88"
-                  },
-                  "600": {
-                    "value": "{Text.White}",
-                    "type": "color",
-                    "description": "Contrast ratio: 4.74"
-                  },
-                  "700": {
-                    "value": "{Text.White}",
-                    "type": "color",
-                    "description": "Contrast ratio: 6.58"
-                  },
-                  "800": {
-                    "value": "{Text.White}",
-                    "type": "color",
-                    "description": "Contrast ratio: 9.44"
-                  },
-                  "900": {
-                    "value": "{Text.White}",
-                    "type": "color",
-                    "description": "Contrast ratio: 13.20"
-                  },
-                  "050": {
-                    "value": "{Text.Dark}",
-                    "type": "color",
-                    "description": "Contrast ratio: 16.12"
-                  },
-                  "Half": {
-                    "value": "{Text.Dark}",
-                    "type": "color",
-                    "description": "Contrast ratio: "
-                  },
-                  "Quarter": {
-                    "value": "{Text.Dark}",
-                    "type": "color",
-                    "description": "Contrast ratio: "
-                  }
+                    "100": {
+                        "value": "{Text.Dark}",
+                        "type": "color",
+                        "description": "Contrast ratio: 13.24"
+                    },
+                    "200": {
+                        "value": "{Text.Dark}",
+                        "type": "color",
+                        "description": "Contrast ratio: 10.59"
+                    },
+                    "300": {
+                        "value": "{Text.Dark}",
+                        "type": "color",
+                        "description": "Contrast ratio: 8.39"
+                    },
+                    "400": {
+                        "value": "{Text.Dark}",
+                        "type": "color",
+                        "description": "Contrast ratio: 6.44"
+                    },
+                    "500": {
+                        "value": "{Text.Dark}",
+                        "type": "color",
+                        "description": "Contrast ratio: 4.88"
+                    },
+                    "600": {
+                        "value": "{Text.White}",
+                        "type": "color",
+                        "description": "Contrast ratio: 4.74"
+                    },
+                    "700": {
+                        "value": "{Text.White}",
+                        "type": "color",
+                        "description": "Contrast ratio: 6.58"
+                    },
+                    "800": {
+                        "value": "{Text.White}",
+                        "type": "color",
+                        "description": "Contrast ratio: 9.44"
+                    },
+                    "900": {
+                        "value": "{Text.White}",
+                        "type": "color",
+                        "description": "Contrast ratio: 13.20"
+                    },
+                    "050": {
+                        "value": "{Text.Dark}",
+                        "type": "color",
+                        "description": "Contrast ratio: 16.12"
+                    },
+                    "Half": {
+                        "value": "{Text.Dark}",
+                        "type": "color",
+                        "description": "Contrast ratio: "
+                    },
+                    "Quarter": {
+                        "value": "{Text.Dark}",
+                        "type": "color",
+                        "description": "Contrast ratio: "
+                    }
                 }
-              }
-            };
+            }
+        };
     }
 
     private getText(): any {
         return {
-              "Dark": {
+            "Dark": {
                 "value": "#121212",
                 "type": "color"
-              },
-              "White": {
+            },
+            "White": {
                 "value": "{Core-Colors.White.Color}",
                 "type": "color"
-              }
+            }
         };
     }
 
     private getImageOverlay(): any {
         return {
-              "value": "rgba(0,0,0,.25)",
-              "type": "color"
+            "value": "rgba(0,0,0,.25)",
+            "type": "color"
         };
     }
 
     private getAlert(): any {
         return {
             "Button": {
-              "value": {
-                "fill": "{Core-Colors.White.Color}",
-                "horizontalPadding": "{Spacing.spacing-2}"
-              },
-              "type": "composition"
+                "value": {
+                    "fill": "{Core-Colors.White.Color}",
+                    "horizontalPadding": "{Spacing.spacing-2}"
+                },
+                "type": "composition"
             },
             "On-Button": {
-              "value": {
-                "fill": "{Core-Colors.Black.Color}",
-                "typography": "{Small-Text.CTA-Small}"
-              },
-              "type": "composition"
+                "value": {
+                    "fill": "{Core-Colors.Black.Color}",
+                    "typography": "{Small-Text.CTA-Small}"
+                },
+                "type": "composition"
             }
         };
     }

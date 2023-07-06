@@ -5,6 +5,7 @@
 import { Atoms, Shade, ColorTheme, ShadeGroup, ModeShadeGroups, BevelSettingsProps, HotlinkModeVariables, OnHotlink, TypographyStyling} from "../atoms/index";
 import { Molecules, Dropdowns } from "../molecules/index";
 import { Organisms, Hero } from "../organisms/index";
+import { Layers } from "../layers";
 import { PropertyColorShade, PropertyPercentage, PropertyGroupListener, PropertyIndexSelectable, PropertyColorPair, Property, ListenerSubscription, ColorPair } from "../common/index";
 import { IDesignSystem, EventValueChange, VarListener, IVarGroup, IColor, EventType } from "../interfaces";
 
@@ -13,6 +14,7 @@ import { Logger } from "../util/logger";
 const log = new Logger("css");
 
 /**
+ * 
  * The CSS code generator.
  * @category Generators
  */
@@ -50,6 +52,44 @@ export class CSSGenerator {
         // Set all organism CSS variables
         this.setOrganismVars();
 
+    }
+
+    public getDyslexiaAsObject(): Object {
+        return {
+            "min-target": "44px",
+            "primaryFont": "OpenDyslexic", // TODO: get correct font
+            "secondaryFont" : "OpenDyslexic", // TODO: get correct font
+            "standard-LineHeight": "180%",
+            "sm-LineHeight": "150%",
+        };
+    }
+        
+    public getMotionSensitivityAsObject(): Object {
+        return {
+            "animation-speed": "0s",
+            "animation-focus-distance": "0px",
+        };
+    }
+
+    public getDyslexiaAsString(): string {
+        const str = this.convertObjectToString(this.getDyslexiaAsObject());
+        log.debug(`Dylexia: ${str}`);
+        return str;
+    }
+
+    public getMotionSensitivityAsString(): string {
+        const str = this.convertObjectToString(this.getMotionSensitivityAsObject());
+        log.debug(`Motion sensitivity: ${str}`);
+        return str;
+    }
+
+    private convertObjectToString(obj: any): string {
+        const r = [":root {"];
+        Object.keys(obj).forEach(name => {
+            r.push(`  --${name}: ${obj[name]};`)
+        })
+        r.push("}")
+        return r.join("\n");
     }
 
     public getVars(): {[name: string]: string} {
