@@ -889,7 +889,6 @@ export class Shade {
         const darkest = Math.min(myLuminance, otherLuminance);
         const ratio = (brightest + 0.05) / (darkest + 0.05);
         const rtn = Util.round2(ratio);
-        log.debug(`Contrast ratio of ${this.hex} to ${other.hex}: ${rtn}`);
         return rtn;
     }
 
