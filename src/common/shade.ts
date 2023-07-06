@@ -332,11 +332,8 @@ export class Shade {
     }
 
     public getContrastShade(lm: boolean): Shade {
-        if (!lm) {
-            console.log("darkmode")
-        }
         if (this.onHex) {
-            const shade = this.fromHex();
+            const shade = this.fromHex().setHex(this.onHex);
             if (!lm) {
                 if (this.onHex === "#FFFFFF") {
                     shade.setOpacity(0.6);
@@ -889,7 +886,6 @@ export class Shade {
         const darkest = Math.min(myLuminance, otherLuminance);
         const ratio = (brightest + 0.05) / (darkest + 0.05);
         const rtn = Util.round2(ratio);
-        log.debug(`Contrast ratio of ${this.hex} to ${other.hex}: ${rtn}`);
         return rtn;
     }
 
