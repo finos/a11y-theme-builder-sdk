@@ -164,7 +164,6 @@ export class Shade {
     public key?: string;
     public coreShadeName?: string;
     private luminance?: number;
-    private contrastShade?: Shade;
     private lightness?: number;
     private perceivedLightness?: number;
     private saturation?: number;
@@ -180,6 +179,20 @@ export class Shade {
         }
         const hex = opts.hex || Util.rgbArrayToHex(opts.rgbArray as number[]);
         this.setHex(hex);
+    }
+
+    public fromHex(): Shade {
+        const rtn = Shade.fromHex(this.hex);
+        rtn.index = this.index;
+        rtn.mode = this.mode;
+        return rtn;
+    }
+
+    public fromRGB(): Shade {
+        const rtn = Shade.fromRGB(this.R, this.G, this.B);
+        rtn.index = this.index;
+        rtn.mode = this.mode;
+        return rtn;
     }
 
     /**
@@ -219,7 +232,7 @@ export class Shade {
      * @param mode The mode of the shade
      * @returns The shade
      */
-    public setMode(mode: ColorMode): Shade {
+    public setMode(mode?: ColorMode): Shade {
         this.mode = mode;
         return this;
     }
@@ -323,7 +336,7 @@ export class Shade {
             console.log("darkmode")
         }
         if (this.onHex) {
-            const shade = new Shade({hex: this.onHex});
+            const shade = this.fromHex();
             if (!lm) {
                 if (this.onHex === "#FFFFFF") {
                     shade.setOpacity(0.6);
@@ -537,11 +550,15 @@ export class Shade {
      * @param ratio 
      */
     public meetsContrastRequirements(bgShades: Shade[], ratio: number): boolean {
+        log.debug(`Enter meetsContrastRequirements: ratio=${ratio}, num shades: ${bgShades.length}`);
         for (let i = 0; i < bgShades.length; i++) {
+            log.debug(`Checking index ${i}`);
             if (this.getContrastRatio(bgShades[i]) < ratio) {
+                log.debug(`Exit meetsContrastRequirements: failure (less than ${ratio})`);
                 return false;
             }
         }
+        log.debug(`Exit meetsContrastRequirements: success`);
         return true;
     }
 
@@ -604,7 +621,7 @@ export class Shade {
             if (startScale.length > (lm ? 1 : 2)) {
                 const scale  = chroma.scale([(startScale[lm ? 1 : 2]),this.hex]).correctLightness(true).colors(numLighterShades)
                 if (scale) {
-                    scale.forEach((hex: string) => shades.push(Shade.fromHex(hex)));
+                    scale.forEach((hex: string) => shades.push(this.fromHex().setHex(hex)));
                     if (shades.length > 0) shades.splice(-1);
                 }
             }
@@ -627,7 +644,7 @@ export class Shade {
             const endColor = chroma.lch( 3, endlch[1], endlch[2] ).rgb();
             const scale = chroma.scale([this.hex as any,endColor]).correctLightness(true).colors(numDarkerShades);
             if (scale) {
-                scale.forEach((hex: string) => shades.push(Shade.fromHex(hex)));
+                scale.forEach((hex: string) => shades.push(this.fromHex().setHex(hex)));
             }
         } else {
             shades.push(this);
@@ -693,8 +710,7 @@ export class Shade {
                 if (darkerRatio >= minRatio) {
                     if (lm) {
                         darkerShade.onHex = Shade.WHITE.hex;
-                    }
-                    else {
+                    } else {
                         darkerShade.onHex = Shade.WHITE_DM.hex;
                     }
                     log.debug(`Found shade after ${count} darken adjustments (ratio=${darkerRatio})`);
@@ -730,7 +746,7 @@ export class Shade {
         rgbArray[lmh.high.idx]= Math.round(lmh.high.val+changeAmount);
         rgbArray[lmh.low.idx]= Math.round(lmh.low.val-changeAmount);
         rgbArray[lmh.mid.idx]= Math.round(grayVal+(rgbArray[lmh.high.idx]-grayVal)*middleValueRatio);
-        return Shade.fromRGBArray(rgbArray);
+        return Shade.fromRGBArray(rgbArray).setMode(this.mode);
     }
 
     public getElevationShades(): Shade[] {
@@ -748,7 +764,7 @@ export class Shade {
         const R = Math.floor(this.R * A + 0xff * opacity);
         const G = Math.floor(this.G * A + 0xff * opacity);
         const B = Math.floor(this.B * A + 0xff * opacity);
-        const shade = Shade.fromRGB(R,G,B);
+        const shade = Shade.fromRGB(R,G,B).setMode(this.mode);
         return shade;
     }
 
@@ -757,7 +773,7 @@ export class Shade {
         const R = Math.floor(this.R * A + shade.R * opacity);
         const G = Math.floor(this.G * A + shade.G * opacity);
         const B = Math.floor(this.B * A + shade.B * opacity);
-        const rtnShade = Shade.fromRGB(R,G,B);
+        const rtnShade = Shade.fromRGB(R,G,B).setMode(this.mode ? this.mode : shade.mode);
         return rtnShade;
     }
 
@@ -801,7 +817,7 @@ export class Shade {
     }
 
     public adjust(multiplier: number): Shade {
-        return Shade.fromRGB(this.R * multiplier, this.G * multiplier, this.B * multiplier);
+        return Shade.fromRGB(this.R * multiplier, this.G * multiplier, this.B * multiplier).setMode(this.mode);
     }
 
     private calculateLightness(): number {
@@ -872,7 +888,9 @@ export class Shade {
         const brightest = Math.max(myLuminance, otherLuminance);
         const darkest = Math.min(myLuminance, otherLuminance);
         const ratio = (brightest + 0.05) / (darkest + 0.05);
-        return Util.round2(ratio);
+        const rtn = Util.round2(ratio);
+        log.debug(`Contrast ratio of ${this.hex} to ${other.hex}: ${rtn}`);
+        return rtn;
     }
 
     /**
@@ -900,7 +918,7 @@ export class Shade {
     public mix(shade: Shade, ratio: number): Shade {
         if (ratio < 0 || ratio > 1) throw new Error(`Expecting a ratio between [0,1] but found ${ratio}`);
         const hex: any = chroma.mix(this.hex, shade.hex, ratio, "rgb");
-        const rtn = Shade.fromHex(hex);
+        const rtn = Shade.fromHex(hex).setMode(this.mode ? this.mode : shade.mode);
         return rtn;
     }
 
@@ -929,12 +947,7 @@ export class Shade {
      * @returns A new shade object.
      */
     public clone(): Shade {
-        //const c = Shade.fromHex(this.hex).setOpacity(this.opacity);
-        const c = new Shade({hex: this.hex});
-        c.setOpacity(this.opacity);
-        c.mode = this.mode;
-        c.index = this.index;
-        return c;
+        return this.fromHex().setOpacity(this.opacity);
     }
 
     public equals(shade: Shade): boolean {

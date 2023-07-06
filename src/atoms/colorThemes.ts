@@ -485,7 +485,8 @@ export class ColorTheme extends Node implements IColorTheme {
         return shade.getShadeOrOnShadeBasedOnContrast(compShade, lm, multiplier).getShadeGroup(lm);
     }
 
-    private findDMShade(button: Shade): Shade {
+    private findDMShade(shade: Shade): Shade {
+        log.debug(`Enter ColorTheme.findDMShade shade=${shade.hex}, index=${shade.index}; searching backwards for shade >= 3.1`);
         // We first need to get the primary of selected dark mode background
         const dmbgValue = this.darkModeBackground.getValue();
         if (!dmbgValue) throw new Error(`The dark mode background has not been selected`);
@@ -493,12 +494,15 @@ export class ColorTheme extends Node implements IColorTheme {
         // Next, loop thru the dark mode shades, starting with the selected index and searching backwards until
         // we find the first shade with a contrast of >= 3.1 when compared with the primary of the selected
         // dark mode background.
-        const shades = button.getMode().color.dark.shades;
-        for (let i = Math.min(button.index,4); i >= 0; i--) {
-            const shade = shades[i];
-            const contrast = shade.getContrastRatio(bg);
+        const shades = shade.getMode().color.dark.shades;
+        let startIndex = shade.index < 0 ? 4 : Math.min(shade.index,4);
+        for (let i = startIndex; i >= 0; i--) {
+            const tmpShade = shades[i];
+            const contrast = tmpShade.getContrastRatio(bg);
+            log.debug(`Contrast at index ${i} is ${contrast}`);
             if (contrast >= 3.1) {
-                return shade;
+                log.debug(`Found DM shade at index ${i}`);
+                return tmpShade;
             }
         }
         throw new Error(`Did not find a dark mode shade with a contrast >= 3.1`);
