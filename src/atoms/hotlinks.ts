@@ -160,9 +160,9 @@ export class Hotlinks extends Atom {
         const onBackground = background.getOnShade2(lm);
         let shade1:Shade | undefined;
         let shade2:Shade | undefined;
-        log.debug(`hotlink begin search: type=${type}, shade=${shade.hex}, underline=${underline}, lm=${lm}`);
         const shades = shade.getShadesOrderedByNearness();
         let count = 0;
+        log.debug(`hotlink begin search: type=${type}, shade=${shade.hex}, underline=${underline}, lm=${lm}, numShades=${shades.length}`);
         while (count < shades.length) {
             const cmpShade = shades[count];
             count++;
@@ -185,7 +185,7 @@ export class Hotlinks extends Atom {
         // Switch to underline if they requested no underline but underline is required
         underline = underline || underlineRequired;
         const unvisitedShade = underline ? shade1 : shade2;
-        if (!unvisitedShade) throw new Error(`No hotlink shade was found for ${type} ${lm?"light":"dark"} mode`);
+        if (!unvisitedShade) throw new Error(`No hotlink shade was found for ${type} ${lm?"light":"dark"} mode, underline=${underline}, underlineRequired=${underlineRequired}`);
         const visitedShade = unvisitedShade.clone().setOpacity(0.7);
         log.debug(`hotlink end search: exit count=${count}, shade1=${shade1}, shade2=${shade2}`);
         return {

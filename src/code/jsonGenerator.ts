@@ -66,6 +66,7 @@ export class JSONGenerator {
         if (lm) json["Border"] = this.getBorder();
         if (lm) json["Shadows"] = this.getShadows();
         if (lm) json["Elevation-Info"] = this.getElevationInfo();
+        if (lm) json["Glow-Info"] = this.getGlowInfo();
         if (lm) json["Base-Info"] = this.getBaseInfo();
         if (lm) json["Bevel-Info"] = this.getBevelInfo();
         if (lm) json["Inverse-Bevel-Info"] = this.getInverseBevelInfo();
@@ -979,6 +980,31 @@ export class JSONGenerator {
             "BaseBlur": this.getOther(baseBlur),
             "BaseSpread": this.getOther(baseSpread),
             "BaseOpacity": this.getOther(baseOpacity),
+        };
+    }
+
+    private getGlowInfo(): any {
+        let rgb, spread, blur, opacity, change: any;
+        const gs = this.atoms.glowSettings;
+        const rgbVal = gs.color.getValue();
+        if (rgbVal) {
+            const s = Shade.fromHex(rgbVal);
+            rgb = `${s.R}, ${s.G}, ${s.B}`;
+        }
+        const spreadVal = gs.spreadRadius.getValue();
+        if (spreadVal) spread = `${spreadVal}px`;
+        const blurVal = gs.blurRadius.getValue();
+        if (blurVal) blur = `${blurVal}px`;
+        const opacityVal = gs.colorOpacity.getValue();
+        if (opacityVal) opacity = `${opacityVal / 100}`;
+        const changeVal = gs.percentageChange.getValue();
+        if (changeVal) change = `${changeVal / 100}`;
+        return {
+            "RGB": this.getOther(rgb),
+            "Spread": this.getOther(spread),
+            "Blur": this.getOther(blur),
+            "Opacity": this.getOther(opacity),
+            "Change": this.getOther(change),
         };
     }
 

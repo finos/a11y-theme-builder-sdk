@@ -5,7 +5,6 @@
 import { Atoms, Shade, ColorTheme, ShadeGroup, ModeShadeGroups, BevelSettingsProps, HotlinkModeVariables, OnHotlink, TypographyStyling} from "../atoms/index";
 import { Molecules, Dropdowns } from "../molecules/index";
 import { Organisms, Hero } from "../organisms/index";
-import { Layers } from "../layers";
 import { PropertyColorShade, PropertyPercentage, PropertyGroupListener, PropertyIndexSelectable, PropertyColorPair, Property, ListenerSubscription, ColorPair } from "../common/index";
 import { IDesignSystem, EventValueChange, VarListener, IVarGroup, IColor, EventType } from "../interfaces";
 
@@ -558,6 +557,7 @@ export class CSSGenerator {
     // core system settings
     private coreSystemSettings() {
         const atoms = this.atoms;
+        const self = this;
         let vk = new CSSVariableKind("", "", [], this);
         // targets
         this.addPropVar("min-target", "px", atoms.minimumTarget.minHeight);
@@ -635,8 +635,20 @@ export class CSSGenerator {
         // bevel standard and inverse settings
         this.addBevelProps(atoms.bevelSettings.standard);
         this.addBevelProps(atoms.bevelSettings.inverse);
-
         this.addPropsVar("focusBlur", "", [atoms.gridSettings.grid, atoms.focusStates.addFocusBlur], this.generateFocusBlurVariable.bind(this));
+        // glow settings
+        this.addPropVar("glow-rgb", "", atoms.glowSettings.color, function(vk: CSSVariableKind) {
+            log.debug(`glow-rgb callback`);
+            const val = self.atoms.glowSettings.color.getValue();
+            if (val !== undefined) {
+                const shade = Shade.fromHex(val);
+                vk.setVar("glow-rgb", `${shade.R}, ${shade.G}, ${shade.B}`);
+            }
+        }); 
+        this.addPropVar("glow-blur", "px", atoms.glowSettings.blurRadius);
+        this.addPropVar("glow-spread", "px", atoms.glowSettings.spreadRadius);
+        this.addPercentToDecimal("glow-opacity", atoms.glowSettings.colorOpacity);
+        this.addPercentToDecimal("glow-change", atoms.glowSettings.percentageChange);
     }
 
     private addBevelProps(props: BevelSettingsProps) {
@@ -1132,7 +1144,7 @@ class CSSTheme {
         if (!shade) return;
         log.debug(`shadeGroupListener entry: type=${type}`);
         const vars = this.theme.getShadeGroups(shade);
-        const vk = new CSSVariableKind("button", "", [prop], this.cssGenerator);
+        const vk = new CSSVariableKind(type, "", [prop], this.cssGenerator);
         // Set light and dark mode button CSS variables
         vk.setModeVars(type, true, vars.lm);
         vk.setModeVars(type, false, vars.dm);

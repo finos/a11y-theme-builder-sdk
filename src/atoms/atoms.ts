@@ -19,6 +19,7 @@ import { Hotlinks } from "./hotlinks";
 import { InputBackground } from "./inputBackground";
 import { ElevationSettings } from "./elevationSettings";
 import { BevelSettings } from "./bevelSettings";
+import { GlowSettings } from "./glowSettings";
 import { AnimationSettings } from "./animationSettings";
 import { ColorBlind } from "./colorBlind";
 import { Node } from "../common/node";
@@ -67,6 +68,8 @@ export class Atoms extends Node {
     public readonly elevationSettings: ElevationSettings;
     /** The bevel settings for this design system */
     public readonly bevelSettings: BevelSettings;
+    /** The glow settings for this design system */
+    public readonly glowSettings: GlowSettings;
     /** The animation settings for this design system */
     public readonly animationSettings: AnimationSettings;
     /** The color blind settings for this design system */
@@ -93,6 +96,7 @@ export class Atoms extends Node {
         this.inputBackground = new InputBackground(this);
         this.elevationSettings = new ElevationSettings(this);
         this.bevelSettings = new BevelSettings(this);
+        this.glowSettings = new GlowSettings(this);
         this.animationSettings = new AnimationSettings(this);
         this.colorBlind = new ColorBlind(this);
     }

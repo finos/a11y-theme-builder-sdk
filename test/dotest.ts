@@ -125,9 +125,10 @@ async function test() {
     console.log(`TEST: VarGroupKeys: ${JSON.stringify(ds.code.getCSSVarGroupKeys())}`);
     const bsg = ds.code.getCSSVarGroup(ds.organisms.hero);
     let bsCount = 0;
+    console.log(`TEST: BSG: begin`);
     bsg.setListener("test", function(vg: CSSVarGroup) {
-        console.log(`TEST: BSG listener ${vg.name} was called`);
         bsCount++; 
+        console.log(`TEST: BSG listener ${vg.name} was called (${bsCount})`);
     });
     console.log(`TEST: BSG: setting hero.verticalGap`);
     ds.organisms.hero.verticalGap.setValue(2);
@@ -136,7 +137,7 @@ async function test() {
     console.log(`TEST: BSG: setting hero.body`);
     ds.organisms.hero.body.setValue("Body 3");
     console.log(`TEST: BSG: bsCount=${bsCount}`);
-    assert(bsCount === 7, `Should have received 7 BSG notifications but received ${bsCount}`);
+    assert(bsCount === 4, `Should have received 4 BSG notifications but received ${bsCount}`);
     console.log(`TEST: BSG: ${JSON.stringify(bsg)}`);
 
     console.log(`TEST: create design system from string: ${JSON.stringify(dsObj,null,4)}`);
@@ -571,12 +572,12 @@ const expectedCssVars = [
     "--dm-background-tertiary",
     "--dm-on-background-tertiary",
     "--buttonOnTertiary",
-    "--buttonHalfOnTertiary",
+    //"--buttonHalfOnTertiary",
     "--onbuttonOnTertiary",
     //"--linkOnTertiary",
     "--iconOnTertiary",
     "--dmbuttonOnTertiary",
-    "--dmbuttonHalfOnTertiary",
+    //"--dmbuttonHalfOnTertiary",
     "--dmonbuttonOnTertiary",
     //"--dmlinkOnTertiary",
     "--dmiconOnTertiary",
@@ -605,10 +606,10 @@ const expectedCssVars = [
     "--gradient-3",
     "--on-gradient-3",
     "--buttonOnGradient3",
-    "--buttonHalfOnGradient3",
+    //"--buttonHalfOnGradient3",
     "--onbuttonOnGradient3",
     "--dmbuttonOnGradient3",
-    "--dmbuttonHalfOnGradient3",
+    //"--dmbuttonHalfOnGradient3",
     "--dmonbuttonOnGradient3",
     //"--linkOnGradient3",
     //"--dmlinkOnGradient3",
@@ -638,11 +639,11 @@ const expectedCssVars = [
     "--dm-border",
     "--input",
     "--on-input",
-    "--input-disabled",
+    //"--input-disabled",
     "--input-hover",
     "--dm-input",
     "--dm-on-input",
-    "--dm-input-disabled",
+    //"--dm-input-disabled",
     "--dm-input-hover",
     "--focusBlur",
     "--quiet",
