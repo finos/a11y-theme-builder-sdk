@@ -20,6 +20,7 @@ export * from "./hotlinks";
 export * from "./inputBackground";
 export * from "./elevationSettings";
 export * from "./bevelSettings";
+export * from "./glowSettings";
 export * from "./animationSettings";
 export * from "./colorBlind";
 export * from "../common/shade";
