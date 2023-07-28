@@ -132,6 +132,7 @@ export class Atoms extends Node {
         obj.inputBackground = this.inputBackground.serialize();
         obj.elevationSettings = this.elevationSettings.serialize();
         obj.bevelSettings = this.bevelSettings.serialize();
+        obj.glowSettings = this.glowSettings.serialize();
         obj.animationSettings = this.animationSettings.serialize();
         obj.colorBlind = this.colorBlind.serialize();
         return obj;
@@ -157,6 +158,7 @@ export class Atoms extends Node {
         this.inputBackground.deserialize(obj.inputBackground);
         this.elevationSettings.deserialize(obj.elevationSettings);
         this.bevelSettings.deserialize(obj.bevelSettings);
+        this.glowSettings.deserialize(obj.glowSettings);
         this.animationSettings.deserialize(obj.animationSettings);
         this.colorBlind.deserialize(obj.colorBlind);
     }
