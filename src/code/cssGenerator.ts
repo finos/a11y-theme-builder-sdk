@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2023 Discover Financial Services
- * Licensed under MIT License. See License.txt in the project root for license information
+ * Licensed under Apache-2.0 License. See License.txt in the project root for license information
  */
 import { Atoms, Shade, ColorTheme, ShadeGroup, ModeShadeGroups, BevelSettingsProps, HotlinkModeVariables, OnHotlink, TypographyStyling} from "../atoms/index";
 import { Molecules, Dropdowns } from "../molecules/index";

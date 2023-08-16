@@ -35,4 +35,4 @@ See the [Developer's Guide](./DEV-GUIDE.md) for information on building, develop
 
 Copyright 2023 Discover Financial Services 
 
-Distributed under the [MIT License](./LICENSE).
+Distributed under the [Apache-2.0 License](./LICENSE).

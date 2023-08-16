@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2023 Discover Financial Services
- * Licensed under MIT License. See License.txt in the project root for license information
+ * Licensed under Apache-2.0 License. See License.txt in the project root for license information
  */
 import {describe, beforeAll, expect, test} from '@jest/globals';
 import { ThemeBuilder, DesignSystem, Color, ColorTheme, PropertyColorShade } from "..";
