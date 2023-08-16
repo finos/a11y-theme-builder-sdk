@@ -28,7 +28,7 @@ jobs:
         with:
           node-version: 18
       - name: Build project with NPM
-        run: npm run build --omit=dev
+        run: npm install --omit=dev
         working-directory: ${{ matrix.module-folder }}
       - name: Depcheck
         uses: dependency-check/Dependency-Check_Action@main
