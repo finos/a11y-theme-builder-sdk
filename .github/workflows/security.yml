@@ -19,7 +19,7 @@ jobs:
     continue-on-error: false
     strategy:
         matrix:
-          module-folder: ['']
+          module-folder: ['.']
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -34,8 +34,8 @@ jobs:
         uses: dependency-check/Dependency-Check_Action@main
         id: Depcheck
         with:
-          project: '${{ matrix.module-folder }}'
-          path: '${{ matrix.module-folder }}'
+          project: '.'
+          path: '.'
           format: 'HTML'
           out: '${{ matrix.module-folder }}-reports'
           args: >
