@@ -25,6 +25,6 @@ jobs:
 #       - run: yarn install --production --frozen-lockfile
         working-directory: node
       - run: npm install -g node-license-validator
-        working-directory: node
+        working-directory: "."
       - run: node-license-validator . --allow-licenses Apache-2.0 MIT BSD-2-Clause BSD BSD-3-Clause Unlicense
-        working-directory: node
+        working-directory: "."
