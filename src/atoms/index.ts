@@ -11,6 +11,7 @@ export * from "./displayAndHeaderStyles";
 export * from "./bodyStyles";
 export * from "./smallTextStyles";
 export * from "./statStyles";
+export * from "./glowSettings";
 export * from "./gridSettings";
 export * from "./minTarget";
 export * from "./borderSettings";
