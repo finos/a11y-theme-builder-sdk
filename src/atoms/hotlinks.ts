@@ -126,7 +126,7 @@ export class Hotlinks extends Atom {
             // Use the dark primary 700 shade in dark mode
             primary = primary.getMode()?.color.dark.shades[7];
         }
-        const onTertiary = this.getHotlinkModeVariables("onTertiary", shade, primary.getOnShade2(lm), underline, lm);
+        const onTertiary = this.getHotlinkModeVariables("onTertiary", shade, primary, underline, lm);
         if (!def) {
             log.debug(`Hotlinks.getHotlinkVariables exit (onBlack variables not set)`)
             return undefined;
@@ -138,6 +138,7 @@ export class Hotlinks extends Atom {
         } else {
             onGradient3 = this.getOnGradient3(def, 24, Shade.WHITE_DM, Shade.HALF_WHITE_DM);
         }
+        onTertiary.unvisited.shade = onTertiary.visited.shade = shade.getOnShade2(lm);
         this.variables = { default: def, onWhite, onBlack, onTertiary, onGradient3 };
         return this.variables;
     } 
@@ -157,6 +158,22 @@ export class Hotlinks extends Atom {
     }
 
     private getHotlinkModeVariables(type: string, shade: Shade, background: Shade, underline: boolean, lm: boolean): HotlinkModeVariables {
+        if (type === "onTertiary") {
+            return {
+                unvisited: {
+                    shade: shade.getOnShade2(lm),
+                    decoration: "underline",
+                    hoverDecoration: "none",
+                },
+                visited: {
+                    shade: shade.getOnShade2(lm).setOpacity(0.7),
+                    decoration: "underline",
+                    hoverDecoration: "none",
+                },
+                underline,
+                underlineRequired: true,
+            };
+        }
         const onBackground = background.getOnShade2(lm);
         let shade1:Shade | undefined;
         let shade2:Shade | undefined;

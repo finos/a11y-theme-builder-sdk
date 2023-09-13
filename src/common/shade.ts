@@ -333,12 +333,9 @@ export class Shade {
 
     public getContrastShade(lm: boolean): Shade {
         if (this.onHex) {
-            const shade = this.fromHex().setHex(this.onHex);
-            if (!lm) {
-                if (this.onHex === "#FFFFFF") {
-                    shade.setOpacity(0.6);
-                    return shade;
-                }
+            const shade = Shade.fromHex(this.onHex);
+            if (!lm && this.onHex === "#FFFFFF") {
+                shade.setOpacity(0.6);
             }
             return shade;
         }
@@ -349,8 +346,7 @@ export class Shade {
         if (!lm) whiteRatio = whiteRatio * 0.6;
         if (blackRatio > whiteRatio) {
             return Shade.BLACK;
-        }
-        else {
+        } else {
             if (lm) {
                 return Shade.WHITE;
             }
