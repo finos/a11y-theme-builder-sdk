@@ -91,7 +91,7 @@ export class Code extends Node {
      * @returns The JSON object.
      */
     public getJSON(lm: boolean): Object {
-        return this.jsonGenerator.getJSONBase(lm);
+        return this.jsonGenerator.getJSON(lm);
     }
 
 }
