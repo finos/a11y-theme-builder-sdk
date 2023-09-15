@@ -1658,52 +1658,19 @@ export class JSONGenerator {
     }
 
     private getColorName(): any {
-        return {
-            "Color-1": {
-                "value": "Pink",
-                "type": "text"
-            },
-            "Color-2": {
-                "value": "Pink",
-                "type": "text"
-            },
-            "Color-3": {
-                "value": "Pink",
-                "type": "text"
-            },
-            "Color-4": {
-                "value": "Pink",
-                "type": "text"
-            },
-            "Color-5": {
-                "value": "Pink",
-                "type": "text"
-            },
-            "Color-6": {
-                "value": "Pink",
-                "type": "text"
-            },
-            "Color-7": {
-                "value": "Pink",
-                "type": "text"
-            },
-            "Color-8": {
-                "value": "Pink",
-                "type": "text"
-            },
-            "Color-9": {
-                "value": "Pink",
-                "type": "text"
-            },
-            "Color-10": {
-                "value": "Pink",
-                "type": "text"
+        const colors = this.atoms.colorPalette.getColors();
+        const rtn: any = {};
+        for (let i = 0; i < colors.length; i++) {
+            rtn[`Color-${i+1}`] = {
+                "type": "text",
+                "value": colors[i].name,
             }
         }
+        return rtn;
     }
 
     private getShowColors(): any {
-        return {
+        const rtn: any = {
             "Secondary": {
                 "value": "true",
                 "type": "boolean"
@@ -1712,47 +1679,15 @@ export class JSONGenerator {
                 "value": "true",
                 "type": "boolean"
             },
-            "Color-1": {
-                "value": "true",
-                "type": "boolean"
-            },
-            "Color-2": {
-                "value": "true",
-                "type": "boolean"
-            },
-            "Color-3": {
-                "value": "true",
-                "type": "boolean"
-            },
-            "Color-4": {
-                "value": "true",
-                "type": "boolean"
-            },
-            "Color-5": {
-                "value": "true",
-                "type": "boolean"
-            },
-            "Color-6": {
-                "value": "true",
-                "type": "boolean"
-            },
-            "Color-7": {
-                "value": "true",
-                "type": "boolean"
-            },
-            "Color-8": {
-                "value": "true",
-                "type": "boolean"
-            },
-            "Color-9": {
-                "value": "true",
-                "type": "boolean"
-            },
-            "Color-10": {
-                "value": "true",
-                "type": "boolean"
+        };
+        const colors = this.atoms.colorPalette.getColors();
+        for (let i = 0; i < Math.max(colors.length,12); i++) {
+            rtn[`Color-${i+1}`] = {
+                "type": "boolean",
+                "value": i < colors.length ? "true" : "false",
             }
         }
+        return rtn;
     }
 
     private getAccessibilityColorSets(): any {
