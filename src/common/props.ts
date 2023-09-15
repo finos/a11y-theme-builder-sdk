@@ -620,7 +620,7 @@ export class TitledShade {
     }
 }
 
-function newStringCategory(display: string, css: string, json: string, prefix: string, count: number): Category<string> {
+function newStringCategory(display: string, prefix: string, css: string, json: string, count: number): Category<string> {
     const members: string[] = [];
     for (let i = 1; i <= count; i++) {
         members.push(`${prefix} ${i}`);
