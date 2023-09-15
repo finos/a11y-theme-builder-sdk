@@ -67,7 +67,7 @@ export class JSONGenerator {
         return this.getJSON(false);
     }
 
-    private getJSON(lm: boolean): any {
+    public getJSON(lm: boolean): any {
         log.debug(`getJSON(lm:${lm}) enter`);
         const theme = this.atoms.colorThemes.getDefaultTheme();
         if (!theme) {
