@@ -14,6 +14,13 @@ export interface PropertyOpts<T> {
     getDefaultValue?: () => T | undefined;
 }
 
+export interface Category<T> {
+    display: string;
+    css: string;
+    json: string;
+    members: T[];
+}
+
 /**
  * A property of a generic type.
  * @category Utilities
@@ -390,26 +397,48 @@ export class PropertyIndexSelectable extends PropertyStringSelectable {
 
 }
 
-export class PropertyElevationSelectable extends PropertyIndexSelectable {
-
-    constructor(name: string, required: boolean, parent: Node, min: number, max: number, def?: number) {
-        super(name, required,  parent, min, max, "No Elevation", "Elevation-", "Reverse-Elevation-", def);
-    }
-
+export interface CategoryAndIndex<T> {
+    category: Category<T>;
+    index: number;
 }
 
-export class PropertyBevelSelectable extends PropertyIndexSelectable {
+export class PropertyStringCategorySelectable extends PropertySelectable<Category<string>[],string> {
 
-    constructor(name: string, required: boolean, parent: Node, min: number, max: number) {
-        super(name, required,  parent, min, max, "No Bevel", "Bevel-", "Reverse-Bevel-");
+    constructor(name: string, required: boolean, parent: Node, opts: PropertySelectableOpts<Category<string>[],string>) {
+        super(name, required,  parent, opts);
     }
 
+    public getCategoryAndValue(): CategoryAndIndex<string> | undefined {
+        const value = this.getValue();
+        if (!value) return undefined;
+        const sv = this.getSelectableValues();
+        sv.forEach((category) => {
+            const mems = category.members;
+            for (let i = 0; i < mems.length; i++) {
+                if (mems[i] === value) {
+                    return { category, index: i + 1};
+                }
+            }
+        });
+        return undefined;
+    }
 }
 
-export class PropertyShadowSelectable extends PropertyIndexSelectable {
+export class PropertyShadowSelectable extends PropertyStringCategorySelectable {
 
-    constructor(name: string, required: boolean, parent: Node, min: number, max: number) {
-        super(name, required,  parent, min, max, "None", "Bevel-Shadow-", "Inverse-Bevel-Shadow-");
+    constructor(name: string, required: boolean, parent: Node, opts?: {defaultValue?: string}) {
+        super(name, required,  parent, { 
+            selectables: [
+                newStringCategory("Elevations", "Elevation", "elevation", "Elevation", 9),
+                newStringCategory("Bevels", "Bevel", "bevel", "Bevel", 9),
+                newStringCategory("Inset Bevels", "Inset Bevel", "inset-bevel", "InsetBevel", 9),
+                newStringCategory("Grooves", "Groove", "groove", "Groove", 9),
+                newStringCategory("Ridges", "Ridge", "ridge", "Ridge", 9),
+                newStringCategory("Recesses", "Recess", "recess", "Recess", 9),
+                newStringCategory("Glows", "Glow", "glow", "Glow", 8),
+            ],
+            defaultValue: opts ? opts.defaultValue : undefined
+        });
     }
 
 }
@@ -589,4 +618,12 @@ export class TitledShade {
         obj.shade = this.shade.serialize();
         return obj;
     }
+}
+
+function newStringCategory(display: string, css: string, json: string, prefix: string, count: number): Category<string> {
+    const members: string[] = [];
+    for (let i = 1; i <= count; i++) {
+        members.push(`${prefix} ${count}`);
+    }
+    return {display,css,json,members};
 }

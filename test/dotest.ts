@@ -197,8 +197,9 @@ async function test() {
         //errCnt++;
     }
 
-    console.log(`TEST: JSON lightmode: ${JSON.stringify(ds.code.getJSON(true),null,4)}`);
-    console.log(`TEST: JSON darkmode: ${JSON.stringify(ds.code.getJSON(false),null,4)}`);
+    console.log(`TEST: Base JSON : ${JSON.stringify(ds.code.getJSONBase(),null,4)}`);
+    console.log(`TEST: JSON lightmode: ${JSON.stringify(ds.code.getJSONLM(),null,4)}`);
+    console.log(`TEST: JSON darkmode: ${JSON.stringify(ds.code.getJSONDM(),null,4)}`);
 
     await ds.store();
     const md = await themeBuilder.listMetadata();

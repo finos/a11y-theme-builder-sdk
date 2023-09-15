@@ -2,10 +2,10 @@
  * Copyright (c) 2023 Discover Financial Services
  * Licensed under MIT License. See License.txt in the project root for license information
  */
-import { Atoms, Shade, Color, ColorTheme, GradientColors, StateSetting, BevelSettingsProps } from "../atoms/index";
+import { Atoms, Shade, Color, ColorTheme, GradientColors, StateSetting, BevelSettingsProps, HotlinkModeVariables } from "../atoms/index";
 import { Molecules } from "../molecules/index";
 import { Organisms } from "../organisms/index";
-import { PropertyColorShade, PropertyElevationSelectable, PropertyBevelSelectable, PropertyShadowSelectable } from "../common/index";
+import { PropertyColorShade, PropertyShadowSelectable } from "../common/index";
 import { IDesignSystem } from "../interfaces";
 
 import { Logger } from "../util/logger";
@@ -30,48 +30,72 @@ export class JSONGenerator {
         this.organisms = ds.organisms as Organisms;
     }
 
-    public getJSON(lm: boolean): any {
-        log.debug("getJSON enter");
+    public getJSONBase(): any {
+        log.debug("getJSONBase enter");
         const theme = this.atoms.colorThemes.getDefaultTheme();
         if (!theme) {
             log.debug("getJSON exit (no default theme)");
             return undefined;
         }
         const json: any = {};
-        if (!lm) json["Core-Colors"] = this.getCoreColors();
-        if (!lm) json["Image-Overlay"] = this.getImageOverlay();
-        json["All-Colors"] = this.getAllColors(lm);
-        json["Theme-Colors"] = this.getThemeColors(theme, lm);
+        json["fontFamilies"] = this.getFontFamilies();
+        json["lineHeights"] = this.getLineHeights();
+        json["baseFont"] = this.getBaseFont();
+        json["fontWeights"] = this.getFontWeights();
+        json["Typography-Info"] = this.getTypographyInfo();
+        json["Sizing"] = this.getSizing();
+        json["Spacing"] = this.getSpacing();
+        json["Radius"] = this.getRadius();
+        json["Border"] = this.getBorder();
+        json["Shadows"] = this.getShadows();
+        json["Elevation-Info"] = this.getElevationInfo();
+        json["Glow-Info"] = this.getGlowInfo();
+        json["Base-Info"] = this.getBaseInfo();
+        json["Bevel-Info"] = this.getBevelInfoBase();
+        json["Color-Name"] = this.getColorName();
+        json["Show-Colors"] = this.getShowColors();
+        json["Accessibility-Color-Sets"] = this.getAccessibilityColorSets();
+        log.debug(`getJSONBase exit - ${JSON.stringify(json, null, 4)}`);
+        return json;
+    }
+
+    public getJSONLM(): any {
+        return this.getJSON(true);
+    }
+
+    public getJSONDM(): any {
+        return this.getJSON(false);
+    }
+
+    private getJSON(lm: boolean): any {
+        log.debug(`getJSON(lm:${lm}) enter`);
+        const theme = this.atoms.colorThemes.getDefaultTheme();
+        if (!theme) {
+            log.debug("getJSON exit (no default theme)");
+            return undefined;
+        }
+        const json: any = {};
+        json["Core-Colors"] = this.getCoreColors(lm);
         json["Theme"] = this.getTheme(theme, lm);
+        json["Theme-Colors"] = this.getThemeColors(theme, lm);
+        json["All-Colors"] = this.getAllColors(lm);
         json["Solid-Backgrounds"] = this.getSolidBackgrounds(theme, lm);
         json["Gradient-Backgrounds"] = this.getGradientBackgrounds(theme, lm);
-        json["Input-Backgrounds"] = this.getInputBackgrounds(lm);
+        json["Surface"] = this.getSurface(theme, lm);
+        json["Elevations"] = this.getElevations(lm);
+        json["Text"] = this.getText();
+        json["Hotlinks"] = this.getHotlinks(theme, lm);
+        json["States"] = this.getStates(lm);
         json["Buttons"] = this.getButtons(theme, lm);
         json["Icons"] = this.getIcons(theme, lm);
-        json["States"] = this.getStates(lm);
-        json["Surface"] = this.getSurface(theme, lm);
-        if (!lm) json["Elevations"] = this.getElevations(lm);
-        json["Hotlinks"] = this.getHotlinks(theme, lm);
-        json["Chips"] = this.getChips(theme, lm);
-        if (!lm) json["Text"] = this.getText();
         json["Text-Decoration"] = this.getTextDecoration(theme, lm);
-        if (lm) json["Borders"] = this.getBorders(lm);
-        if (lm) json["fontFamilies"] = this.getFontFamilies();
-        if (lm) json["baseFont"] = this.getBaseFont();
-        if (lm) json["fontWeights"] = this.getFontWeights();
-        if (lm) json["Typography-Info"] = this.getTypographyInfo();
-        if (lm) json["Sizing"] = this.getSizing();
-        if (lm) json["Spacing"] = this.getSpacing();
-        if (lm) json["Radius"] = this.getRadius();
-        if (lm) json["Border"] = this.getBorder();
-        if (lm) json["Shadows"] = this.getShadows();
-        if (lm) json["Elevation-Info"] = this.getElevationInfo();
-        if (lm) json["Glow-Info"] = this.getGlowInfo();
-        if (lm) json["Base-Info"] = this.getBaseInfo();
-        if (lm) json["Bevel-Info"] = this.getBevelInfo();
-        if (lm) json["Inverse-Bevel-Info"] = this.getInverseBevelInfo();
-        if (!lm) json["Alert"] = this.getAlert();
-        log.debug(`getJSON exit - ${JSON.stringify(json, null, 4)}`);
+        json["Borders"] = this.getBorders(lm);
+        json["Input Outlines"] = this.getInputOutlines(lm);
+        json["Input-Backgrounds"] = this.getInputBackgrounds(lm);
+        json["White-Glow"] = this.getWhiteGlow(lm);
+        json["Bevel-Info"] = this.getBevelInfo(lm);
+        json["Hotlink-Underline"] = this.getHotlinkUnderline(lm);
+        log.debug(`getJSON(lm:${lm}) exit - ${JSON.stringify(json, null, 4)}`);
         return json;
     }
 
@@ -358,11 +382,11 @@ export class JSONGenerator {
     }
 
     public getDyslexiaAsString(): string {
-        return JSON.stringify(this.getDyslexiaAsObject(),null,2);
+        return JSON.stringify(this.getDyslexiaAsObject(), null, 2);
     }
 
     public getMotionSensitivityAsString(): string {
-        return JSON.stringify(this.getMotionSensitivityAsObject(),null,2);
+        return JSON.stringify(this.getMotionSensitivityAsObject(), null, 2);
     }
 
     private getAllColors(lm: boolean): any {
@@ -616,6 +640,16 @@ export class JSONGenerator {
         return {
             primary: fcn(primary),
             secondary: fcn(secondary),
+        };
+    }
+
+    private getLineHeights(): any {
+        const sm = this.atoms.fontsSettings.smallLineHeight.getValue();
+        const lg = this.atoms.fontsSettings.standardLineHeight.getValue();
+        const fcn = function (value?: number) { return { type: "fontFamilies", value: value + "%" || "" } };
+        return {
+            primary: fcn(sm),
+            secondary: fcn(lg),
         };
     }
 
@@ -899,47 +933,33 @@ export class JSONGenerator {
     }
 
     private getShadows(): any {
-        const buttonElevation = this.molecules.standardButtons.buttonElevation;
-        const buttonBevel = this.molecules.standardButtons.buttonBevel;
-        const chipElevation = this.molecules.chips.elevation;
-        const avatarElevation = this.molecules.avatars.elevation;
-        const cardElevation = this.molecules.standardCards.elevation;
-        const cardBevel = this.molecules.standardCards.bevel;
-        const imageElevation = this.molecules.images.imageElevation;
-        const sliderHandleElevation = this.molecules.sliders.handleElevation;
-        const sliderBarShadow = this.molecules.sliders.barInsetShadow;
-        const modalElevation = this.molecules.modal.elevation;
-        const toastElevation = this.molecules.toasts.elevation;
-        const dropDownElevation = this.molecules.dropdowns.menuElevation;
-        const fcn = function (elevationIdx: number, bevelIdx?: number): any {
-            let value: string = "{Elevation-Shadows.elevation-" + elevationIdx + "}";
-            if (bevelIdx !== undefined) {
-                if (bevelIdx >= 0) value = value + ",{Bevels.bevel-" + bevelIdx + "}";
-                else value = value + ",{Inverse-Bevels.bevel-" + -bevelIdx + "}";
-            }
-            return { type: "boxShadow", value };
-        };
-        const fcn1 = function (elevation: PropertyElevationSelectable, bevel?: PropertyBevelSelectable): any {
-            if (bevel) return fcn(elevation.toIndex(), bevel.toIndex());
-            return fcn(elevation.toIndex());
-        };
-        const fcn2 = function (shadow: PropertyShadowSelectable): any {
-            const idx = shadow.toIndex();
-            const value = idx >= 0 ? "{Bevels.bevel-" + idx + "}" : "{Inverse-Bevels.inbevel-" + -idx + "}";
+        const buttonShadow = this.molecules.standardButtons.buttonShadow;
+        const chipShadow = this.molecules.chips.shadow;
+        const avatarShadow = this.molecules.avatars.shadow;
+        const cardShadow = this.molecules.standardCards.shadow;
+        const imageShadow = this.molecules.images.imageShadow;
+        const sliderHandleShadow = this.molecules.sliders.handleShadow;
+        const sliderBarShadow = this.molecules.sliders.barShadow;
+        const modalShadow = this.molecules.modal.shadow;
+        const toastShadow = this.molecules.toasts.shadow;
+        const dropDownShadow = this.molecules.dropdowns.menuShadow;
+        const fcn = function (prop: PropertyShadowSelectable): any {
+            const cv = prop.getCategoryAndValue();
+            const value = cv ? `${cv.category.json}-${cv.index}` : undefined;
             return { type: "boxShadow", value };
         };
         return {
-            "Button-Shadow": fcn1(buttonElevation, buttonBevel),
-            "Chip-Shadow": fcn1(chipElevation),
-            "Avatar-Shadow": fcn1(avatarElevation),
-            "Card-Shadow": fcn1(cardElevation, cardBevel),
-            "Image-Shadow": fcn1(imageElevation),
-            "SliderHandle-Shadow": fcn1(sliderHandleElevation),
-            "SliderBar-Shadow": fcn2(sliderBarShadow),
-            "Modal-Shadow": fcn1(modalElevation),
-            "Tooltip-Shadow": fcn(0, 0),
-            "Toast-Shadow": fcn(toastElevation.toIndex(), 0),
-            "Dropdown-Shadow": fcn1(dropDownElevation),
+            "Button-Shadow": fcn(buttonShadow),
+            "Chip-Shadow": fcn(chipShadow),
+            "Avatar-Shadow": fcn(avatarShadow),
+            "Card-Shadow": fcn(cardShadow),
+            "Image-Shadow": fcn(imageShadow),
+            "SliderHandle-Shadow": fcn(sliderHandleShadow),
+            "SliderBar-Shadow": fcn(sliderBarShadow),
+            "Modal-Shadow": fcn(modalShadow),
+            "Tooltip-Shadow": { type: "boxShadow", value: undefined },
+            "Toast-Shadow": fcn(toastShadow),
+            "Dropdown-Shadow": fcn(dropDownShadow),
         };
     }
 
@@ -963,12 +983,6 @@ export class JSONGenerator {
             const s = Shade.fromHex(rgbVal);
             rgb = `${s.R}, ${s.G}, ${s.B}`;
         }
-        const baseBlurVal = es.baseBlurRadius.getValue();
-        if (baseBlurVal) baseBlur = `${baseBlurVal}px`;
-        const baseSpreadVal = es.baseSpreadRadius.getValue();
-        if (baseSpreadVal) baseSpread = `${baseSpreadVal}px`;
-        const baseOpacityVal = es.baseColorOpacity.getValue();
-        if (baseOpacityVal) baseOpacity = `${baseOpacityVal / 100}`;
         return {
             "Change": this.getOther(change),
             "Horizontal": this.getOther(horizontal),
@@ -977,9 +991,6 @@ export class JSONGenerator {
             "Blur": this.getOther(blur),
             "Opacity": this.getOther(opacity),
             "RGB": this.getOther(rgb),
-            "BaseBlur": this.getOther(baseBlur),
-            "BaseSpread": this.getOther(baseSpread),
-            "BaseOpacity": this.getOther(baseOpacity),
         };
     }
 
@@ -1009,10 +1020,8 @@ export class JSONGenerator {
     }
 
     private getBaseInfo(): any {
-        let change, spread, blur, opacity: any;
+        let spread, blur, opacity: any;
         const es = this.atoms.elevationSettings;
-        const changeVal = es.percentageChange.getValue();
-        if (changeVal) change = `${changeVal / 100}`;
         const spreadVal = es.spreadRadius.getValue();
         if (spreadVal) spread = `${spreadVal}px`;
         const blurVal = es.blurRadius.getValue();
@@ -1020,19 +1029,32 @@ export class JSONGenerator {
         const opacityVal = es.colorOpacity.getValue();
         if (opacityVal) opacity = `${opacityVal / 100}`;
         return {
-            "Change": this.getOther(change),
             "Spread": this.getOther(spread),
             "Blur": this.getOther(blur),
             "Opacity": this.getOther(opacity),
         };
     }
 
-    private getBevelInfo(): any {
-        return this.getBevelInfo2(this.atoms.bevelSettings.standard);
+    private getBevelInfo(lm: boolean): any {
+        if (lm) {
+            return {
+                "Light-Opacity": {
+                    "value": ".4",
+                    "type": "other"
+                }
+            }
+        } else {
+            return {
+                "Light-Opacity": {
+                    "value": ".2",
+                    "type": "other"
+                }
+            }
+        }
     }
 
-    private getInverseBevelInfo(): any {
-        return this.getBevelInfo2(this.atoms.bevelSettings.inverse);
+    private getBevelInfoBase(): any {
+        return this.getBevelInfo2(this.atoms.bevelSettings.standard);
     }
 
     private getBevelInfo2(props: BevelSettingsProps): any {
@@ -1099,6 +1121,41 @@ export class JSONGenerator {
         return { Colored: { "Color": this.getShadeColor(icon, lm, theme) } };
     }
 
+    private getInputOutlines(lm: boolean): any {
+        if (lm) {
+            return {
+                "Default": {
+                    "value": "{Borders.Default}",
+                    "type": "color",
+                    "description": "--border"
+                },
+                "Focus": {
+                    "value": "{Buttons.Colored.Color}",
+                    "type": "color"
+                },
+                "Hover": {
+                    "value": "{Input Outlines.Focus}80",
+                    "type": "color"
+                }
+            }
+        } else {
+            return {
+                "Default": {
+                    "value": "{Borders.Default}",
+                    "type": "color"
+                },
+                "Focus": {
+                    "value": "{Buttons.Colored.Color}",
+                    "type": "color"
+                },
+                "Hover": {
+                    "value": "{Input Outlines.Focus}80",
+                    "type": "color"
+                }
+            }
+        }
+    }
+
     private getInputBackgrounds(lm: boolean): any {
         const vars = this.atoms.inputBackground.getVariables();
         if (!vars) return {};
@@ -1106,6 +1163,41 @@ export class JSONGenerator {
         return {
             Default: this.getColor(inputDefault.getRGBA()),
         };
+    }
+
+    private getWhiteGlow(lm: boolean): any {
+        if (lm) {
+            return {
+                "Bright": {
+                    "value": "{Core-Colors.White.Color}",
+                    "type": "color"
+                },
+                "Dim": {
+                    "value": "{Core-Colors.White.Color}",
+                    "type": "color",
+                    "$extensions": {
+                        "studio.tokens": {
+                            "modify": {
+                                "type": "alpha",
+                                "value": ".50",
+                                "space": "lch"
+                            }
+                        }
+                    }
+                }
+            }
+        } else {
+            return {
+                "Bright": {
+                    "value": "#ffffff30",
+                    "type": "color"
+                },
+                "Dim": {
+                    "value": "#ffffff20",
+                    "type": "color"
+                }
+            }
+        }
     }
 
     private getShadeColor(shade: Shade, lm: boolean, theme?: ColorTheme, onShade?: boolean): string {
@@ -1180,121 +1272,352 @@ export class JSONGenerator {
         return shade.id;
     }
 
-    private getCoreColors(): any {
-        return {
-            "White": {
-                "Color": {
-                    "value": "rgba(255,255,255,0.6)",
-                    "type": "color"
-                }
-            },
-            "Gray": {
-                "Color": {
-                    "100": {
-                        "value": "#C8C8C8",
+    private getCoreColors(lm: boolean): any {
+        if (lm) {
+            return {
+                "White": {
+                    "Color": {
+                        "value": "#ffffff",
                         "type": "color"
                     },
-                    "200": {
-                        "value": "#B1B1B1",
+                    "Color-Half": {
+                        "value": "{Core-Colors.White.Color}80",
                         "type": "color"
                     },
-                    "300": {
-                        "value": "#9B9B9B",
+                    "Color-Quarter": {
+                        "value": "{Core-Colors.White.Color}20",
                         "type": "color"
                     },
-                    "400": {
-                        "value": "#858585",
-                        "type": "color"
-                    },
-                    "500": {
-                        "value": "#6A6A6A",
-                        "type": "color"
-                    },
-                    "600": {
-                        "value": "#505050",
-                        "type": "color"
-                    },
-                    "700": {
-                        "value": "#383838",
-                        "type": "color"
-                    },
-                    "800": {
-                        "value": "#212121",
-                        "type": "color"
-                    },
-                    "900": {
-                        "value": "#070707",
-                        "type": "color"
-                    },
-                    "050": {
-                        "value": "#DFDFDF",
+                    "On-Color": {
+                        "value": "{Text.Dark}",
                         "type": "color"
                     }
                 },
-                "On-Color": {
-                    "100": {
-                        "value": "{Text.Dark}",
-                        "type": "color",
-                        "description": "Contrast ratio: 13.24"
+                "Black": {
+                    "Color": {
+                        "value": "#121212",
+                        "type": "color"
                     },
-                    "200": {
-                        "value": "{Text.Dark}",
-                        "type": "color",
-                        "description": "Contrast ratio: 10.59"
+                    "Color-Half": {
+                        "value": "{Core-Colors.Black.Color}80",
+                        "type": "color"
                     },
-                    "300": {
-                        "value": "{Text.Dark}",
-                        "type": "color",
-                        "description": "Contrast ratio: 8.39"
+                    "Color-Quarter": {
+                        "value": "{Core-Colors.Black.Color}40",
+                        "type": "color"
                     },
-                    "400": {
-                        "value": "{Text.Dark}",
-                        "type": "color",
-                        "description": "Contrast ratio: 6.44"
-                    },
-                    "500": {
-                        "value": "{Text.Dark}",
-                        "type": "color",
-                        "description": "Contrast ratio: 4.88"
-                    },
-                    "600": {
+                    "On-Color": {
                         "value": "{Text.White}",
-                        "type": "color",
-                        "description": "Contrast ratio: 4.74"
-                    },
-                    "700": {
-                        "value": "{Text.White}",
-                        "type": "color",
-                        "description": "Contrast ratio: 6.58"
-                    },
-                    "800": {
-                        "value": "{Text.White}",
-                        "type": "color",
-                        "description": "Contrast ratio: 9.44"
-                    },
-                    "900": {
-                        "value": "{Text.White}",
-                        "type": "color",
-                        "description": "Contrast ratio: 13.20"
-                    },
-                    "050": {
-                        "value": "{Text.Dark}",
-                        "type": "color",
-                        "description": "Contrast ratio: 16.12"
-                    },
-                    "Half": {
-                        "value": "{Text.Dark}",
-                        "type": "color",
-                        "description": "Contrast ratio: "
-                    },
-                    "Quarter": {
-                        "value": "{Text.Dark}",
-                        "type": "color",
-                        "description": "Contrast ratio: "
+                        "type": "color"
                     }
+                },
+                "Near-Black": {
+                    "Color": {
+                        "value": "#181818",
+                        "type": "color"
+                    }
+                },
+                "Gray": {
+                    "Color": {
+                        "100": {
+                            "value": "rgb(228, 228, 228)",
+                            "type": "color"
+                        },
+                        "200": {
+                            "value": "rgb(205, 205, 205)",
+                            "type": "color"
+                        },
+                        "300": {
+                            "value": "rgb(183, 183, 183)",
+                            "type": "color"
+                        },
+                        "400": {
+                            "value": "rgb(160, 160, 160)",
+                            "type": "color"
+                        },
+                        "500": {
+                            "value": "rgb(138, 138, 138)",
+                            "type": "color"
+                        },
+                        "600": {
+                            "value": "rgb(115, 115, 115)",
+                            "type": "color"
+                        },
+                        "700": {
+                            "value": "rgb(93, 93, 93)",
+                            "type": "color"
+                        },
+                        "800": {
+                            "value": "rgb(70, 70, 70)",
+                            "type": "color"
+                        },
+                        "900": {
+                            "value": "rgb(48, 48, 48)",
+                            "type": "color"
+                        },
+                        "050": {
+                            "value": "rgb(250, 250, 250)",
+                            "type": "color"
+                        },
+                        "Half": {
+                            "value": "rgb(253, 253, 253)",
+                            "type": "color"
+                        },
+                        "Quarter": {
+                            "value": "rgb(254, 254, 254)",
+                            "type": "color"
+                        }
+                    },
+                    "On-Color": {
+                        "100": {
+                            "value": "{Text.Dark}",
+                            "type": "color",
+                            "description": "Contrast ratio: 13.24"
+                        },
+                        "200": {
+                            "value": "{Text.Dark}",
+                            "type": "color",
+                            "description": "Contrast ratio: 10.59"
+                        },
+                        "300": {
+                            "value": "{Text.Dark}",
+                            "type": "color",
+                            "description": "Contrast ratio: 8.39"
+                        },
+                        "400": {
+                            "value": "{Text.Dark}",
+                            "type": "color",
+                            "description": "Contrast ratio: 6.44"
+                        },
+                        "500": {
+                            "value": "{Text.Dark}",
+                            "type": "color",
+                            "description": "Contrast ratio: 4.88"
+                        },
+                        "600": {
+                            "value": "{Text.White}",
+                            "type": "color",
+                            "description": "Contrast ratio: 4.74"
+                        },
+                        "700": {
+                            "value": "{Text.White}",
+                            "type": "color",
+                            "description": "Contrast ratio: 6.58"
+                        },
+                        "800": {
+                            "value": "{Text.White}",
+                            "type": "color",
+                            "description": "Contrast ratio: 9.44"
+                        },
+                        "900": {
+                            "value": "{Text.White}",
+                            "type": "color",
+                            "description": "Contrast ratio: 13.20"
+                        },
+                        "050": {
+                            "value": "{Text.Dark}",
+                            "type": "color",
+                            "description": "Contrast ratio: 16.12"
+                        },
+                        "Half": {
+                            "value": "{Text.Dark}",
+                            "type": "color",
+                            "description": "Contrast ratio: "
+                        },
+                        "Quarter": {
+                            "value": "{Text.Dark}",
+                            "type": "color",
+                            "description": "Contrast ratio: "
+                        }
+                    }
+                },
+                "Transparent": {
+                    "value": "#00000000",
+                    "type": "color"
+                },
+                "Image-Overlay": {
+                    "value": "rgba(0,0,0,.25)",
+                    "type": "color"
                 }
             }
-        };
+        } else {
+            return {
+                "White": {
+                    "Color": {
+                        "value": "rgba(255,255,255,0.6)",
+                        "type": "color"
+                    },
+                    "Color-Half": {
+                        "value": "{Core-Colors.White.Color}",
+                        "type": "color",
+                        "$extensions": {
+                            "studio.tokens": {
+                                "modify": {
+                                    "type": "alpha",
+                                    "value": ".5",
+                                    "space": "lch"
+                                }
+                            }
+                        }
+                    },
+                    "Color-Quarter": {
+                        "value": "{Core-Colors.White.Color}",
+                        "type": "color",
+                        "$extensions": {
+                            "studio.tokens": {
+                                "modify": {
+                                    "type": "alpha",
+                                    "value": ".25",
+                                    "space": "lch"
+                                }
+                            }
+                        }
+                    },
+                    "On-Color": {
+                        "value": "{Text.Dark}",
+                        "type": "color"
+                    }
+                },
+                "Black": {
+                    "Color": {
+                        "value": "#121212",
+                        "type": "color"
+                    },
+                    "Color-Half": {
+                        "value": "{Core-Colors.Black.Color}80",
+                        "type": "color"
+                    },
+                    "Color-Quarter": {
+                        "value": "{Core-Colors.Black.Color}40",
+                        "type": "color"
+                    },
+                    "On-Color": {
+                        "value": "{Text.White}",
+                        "type": "color"
+                    }
+                },
+                "Near-Black": {
+                    "Color": {
+                        "value": "rgb(24,24,24)",
+                        "type": "color"
+                    }
+                },
+                "Gray": {
+                    "Color": {
+                        "100": {
+                            "value": "#C8C8C8",
+                            "type": "color"
+                        },
+                        "200": {
+                            "value": "#B1B1B1",
+                            "type": "color"
+                        },
+                        "300": {
+                            "value": "#9B9B9B",
+                            "type": "color"
+                        },
+                        "400": {
+                            "value": "#858585",
+                            "type": "color"
+                        },
+                        "500": {
+                            "value": "#6A6A6A",
+                            "type": "color"
+                        },
+                        "600": {
+                            "value": "#505050",
+                            "type": "color"
+                        },
+                        "700": {
+                            "value": "#383838",
+                            "type": "color"
+                        },
+                        "800": {
+                            "value": "#212121",
+                            "type": "color"
+                        },
+                        "900": {
+                            "value": "#181818",
+                            "type": "color"
+                        },
+                        "050": {
+                            "value": "#DFDFDF",
+                            "type": "color"
+                        }
+                    },
+                    "On-Color": {
+                        "100": {
+                            "value": "{Text.Dark}",
+                            "type": "color",
+                            "description": "Contrast ratio: 13.24"
+                        },
+                        "200": {
+                            "value": "{Text.Dark}",
+                            "type": "color",
+                            "description": "Contrast ratio: 10.59"
+                        },
+                        "300": {
+                            "value": "{Text.Dark}",
+                            "type": "color",
+                            "description": "Contrast ratio: 8.39"
+                        },
+                        "400": {
+                            "value": "{Text.Dark}",
+                            "type": "color",
+                            "description": "Contrast ratio: 6.44"
+                        },
+                        "500": {
+                            "value": "{Text.Dark}",
+                            "type": "color",
+                            "description": "Contrast ratio: 4.88"
+                        },
+                        "600": {
+                            "value": "{Text.White}",
+                            "type": "color",
+                            "description": "Contrast ratio: 4.74"
+                        },
+                        "700": {
+                            "value": "{Text.White}",
+                            "type": "color",
+                            "description": "Contrast ratio: 6.58"
+                        },
+                        "800": {
+                            "value": "{Text.White}",
+                            "type": "color",
+                            "description": "Contrast ratio: 9.44"
+                        },
+                        "900": {
+                            "value": "{Text.White}",
+                            "type": "color",
+                            "description": "Contrast ratio: 13.20"
+                        },
+                        "050": {
+                            "value": "{Text.Dark}",
+                            "type": "color",
+                            "description": "Contrast ratio: 16.12"
+                        },
+                        "Half": {
+                            "value": "{Text.Dark}",
+                            "type": "color",
+                            "description": "Contrast ratio: "
+                        },
+                        "Quarter": {
+                            "value": "{Text.Dark}",
+                            "type": "color",
+                            "description": "Contrast ratio: "
+                        }
+                    }
+                },
+                "Transparent": {
+                    "value": "#00000000",
+                    "type": "color"
+                },
+                "Image-Overlay": {
+                    "value": "rgba(0,0,0,.25)",
+                    "type": "color"
+                }
+            }
+        }
     }
 
     private getText(): any {
@@ -1310,30 +1633,307 @@ export class JSONGenerator {
         };
     }
 
-    private getImageOverlay(): any {
+    private getHotlinkUnderline(lm: boolean): any {
+        const vars = this.atoms.hotlinks.getHotlinkVariables2(lm);
+        if (!vars) return undefined;
         return {
-            "value": "rgba(0,0,0,.25)",
-            "type": "color"
-        };
+            "On-Colored": this.getHotlinkUnderlineSection(vars.onTertiary),
+            "On-White": this.getHotlinkUnderlineSection(vars.onWhite),
+            "On-Black": this.getHotlinkUnderlineSection(vars.onBlack),
+            "Default": this.getHotlinkUnderlineSection(vars.default),
+        }
     }
 
-    private getAlert(): any {
+    private getHotlinkUnderlineSection(vars: HotlinkModeVariables): any {
         return {
-            "Button": {
-                "value": {
-                    "fill": "{Core-Colors.White.Color}",
-                    "horizontalPadding": "{Spacing.spacing-2}"
-                },
-                "type": "composition"
+            "Default": {
+                "type": "other",
+                "value": vars.unvisited.decoration,
             },
-            "On-Button": {
-                "value": {
-                    "fill": "{Core-Colors.Black.Color}",
-                    "typography": "{Small-Text.CTA-Small}"
-                },
-                "type": "composition"
+            "Hover": {
+                "type": "other",
+                "value": vars.unvisited.hoverDecoration,
             }
-        };
+        }
+    }
+
+    private getColorName(): any {
+        return {
+            "Color-1": {
+                "value": "Pink",
+                "type": "text"
+            },
+            "Color-2": {
+                "value": "Pink",
+                "type": "text"
+            },
+            "Color-3": {
+                "value": "Pink",
+                "type": "text"
+            },
+            "Color-4": {
+                "value": "Pink",
+                "type": "text"
+            },
+            "Color-5": {
+                "value": "Pink",
+                "type": "text"
+            },
+            "Color-6": {
+                "value": "Pink",
+                "type": "text"
+            },
+            "Color-7": {
+                "value": "Pink",
+                "type": "text"
+            },
+            "Color-8": {
+                "value": "Pink",
+                "type": "text"
+            },
+            "Color-9": {
+                "value": "Pink",
+                "type": "text"
+            },
+            "Color-10": {
+                "value": "Pink",
+                "type": "text"
+            }
+        }
+    }
+
+    private getShowColors(): any {
+        return {
+            "Secondary": {
+                "value": "true",
+                "type": "boolean"
+            },
+            "Tertiary": {
+                "value": "true",
+                "type": "boolean"
+            },
+            "Color-1": {
+                "value": "true",
+                "type": "boolean"
+            },
+            "Color-2": {
+                "value": "true",
+                "type": "boolean"
+            },
+            "Color-3": {
+                "value": "true",
+                "type": "boolean"
+            },
+            "Color-4": {
+                "value": "true",
+                "type": "boolean"
+            },
+            "Color-5": {
+                "value": "true",
+                "type": "boolean"
+            },
+            "Color-6": {
+                "value": "true",
+                "type": "boolean"
+            },
+            "Color-7": {
+                "value": "true",
+                "type": "boolean"
+            },
+            "Color-8": {
+                "value": "true",
+                "type": "boolean"
+            },
+            "Color-9": {
+                "value": "true",
+                "type": "boolean"
+            },
+            "Color-10": {
+                "value": "true",
+                "type": "boolean"
+            }
+        }
+    }
+
+    private getAccessibilityColorSets(): any {
+        return {
+            "Primary-Background": {
+                "Hotlink-Color": {
+                    "ColoredHotlinks": {
+                        "value": "true",
+                        "type": "boolean"
+                    },
+                    "BlackHotlinks": {
+                        "value": "false",
+                        "type": "boolean"
+                    },
+                    "WhiteHotlinks": {
+                        "value": "false",
+                        "type": "boolean"
+                    }
+                },
+                "Button-Color": {
+                    "ColoredButtons": {
+                        "value": "true",
+                        "type": "boolean"
+                    },
+                    "BlackButtons": {
+                        "value": "false",
+                        "type": "boolean"
+                    },
+                    "WhiteButtons": {
+                        "value": "false",
+                        "type": "boolean"
+                    }
+                },
+                "Icon-Color": {
+                    "ColoredIcons": {
+                        "value": "true",
+                        "type": "boolean"
+                    },
+                    "BlackIcons": {
+                        "value": "false",
+                        "type": "boolean"
+                    },
+                    "WhiteIcons": {
+                        "value": "false",
+                        "type": "boolean"
+                    }
+                }
+            },
+            "Black-Background": {
+                "Hotlink-Color": {
+                    "ColoredHotlinks": {
+                        "value": "true",
+                        "type": "boolean"
+                    },
+                    "BlackHotlinks": {
+                        "value": "false",
+                        "type": "boolean"
+                    },
+                    "WhiteHotlinks": {
+                        "value": "false",
+                        "type": "boolean"
+                    }
+                },
+                "Button-Color": {
+                    "ColoredButtons": {
+                        "value": "true",
+                        "type": "boolean"
+                    },
+                    "BlackButtons": {
+                        "value": "false",
+                        "type": "boolean"
+                    },
+                    "WhiteButtons": {
+                        "value": "false",
+                        "type": "boolean"
+                    }
+                },
+                "Icon-Color": {
+                    "ColoredIcons": {
+                        "value": "true",
+                        "type": "boolean"
+                    },
+                    "BlackIcons": {
+                        "value": "false",
+                        "type": "boolean"
+                    },
+                    "WhiteIcons": {
+                        "value": "false",
+                        "type": "boolean"
+                    }
+                }
+            },
+            "White-Background": {
+                "Hotlink-Color": {
+                    "ColoredHotlinks": {
+                        "value": "true",
+                        "type": "boolean"
+                    },
+                    "BlackHotlinks": {
+                        "value": "false",
+                        "type": "boolean"
+                    },
+                    "WhiteHotlinks": {
+                        "value": "false",
+                        "type": "boolean"
+                    }
+                },
+                "Button-Color": {
+                    "ColoredButtons": {
+                        "value": "true",
+                        "type": "boolean"
+                    },
+                    "BlackButtons": {
+                        "value": "false",
+                        "type": "boolean"
+                    },
+                    "WhiteButtons": {
+                        "value": "false",
+                        "type": "boolean"
+                    }
+                },
+                "Icon-Color": {
+                    "ColoredIcons": {
+                        "value": "true",
+                        "type": "boolean"
+                    },
+                    "BlackIcons": {
+                        "value": "false",
+                        "type": "boolean"
+                    },
+                    "WhiteIcons": {
+                        "value": "false",
+                        "type": "boolean"
+                    }
+                }
+            },
+            "Colored-Background": {
+                "Hotlink-Color": {
+                    "ColoredHotlinks": {
+                        "value": "false",
+                        "type": "boolean"
+                    },
+                    "BlackHotlinks": {
+                        "value": "false",
+                        "type": "boolean"
+                    },
+                    "WhiteHotlinks": {
+                        "value": "true",
+                        "type": "boolean"
+                    }
+                },
+                "Button-Color": {
+                    "ColoredButtons": {
+                        "value": "false",
+                        "type": "boolean"
+                    },
+                    "BlackButtons": {
+                        "value": "false",
+                        "type": "boolean"
+                    },
+                    "WhiteButtons": {
+                        "value": "true",
+                        "type": "boolean"
+                    }
+                },
+                "Icon-Color": {
+                    "ColoredIcons": {
+                        "value": "false",
+                        "type": "boolean"
+                    },
+                    "BlackIcons": {
+                        "value": "false",
+                        "type": "boolean"
+                    },
+                    "WhiteIcons": {
+                        "value": "true",
+                        "type": "boolean"
+                    }
+                }
+            }
+        }
     }
 
 }

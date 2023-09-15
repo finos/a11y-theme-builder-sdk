@@ -4,7 +4,7 @@
  */
 import { Molecule } from "./molecule";
 import { IMolecules } from "../interfaces";
-import { PropertyNumberSelectable, PropertyElevationSelectable } from "../common/props";
+import { PropertyNumberSelectable, PropertyShadowSelectable } from "../common/props";
 
 /**
  * The avatars molecule.
@@ -16,14 +16,14 @@ export class Avatars extends Molecule {
     public mediumBorder: PropertyNumberSelectable;
     /** The extra large border property */
     public extraLargeBorder: PropertyNumberSelectable;
-    /** The elevation property */
-    public elevation: PropertyElevationSelectable;
+    /** The shadow property */
+    public shadow: PropertyShadowSelectable;
 
     constructor(molecules: IMolecules) {
         super("Avatars", molecules);
         this.mediumBorder = new PropertyNumberSelectable("Medium Avatar Border", false, this, [0, 0.5, 1, 2, 3, 4], 2);
         this.extraLargeBorder = new PropertyNumberSelectable("Extra Large Avatar Border", false, this, [0, 0.5, 1, 2, 3, 4, 5, 6, 7, 8], 2);
-        this.elevation = new PropertyElevationSelectable("Avatar Elevation", false, this, 0, 9);
+        this.shadow = new PropertyShadowSelectable("Avatar Shadow", false, this);
     }
 
     public deserialize(obj: any) {
@@ -31,14 +31,14 @@ export class Avatars extends Molecule {
         super.deserialize(obj);
         this.mediumBorder.deserialize(obj.mediumBorder);
         this.extraLargeBorder.deserialize(obj.extraLargeBorder);
-        this.elevation.deserialize(obj.elevation);
+        this.shadow.deserialize(obj.shadow);
     }
 
     public serialize(): any {
         const obj: any = {};
         obj.mediumBorder = this.mediumBorder.serialize();
         obj.extraLargeBorder = this.extraLargeBorder.serialize();
-        obj.elevation = this.elevation.serialize();
+        obj.shadow = this.shadow.serialize();
         return obj;
     }
 }
