@@ -412,14 +412,15 @@ export class PropertyStringCategorySelectable extends PropertySelectable<Categor
         const value = this.getValue();
         if (!value) return undefined;
         const sv = this.getSelectableValues();
-        sv.forEach((category) => {
+        for (let j = 0; j < sv.length; j++) {
+            const category = sv[j];
             const mems = category.members;
             for (let i = 0; i < mems.length; i++) {
                 if (mems[i] === value) {
                     return { category, index: i + 1};
                 }
             }
-        });
+        }
         return undefined;
     }
 }
