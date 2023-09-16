@@ -408,18 +408,19 @@ export class PropertyStringCategorySelectable extends PropertySelectable<Categor
         super(name, required,  parent, opts);
     }
 
-    public getCategoryAndValue(): CategoryAndIndex<string> | undefined {
+    public getCategoryAndIndex(): CategoryAndIndex<string> | undefined {
         const value = this.getValue();
         if (!value) return undefined;
         const sv = this.getSelectableValues();
-        sv.forEach((category) => {
+        for (let i = 0; i < sv.length; i++) {
+            const category = sv[i];
             const mems = category.members;
-            for (let i = 0; i < mems.length; i++) {
-                if (mems[i] === value) {
-                    return { category, index: i + 1};
+            for (let j = 0; j < mems.length; j++) {
+                if (mems[j] === value) {
+                    return { category, index: j + 1};
                 }
             }
-        });
+        }
         return undefined;
     }
 }

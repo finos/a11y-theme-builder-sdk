@@ -944,8 +944,8 @@ export class JSONGenerator {
         const toastShadow = this.molecules.toasts.shadow;
         const dropDownShadow = this.molecules.dropdowns.menuShadow;
         const fcn = function (prop: PropertyShadowSelectable): any {
-            const cv = prop.getCategoryAndValue();
-            const value = cv ? `${cv.category.json}-${cv.index}` : undefined;
+            const ci = prop.getCategoryAndIndex();
+            const value = ci ? `${ci.category.json}-${ci.index}` : undefined;
             return { type: "boxShadow", value };
         };
         return {
