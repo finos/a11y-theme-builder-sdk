@@ -1451,7 +1451,7 @@ function shadowToCSS(vk: CSSVariableKind) {
     const prop = vk.props[0] as PropertyShadowSelectable;
     const ci = prop.getCategoryAndIndex();
     if (!ci) return undefined;
-    vk.setVar(vk.name, `var(--${ci.category.css}-${ci.index})`);
+    vk.setVar(vk.name, `var(--${ci.category.css}-${ci.memberIndex+1})`);
 }
 
 function colorToCSS(vk: CSSVariableKind) {

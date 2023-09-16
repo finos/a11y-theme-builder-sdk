@@ -399,7 +399,8 @@ export class PropertyIndexSelectable extends PropertyStringSelectable {
 
 export interface CategoryAndIndex<T> {
     category: Category<T>;
-    index: number;
+    categoryIndex: number;
+    memberIndex: number;
 }
 
 export class PropertyStringCategorySelectable extends PropertySelectable<Category<string>[],string> {
@@ -412,12 +413,12 @@ export class PropertyStringCategorySelectable extends PropertySelectable<Categor
         const value = this.getValue();
         if (!value) return undefined;
         const sv = this.getSelectableValues();
-        for (let i = 0; i < sv.length; i++) {
-            const category = sv[i];
+        for (let categoryIndex = 0; categoryIndex < sv.length; categoryIndex++) {
+            const category = sv[categoryIndex];
             const mems = category.members;
-            for (let j = 0; j < mems.length; j++) {
-                if (mems[j] === value) {
-                    return { category, index: j + 1};
+            for (let memberIndex = 0; memberIndex < mems.length; memberIndex++) {
+                if (mems[memberIndex] === value) {
+                    return { category, categoryIndex, memberIndex};
                 }
             }
         }

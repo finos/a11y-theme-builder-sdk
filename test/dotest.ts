@@ -197,6 +197,7 @@ async function test() {
         //errCnt++;
     }
 
+    console.log(`TEST: Shadow selectables: ${JSON.stringify(ds.molecules.standardCards.shadow.getSelectableValues(),null,4)}`);
     console.log(`TEST: Base JSON : ${JSON.stringify(ds.code.getJSONBase(),null,4)}`);
     console.log(`TEST: JSON lightmode: ${JSON.stringify(ds.code.getJSONLM(),null,4)}`);
     console.log(`TEST: JSON darkmode: ${JSON.stringify(ds.code.getJSONDM(),null,4)}`);
