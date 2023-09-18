@@ -415,6 +415,9 @@ export class PropertyStringCategorySelectable extends PropertySelectable<Categor
         const sv = this.getSelectableValues();
         for (let categoryIndex = 0; categoryIndex < sv.length; categoryIndex++) {
             const category = sv[categoryIndex];
+            if (category.display === value) {
+                return { category, categoryIndex, memberIndex: -1};
+            }
             const mems = category.members;
             for (let memberIndex = 0; memberIndex < mems.length; memberIndex++) {
                 if (mems[memberIndex] === value) {
@@ -431,6 +434,7 @@ export class PropertyShadowSelectable extends PropertyStringCategorySelectable {
     constructor(name: string, required: boolean, parent: Node, opts?: {defaultValue?: string}) {
         super(name, required,  parent, { 
             selectables: [
+                newStringCategory("None", "", "", "", 0),
                 newStringCategory("Elevations", "Elevation", "elevation", "Elevation", 9),
                 newStringCategory("Bevels", "Bevel", "bevel", "Bevel", 9),
                 newStringCategory("Inset Bevels", "Inset Bevel", "inset-bevel", "InsetBevel", 9),
@@ -439,7 +443,7 @@ export class PropertyShadowSelectable extends PropertyStringCategorySelectable {
                 newStringCategory("Recesses", "Recess", "recess", "Recess", 9),
                 newStringCategory("Glows", "Glow", "glow", "Glow", 8),
             ],
-            defaultValue: opts ? opts.defaultValue : undefined
+            defaultValue: opts ? opts.defaultValue : "None" 
         });
     }
 

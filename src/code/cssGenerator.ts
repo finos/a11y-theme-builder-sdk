@@ -1450,8 +1450,11 @@ function getCoreShadeVarName(shade: Shade): string | undefined {
 function shadowToCSS(vk: CSSVariableKind) {
     const prop = vk.props[0] as PropertyShadowSelectable;
     const ci = prop.getCategoryAndIndex();
-    if (!ci) return undefined;
-    vk.setVar(vk.name, `var(--${ci.category.css}-${ci.memberIndex+1})`);
+    if (!ci || !ci.category.css || ci.memberIndex < 0) {
+        vk.setVar(vk.name, undefined);
+    } else {
+        vk.setVar(vk.name, `var(--${ci.category.css}-${ci.memberIndex+1})`);
+    }
 }
 
 function colorToCSS(vk: CSSVariableKind) {

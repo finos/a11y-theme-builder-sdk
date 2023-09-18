@@ -945,7 +945,7 @@ export class JSONGenerator {
         const dropDownShadow = this.molecules.dropdowns.menuShadow;
         const fcn = function (prop: PropertyShadowSelectable): any {
             const ci = prop.getCategoryAndIndex();
-            const value = ci ? `${ci.category.json}-${ci.memberIndex+1}` : undefined;
+            const value = ci && ci.category.json && ci.memberIndex >= 0 ? `${ci.category.json}-${ci.memberIndex+1}` : undefined;
             return { type: "boxShadow", value };
         };
         return {
