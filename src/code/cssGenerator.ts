@@ -380,12 +380,6 @@ export class CSSGenerator {
                 "chipLetterSpacing": `var(--${typography}LetterSpacing)`,
             });    
         });
-        chipVK.setVars({
-           "switch-height": "var(--spacing-3)",  // TODO: should be dynamic?
-           "switch-radius": "3", // TODO: should be dynamic?
-           "switch-bar-height": "0.5", // TODO: should be dynamic?
-           "switch-bar-radius": "0.5", // TODO: should be dynamic?
-        });
         // cards
         const card = ms.standardCards;
         const cardsVK = new CSSVariableKind("card","",[card.padding], this);
@@ -417,24 +411,17 @@ export class CSSGenerator {
         });
         // Toasts
         const toast = ms.toasts;
-        const toastVK = new CSSVariableKind("toast","",[toast.handleBorderRadius], this);
         this.addPropVar("toast-radius", "", toast.handleBorderRadius);
         this.addPropVar("toast-padding", "", toast.padding);
         this.addPropVar("toast-shadow", "", toast.shadow, shadowToCSS);
-        toastVK.setVars({
-            "toast-bevel": "var(--bevel-0)",
-            "toast-boxshadow": "var(--toast-elevation), var(--toast-bevel)",
-        });
         // Images
         const image = ms.images;
-        const imageVK = new CSSVariableKind("images","",[image.imageShadow], this);
         this.addPropVar("image-shadow", "", image.imageShadow, shadowToCSS);
         this.addPropVar("image-radius", "", image.generalImageBorderRadius);
         this.addPropVar("inline-image-height", "", image.listImageHeight);
         this.addPropVar("inline-image-radius", "", image.listImageBorderRadius);
         // Avatar Images
         const avatar = ms.avatars;
-        const imagesVK = new CSSVariableKind("avatar","",[avatar.mediumBorder], this);
         this.addPropVar("avatar-border", "", avatar.mediumBorder);
         this.addPropVar("avatar-border-lg", "", avatar.extraLargeBorder);
         this.addPropVar("avatar-shadow", "", avatar.shadow, shadowToCSS);
@@ -442,14 +429,13 @@ export class CSSGenerator {
         const slider = ms.sliders;
         this.addPropVar("sliderhandleHeight", "", slider.visibleHeight);
         this.addPropVar("sliderhandleRadius", "", slider.handleBorderRadius);
-        this.addPropVar("sliderhandleShadow", "", slider.handleShadow, shadowToCSS);
+        this.addPropVar("sliderhandle-shadow", "", slider.handleShadow, shadowToCSS);
         this.addPropVar("sliderbarHeight", "", slider.barHeight);
-        this.addPropVar("barShadow", "", slider.barShadow, shadowToCSS);
+        this.addPropVar("sliderbar-shadow", "", slider.barShadow, shadowToCSS);
         // popover
         const popover = ms.popovers;
-        const poVK = new CSSVariableKind("popover","",[popover.borderRadius], this);
         this.addPropVar("popoverRadius", "", popover.borderRadius);
-        this.addPropVar("popoverShadow", "", popover.shadow, shadowToCSS);
+        this.addPropVar("popover-shadow", "", popover.shadow, shadowToCSS);
         // Spacing
         const spacing = ms.spacing;
         this.addPropVar("section-padding", "", spacing.sectionPadding);

@@ -2,7 +2,20 @@
  * Copyright (c) 2023 Discover Financial Services
  * Licensed under MIT License. See License.txt in the project root for license information
  */
-import { ThemeBuilder, ColorTheme, ColorPair, EventType, Event, EventValueChange, PropertyColorShade, PropertyColorPair, PropertyTitledShade, Shade, CSSVarGroup } from "../index";
+import { 
+    ThemeBuilder, 
+    ColorTheme, 
+    ColorPair, 
+    EventType, 
+    Event, 
+    EventValueChange, 
+    PropertyColorShade, 
+    PropertyShadowSelectable,
+    PropertyColorPair,
+    PropertyTitledShade,
+    Shade,
+    CSSVarGroup
+} from "../index";
 
 let errCnt = 0;
 let buttonSelectablesChangedCount = 0;
@@ -107,6 +120,8 @@ async function test() {
     assert(ds.molecules.avatars.mediumBorder.getValue() === 8, "Avatar medium border is not 8");
 
     selectColorPair(ct.lightModeBackground, 2);
+
+    ds.molecules.standardButtons.buttonShadow.setValue("Elevation 3");
 
     console.log("TEST: Adding new color after primary was selected");
     colorPalette.addColor("newColor","#0047AB");
