@@ -7,8 +7,7 @@ import { IMolecules } from "../interfaces";
 import { 
     PropertyStringSelectable,
     PropertyPixel,
-    PropertyBevelSelectable,
-    PropertyElevationSelectable,
+    PropertyShadowSelectable,
     PropertyNumber,
     PropertyNumberSelectable,
 } from "../common/props";
@@ -29,10 +28,8 @@ export class Chips extends Molecule {
     public horizontalPadding: PropertyNumberSelectable;
     /** The text property */
     public text: PropertyStringSelectable;
-    /** The elevation property */
-    public elevation: PropertyElevationSelectable;
-    /** The bevel property */
-    public bevel: PropertyBevelSelectable;
+    /** The shadow property */
+    public shadow: PropertyShadowSelectable;
 
    constructor(molecules: IMolecules) {
         super("Chips", molecules);
@@ -44,8 +41,7 @@ export class Chips extends Molecule {
             selectables: ["Caption", "Caption Bold"],
             defaultValue: "Caption",
         });
-        this.elevation = new PropertyElevationSelectable("Chip Elevation", false, this, 0, 9, 2);
-        this.bevel = new PropertyBevelSelectable("Chip Bevel", false, this, 3, 3);
+        this.shadow = new PropertyShadowSelectable("Chip Elevation", false, this, {defaultValue: "Elevation 2"});
     }
 
     public deserialize(obj: any) {
@@ -56,8 +52,7 @@ export class Chips extends Molecule {
         this.radius.deserialize(obj.radius);
         this.horizontalPadding.deserialize(obj.horizontalPadding);
         this.text.deserialize(obj.text);
-        this.elevation.deserialize(obj.elevation);
-        this.bevel.deserialize(obj.bevel);
+        this.shadow.deserialize(obj.shadow);
     }
 
     public serialize(): any {
@@ -67,8 +62,7 @@ export class Chips extends Molecule {
         obj.radius = this.radius.serialize();
         obj.horizontalPadding = this.horizontalPadding.serialize();
         obj.text = this.text.serialize();
-        obj.elevation = this.elevation.serialize();
-        obj.bevel = this.bevel.serialize();
+        obj.shadow = this.shadow.serialize();
         return obj;
     }
 }

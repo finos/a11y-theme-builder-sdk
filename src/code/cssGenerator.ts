@@ -5,7 +5,7 @@
 import { Atoms, Shade, ColorTheme, ShadeGroup, ModeShadeGroups, BevelSettingsProps, HotlinkModeVariables, OnHotlink, TypographyStyling} from "../atoms/index";
 import { Molecules, Dropdowns } from "../molecules/index";
 import { Organisms, Hero } from "../organisms/index";
-import { PropertyColorShade, PropertyPercentage, PropertyGroupListener, PropertyIndexSelectable, PropertyColorPair, Property, ListenerSubscription, ColorPair } from "../common/index";
+import { PropertyColorShade, PropertyPercentage, PropertyGroupListener, PropertyShadowSelectable, PropertyColorPair, Property, ListenerSubscription, ColorPair } from "../common/index";
 import { IDesignSystem, EventValueChange, VarListener, IVarGroup, IColor, EventType } from "../interfaces";
 
 import { Logger } from "../util/logger";
@@ -310,8 +310,8 @@ export class CSSGenerator {
         const ms = this.molecules;
         // dropdowns
         const dd = ms.dropdowns;
-        const dropdownVk = new CSSVariableKind("dropdowns","",[dd.menuElevation], this);
-        this.addPropVar("dropdown-elevation", "", dd.menuElevation, elevationToCSS);
+        const dropdownVk = new CSSVariableKind("dropdowns","",[dd.menuShadow], this);
+        this.addPropVar("dropdown-shadow", "", dd.menuShadow, shadowToCSS);
         this.addPropVar("dropdown-radius", "", dd.borderRadius);
         dropdownVk.setVars({
             "dropdown-focus-bg": "linear-gradient(90deg, var(--button) var(--dropdown-focus-theme), var(--transparent) var(--dropdown-focus-theme))",
@@ -346,11 +346,7 @@ export class CSSGenerator {
         this.addPropVar("button-radius", "", stb.radius);
         this.addPropVar("button-minwidth", "", stb.minWidth);
         this.addPropVar("button-height", "", stb.height);
-        this.addPropVar("button-elevation", "", stb.buttonElevation, elevationToCSS);
-        this.addPropVar("button-bevel", "", stb.buttonBevel, bevelToCSS);
-        buttonVk.setVars({
-            "button-shadow": "var(--button-elevation), var(--button-bevel)",
-        });
+        this.addPropVar("button-shadow", "", stb.buttonShadow, shadowToCSS);
         // small button
         const smb = ms.smallButtons;
         const smbVK = new CSSVariableKind("smb","",[smb.visibleHeight], this);
@@ -375,8 +371,7 @@ export class CSSGenerator {
         this.addPropVar("chip-height", "", chip.visibleHeight);
         this.addPropVar("chip-radius", "", chip.radius);
         this.addPropVar("chip-padding", "", chip.horizontalPadding);
-        this.addPropVar("chip-elevation", "", chip.elevation, elevationToCSS);
-        this.addPropVar("chip-bevel", "", chip.bevel, bevelToCSS);
+        this.addPropVar("chip-shadow", "", chip.shadow, shadowToCSS);
         this.addPropVar("chip-text", "", chip.text, function(vk: CSSVariableKind) {
             const typography = (chip.text.getValue() === "Caption") ? "caption" : "caption-bold";
             chipVK.setVars({
@@ -385,35 +380,26 @@ export class CSSGenerator {
                 "chipLetterSpacing": `var(--${typography}LetterSpacing)`,
             });    
         });
-        chipVK.setVars({
-           "switch-height": "var(--spacing-3)",  // TODO: should be dynamic?
-           "switch-radius": "3", // TODO: should be dynamic?
-           "switch-bar-height": "0.5", // TODO: should be dynamic?
-           "switch-bar-radius": "0.5", // TODO: should be dynamic?
-        });
         // cards
         const card = ms.standardCards;
         const cardsVK = new CSSVariableKind("card","",[card.padding], this);
         this.addPropVar("card-padding", "", card.padding);
         this.addPropVar("card-gap", "", card.contentGap);
         this.addPropVar("card-radius", "", card.borderRadius);
-        this.addPropVar("card-elevation", "", card.elevation, elevationToCSS);
-        this.addPropVar("card-bevel", "", card.bevel, bevelToCSS);
+        this.addPropVar("card-shadow", "", card.shadow, shadowToCSS);
         cardsVK.setVars({
             "card-border": "var(--border-1)",
             "card-border-color": "var(--border)",
-            "card-shadow": "var(--card-elevation), var(--card-bevel)",
         });
         // modals
         const modal = ms.modal;
         const modalVK = new CSSVariableKind("modal","",[modal.borderRadius], this);
         this.addPropVar("modal-radius", "", modal.borderRadius);
-        this.addPropVar("modal-elevation", "", modal.elevation, elevationToCSS);
+        this.addPropVar("modal-shadow", "", modal.shadow, shadowToCSS);
         this.addPropVar("modal-overlay", "", modal.color, colorToCSS);
         modalVK.setVars({
             "modal-padding": "2", // TODO: static?
             "modal-border": "var(--spacing-2)",
-            "modal-shadow": "var(--modal-elevation)",
         });
         const ttVK = new CSSVariableKind("tooltip","",[], this);
         ttVK.setVars({
@@ -425,45 +411,31 @@ export class CSSGenerator {
         });
         // Toasts
         const toast = ms.toasts;
-        const toastVK = new CSSVariableKind("toast","",[toast.handleBorderRadius], this);
         this.addPropVar("toast-radius", "", toast.handleBorderRadius);
         this.addPropVar("toast-padding", "", toast.padding);
-        this.addPropVar("toast-elevation", "", toast.elevation, elevationToCSS);
-        toastVK.setVars({
-            "toast-bevel": "var(--bevel-0)",
-            "toast-boxshadow": "var(--toast-elevation), var(--toast-bevel)",
-        });
+        this.addPropVar("toast-shadow", "", toast.shadow, shadowToCSS);
         // Images
         const image = ms.images;
-        const imageVK = new CSSVariableKind("images","",[image.imageElevation], this);
-        this.addPropVar("image-elevation", "", image.imageElevation, elevationToCSS);
+        this.addPropVar("image-shadow", "", image.imageShadow, shadowToCSS);
         this.addPropVar("image-radius", "", image.generalImageBorderRadius);
         this.addPropVar("inline-image-height", "", image.listImageHeight);
         this.addPropVar("inline-image-radius", "", image.listImageBorderRadius);
-        imageVK.setVars({
-            "image-shadow": "var(--image-elevation)",
-        })
         // Avatar Images
         const avatar = ms.avatars;
-        const imagesVK = new CSSVariableKind("avatar","",[avatar.mediumBorder], this);
         this.addPropVar("avatar-border", "", avatar.mediumBorder);
         this.addPropVar("avatar-border-lg", "", avatar.extraLargeBorder);
-        this.addPropVar("avatar-elevation", "", avatar.elevation, elevationToCSS);
-        imagesVK.setVar("avatar-shadow", "var(--avatar-elevation)");
+        this.addPropVar("avatar-shadow", "", avatar.shadow, shadowToCSS);
         // sliders
         const slider = ms.sliders;
         this.addPropVar("sliderhandleHeight", "", slider.visibleHeight);
         this.addPropVar("sliderhandleRadius", "", slider.handleBorderRadius);
-        this.addPropVar("sliderhandleElevation", "", slider.handleElevation, elevationToCSS);
+        this.addPropVar("sliderhandle-shadow", "", slider.handleShadow, shadowToCSS);
         this.addPropVar("sliderbarHeight", "", slider.barHeight);
-        this.addPropVar("barInBevel", "", slider.barInsetShadow, shadowToCSS);
+        this.addPropVar("sliderbar-shadow", "", slider.barShadow, shadowToCSS);
         // popover
         const popover = ms.popovers;
-        const poVK = new CSSVariableKind("popover","",[popover.borderRadius], this);
         this.addPropVar("popoverRadius", "", popover.borderRadius);
-        this.addPropVar("popoverElevation", "", popover.elevation, elevationToCSS);
-        this.addPropVar("popoverBevel", "", popover.bevel, bevelToCSS);
-        poVK.setVar("popoverShadow", "var(--popoverElevation), var(--popoverBevel)");
+        this.addPropVar("popover-shadow", "", popover.shadow, shadowToCSS);
         // Spacing
         const spacing = ms.spacing;
         this.addPropVar("section-padding", "", spacing.sectionPadding);
@@ -1461,23 +1433,14 @@ function getCoreShadeVarName(shade: Shade): string | undefined {
     return undefined;
 }
 
-function elevationToCSS(vk: CSSVariableKind) {
-    levelToCSS(vk, "elevation");
-}
-
-function bevelToCSS(vk: CSSVariableKind) {
-    levelToCSS(vk, "bevel");
-}
-
 function shadowToCSS(vk: CSSVariableKind) {
-    levelToCSS(vk, "bevel");
-}
-
-function levelToCSS(vk: CSSVariableKind, type: string) {
-    const prop = vk.props[0] as PropertyIndexSelectable;
-    const idx = prop.toIndex();
-    if (idx >= 0) vk.setVar(vk.name, `var(--${type}-${idx})`);
-    else vk.setVar(vk.name, `var(--reverse-bevel-${-idx})`);
+    const prop = vk.props[0] as PropertyShadowSelectable;
+    const ci = prop.getCategoryAndIndex();
+    if (!ci || !ci.category.css || ci.memberIndex < 0) {
+        vk.setVar(vk.name, undefined);
+    } else {
+        vk.setVar(vk.name, `var(--${ci.category.css}-${ci.memberIndex+1})`);
+    }
 }
 
 function colorToCSS(vk: CSSVariableKind) {

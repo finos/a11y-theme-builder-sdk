@@ -8,8 +8,7 @@ import {
     PropertyBoolean,
     PropertyPixelSelectable,
     PropertyBackgroundColorStyle,
-    PropertyBevelSelectable,
-    PropertyElevationSelectable,
+    PropertyShadowSelectable,
 } from "../common/props";
 
 /**
@@ -26,10 +25,8 @@ export class ChartBar extends Molecule {
     public barRadius: PropertyPixelSelectable;
     /** The chart border property  */
     public chartBorder: PropertyPixelSelectable;
-    /** The bar elevation property  */
-    public barElevation: PropertyElevationSelectable;
-    /** The bar bevel property  */
-    public barBevel: PropertyBevelSelectable;
+    /** The bar shadow property  */
+    public barShadow: PropertyShadowSelectable;
     /** The chart line display property  */
     public chartLinesDisplay: PropertyBoolean;
     /** The Y labels display property  */
@@ -41,8 +38,7 @@ export class ChartBar extends Molecule {
         this.barWidth = new PropertyPixelSelectable("Bar Width", false, this, [8, 16, 24, 32, 40, 48, 56]);
         this.barRadius = new PropertyPixelSelectable("Bar Radius", false, this, [0, 4, 8, 16, 24, 32, 40, 48, 56]);
         this.chartBorder = new PropertyPixelSelectable("Chart Border", false, this, [1, 2, 3, 4]);
-        this.barElevation = new PropertyElevationSelectable("Bar Elevation", false, this, 0, 9);
-        this.barBevel = new PropertyBevelSelectable("Bar Bevel", false, this, 3, 3);
+        this.barShadow = new PropertyShadowSelectable("Bar Shadow", false, this);
         this.chartLinesDisplay = new PropertyBoolean("Chart Lines Display", false, this);
         this.yLabelsDisplay = new PropertyBoolean("Y Labels Display", false, this);
     }
@@ -54,8 +50,7 @@ export class ChartBar extends Molecule {
         this.barWidth.deserialize(obj.barWidth);
         this.barRadius.deserialize(obj.barRadius);
         this.chartBorder.deserialize(obj.chartBorder);
-        this.barElevation.deserialize(obj.barElevation);
-        this.barBevel.deserialize(obj.barBevel);
+        this.barShadow.deserialize(obj.barShadow);
         this.chartLinesDisplay.deserialize(obj.chartLinesDisplay);
         this.yLabelsDisplay.deserialize(obj.yLabelsDisplay);
     }
@@ -66,8 +61,7 @@ export class ChartBar extends Molecule {
         obj.barWidth = this.barWidth.serialize();
         obj.barRadius = this.barRadius.serialize();
         obj.chartBorder = this.chartBorder.serialize();
-        obj.barElevation = this.barElevation.serialize();
-        obj.barBevel = this.barBevel.serialize();
+        obj.barShadow = this.barShadow.serialize();
         obj.chartLinesDisplay = this.chartLinesDisplay.serialize();
         obj.yLabelsDisplay = this.yLabelsDisplay.serialize();
         return obj;
