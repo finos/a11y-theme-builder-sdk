@@ -242,10 +242,10 @@ export class CSSGenerator {
         for (let i = 0; i < fw.length; i++) {
             this.addPropVar(`fontWeight-${i}`, "", fw[i]);
         }
+        this.addPropVar(`secondary-fontWeight`, "", fs.secondaryFontWeight);
         this.addPropVar("standard-LineHeight", "%", fs.standardLineHeight);
         this.addPropVar("header-LineHeight", "%", fs.headerLineHeight);
         this.addPropVar("sm-LineHeight", "%", fs.smallLineHeight);
-        this.addPropVar(`secondary-fontWeight`, "", fs.secondaryFontWeight);
 
         // Display and header styles
         const dhs = atoms.displayAndHeaderStyles;
