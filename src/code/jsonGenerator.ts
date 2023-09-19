@@ -776,7 +776,7 @@ export class JSONGenerator {
     private getBorder(): any {
         const type = "borderWidth";
         const border = this.atoms.borderSettings.baseBorderWidth.getValue() || 0;
-        const buttonBorder = this.molecules.standardButtons.minWidth.getValue() || 0;
+        const buttonBorder = this.molecules.standardButtons.secondaryBorder.getValue() || 0;
         const largeAvatarBorder = this.molecules.avatars.extraLargeBorder.getValue() || 0;
         const smallAvatarBorder = this.molecules.avatars.mediumBorder.getValue() || 0;
         const imageBorder = this.molecules.images.generalImageBorderRadius.getValue() || 0;
