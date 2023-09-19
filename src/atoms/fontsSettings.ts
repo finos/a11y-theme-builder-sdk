@@ -26,6 +26,8 @@ export class FontsSettings extends Atom {
     public headerLineHeight: PropertyNumber;
     /** The small line height property */
     public smallLineHeight: PropertyNumber;
+    /** The small line height property */
+    public secondaryFontWeight: PropertyNumber;
 
     constructor(atoms: IAtoms) {
         super("Fonts Settings", false, atoms);
@@ -41,6 +43,7 @@ export class FontsSettings extends Atom {
         this.standardLineHeight = new PropertyNumber("Standard Line Height", false, this, {defaultValue: 160});
         this.headerLineHeight = new PropertyNumber("Header Line Height", false, this, {defaultValue: 110});
         this.smallLineHeight = new PropertyNumber("Small Text Line Height", false, this, {defaultValue: 110});
+        this.secondaryFontWeight = new PropertyNumber(`Secondary Font Weight`, false, this, {defaultValue: 400});
     }
 
     public deserialize(obj: any) {
@@ -56,6 +59,7 @@ export class FontsSettings extends Atom {
         this.standardLineHeight.deserialize(obj.standardLineHeight);
         this.headerLineHeight.deserialize(obj.headerLineHeight);
         this.smallLineHeight.deserialize(obj.smallLineHeight);
+        this.secondaryFontWeight.deserialize(obj.secondaryFontWeight);
     }
 
     public serialize(): any {
@@ -70,6 +74,7 @@ export class FontsSettings extends Atom {
         obj.standardLineHeight = this.standardLineHeight.serialize();
         obj.headerLineHeight = this.headerLineHeight.serialize();
         obj.smallLineHeight = this.smallLineHeight.serialize();
+        obj.secondaryFontWeight = this.secondaryFontWeight.serialize();
         return obj;
     }
 }

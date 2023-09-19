@@ -634,6 +634,10 @@ export class JSONGenerator {
                 value: `${weight}`,
             };
         }
+        rtn['secondary-font-weight'] = {
+            type: "fontWeights",
+            value: `${this.atoms.fontsSettings.secondaryFontWeight.getValue() || 0}`,
+        }
         const headerWeight = this.atoms.displayAndHeaderStyles.headingDisplayFontWeight.getValue() || 0;
         rtn["Header-Weight"] = {
             type: "fontWeights",
