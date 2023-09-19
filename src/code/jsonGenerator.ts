@@ -504,8 +504,8 @@ export class JSONGenerator {
                 primary = '{Core-Colors.White.Color}';
                 secondary = '{Core-Colors.Gray.Color.050}';
             }
-            onPrimary = '{Theme-Colors.Primary.On-Color.Half}';
-            onSecondary = '{Theme-Colors.Primary.On-Color.Quarter}';
+            onPrimary = '{Text.Dark}';
+            onSecondary = '{Text.Dark}';
             // tertiary BG //
             tertiary = '{Theme.Primary.Color}';
             onTertiary = '{Theme.Primary.On-Color}';
@@ -832,7 +832,7 @@ export class JSONGenerator {
         }
         const shades = theme.getElevationShades(lm);
         for (let i = 0; i < shades.length; i++) {
-            rtn[`Elevation-${i + 1}`] = this.getShadeColor(shades[i], lm);
+            rtn[`Elevation-${i + 1}`] = lm ? "{Solid-Backgrounds.Primary.Color}" : this.getShadeColor(shades[i], lm);
         }
         log.debug(`getElevations exit`);
         return rtn;
