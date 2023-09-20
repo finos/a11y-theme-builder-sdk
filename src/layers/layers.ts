@@ -11,9 +11,9 @@ import { PropertyBoolean, PropertyStringSelectable } from "../common/props";
  */
 export class Layers extends Node {
 
-    public static readonly DT_DESKTOP = "Desktop";
-    public static readonly DT_TABLET = "Table";
-    public static readonly DT_MOBILE = "Mobile";
+    public static readonly DT_DESKTOP = "desktop";
+    public static readonly DT_TABLET = "tablet";
+    public static readonly DT_MOBILE = "mobile";
 
     /** Color blind property */
     public readonly colorBlind: PropertyBoolean;
@@ -32,7 +32,7 @@ export class Layers extends Node {
         this.dyslexia = new PropertyBoolean("Dyslexia", false, this, {defaultValue: false});
         this.motionSensitivity = new PropertyBoolean("Motion Sensitivity", false, this, {defaultValue: false});
         this.properties = [this.colorBlind, this.dyslexia, this.motionSensitivity];
-        this.deviceTarget = new PropertyStringSelectable("Dropdown Menu Focus State", true, this, {
+        this.deviceTarget = new PropertyStringSelectable("Devices", true, this, {
             selectables: [Layers.DT_DESKTOP, Layers.DT_TABLET, Layers.DT_MOBILE],
             defaultValue: Layers.DT_DESKTOP,
         });
