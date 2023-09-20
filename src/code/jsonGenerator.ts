@@ -461,6 +461,8 @@ export class JSONGenerator {
     private getSolidBackgrounds(theme: ColorTheme, lm: boolean): any {
         log.debug("getSolidBackgrounds enter");
         const bg = lm ? theme.lightModeBackground : theme.darkModeBackground;
+        const vars = theme.getBackgroundVariables(bg);
+
         const colorPair = bg.getValue();
         if (!colorPair) {
             log.debug("getSolidBackgrounds exit (no background color pair)");
@@ -562,6 +564,8 @@ export class JSONGenerator {
         const Black = this.getSolidColor(lm, buttonShade, iconShade, hotlinkShade, Shade.BLACK, "White");
         const White = this.getSolidColor(lm, buttonShade, iconShade, hotlinkShade, Shade.WHITE, "Dark");
         return { Primary, Secondary, Tertiary, Black, White };
+
+        
     }
 
     private getSolidColor(lm: boolean, button: Shade, icon: Shade, hotlink: Shade, compShade: Shade, other: string): any {
@@ -695,6 +699,7 @@ export class JSONGenerator {
         const type = "sizing";
         const sizing = this.atoms.gridSettings.grid.getValue() || 0;
         const minTarget = this.atoms.minimumTarget.minHeight.getValue() || 0;
+        const mobileMinTarget = this.atoms.minimumTarget.mobileMinHeight.getValue() || 0;
         const buttonMinWidth = this.molecules.standardButtons.minWidth.getValue() || 0;
         const smallButtonHeight = this.molecules.smallButtons.visibleHeight.getValue() || 0;
         const chipHeight = this.molecules.chips.visibleHeight.getValue() || 0;
@@ -705,6 +710,7 @@ export class JSONGenerator {
         return {
             "Size-1": { type, value: `${sizing}px` },
             "min-target": { type: "sizing", value: `${minTarget}px` },
+            "mobile-min-target": { type: "sizing", value: `${mobileMinTarget}px` },
             "Button-MinWidth": `${buttonMinWidth}px`,
             "Sm-Button-Height": fcn(smallButtonHeight),
             "Chip-Height": fcn(chipHeight),
