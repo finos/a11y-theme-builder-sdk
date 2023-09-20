@@ -534,7 +534,7 @@ export class CSSGenerator {
         let vk = new CSSVariableKind("", "", [], this);
         // targets
         this.addPropVar("min-target", "px", atoms.minimumTarget.minHeight);
-        this.addPropVar("mobile-target", "px", atoms.minimumTarget.minHeight);
+        this.addPropVar("mobile-min-target", "px", atoms.minimumTarget.mobileMinHeight);
         this.addPropVar("animation-speed", "ms", atoms.animationSettings.animationTiming);
         this.addPropVar("animation-distance", "px", atoms.animationSettings.hoverAndFocusAnimationDistance);
         this.addPropVar("animation-focus-distance", "px", atoms.animationSettings.hoverAndFocusAnimationDistance);
