@@ -462,7 +462,6 @@ export class JSONGenerator {
         log.debug("getSolidBackgrounds enter");
         const bg = lm ? theme.lightModeBackground : theme.darkModeBackground;
         const vars = theme.getBackgroundVariables(bg);
-
         const colorPair = bg.getValue();
         if (!colorPair) {
             log.debug("getSolidBackgrounds exit (no background color pair)");
@@ -526,33 +525,33 @@ export class JSONGenerator {
             // tertiary BG //
             tertiary = '{Theme-Colors.Primary.Color.700}';
             onTertiary = '{Text.White}';
-            const buttonOnTertiary = buttonSG.tertiary.shade;
-            if (buttonOnTertiary.equals(buttonShade)) {
-                tertiaryButton = '{Buttons.Colored.Color}';
-                tertiaryOnButton = '{Buttons.Colored.On-Color}';
-            } else if (buttonOnTertiary.equals(Shade.BLACK)) {
-                tertiaryButton = '{Buttons.Dark.Color}';
-                tertiaryOnButton = '{Buttons.Dark.On-Color}';
-            } else {
-                tertiaryButton = '{Buttons.White.Color}';
-                tertiaryOnButton = '{Buttons.White.On-Color}';
-            }
-            const iconOnTertiary = iconShade.getShadeOrOnShadeBasedOnContrast(tertiaryShade, lm);
-            if (iconOnTertiary.equals(iconShade)) {
-                tertiaryIcon = '{Icons.Colored.Color}';
-            } else if (iconOnTertiary.equals(Shade.BLACK)) {
-                tertiaryIcon = '{Icons.Dark.Color}';
-            } else {
-                tertiaryIcon = '{Icons.White.Color}';
-            }
-            const hotlinkOnTertiary = hotlinkVars.onTertiary.unvisited.shade;
-            if (hotlinkOnTertiary.equals(hotlinkShade)) {
-                tertiaryHotlink = '{Hotlinks.Colored.Link}';
-            } else if (hotlinkOnTertiary === Shade.BLACK) {
-                tertiaryHotlink = '{Hotlinks.Dark.Link}';
-            } else {
-                tertiaryHotlink = '{Hotlinks.White.Link}';
-            }
+        }
+        const buttonOnTertiary = buttonSG.tertiary.shade;
+        if (buttonOnTertiary.equals(buttonShade)) {
+            tertiaryButton = '{Buttons.Colored.Color}';
+            tertiaryOnButton = '{Buttons.Colored.On-Color}';
+        } else if (buttonOnTertiary.equals(Shade.BLACK)) {
+            tertiaryButton = '{Buttons.Dark.Color}';
+            tertiaryOnButton = '{Buttons.Dark.On-Color}';
+        } else {
+            tertiaryButton = '{Buttons.White.Color}';
+            tertiaryOnButton = '{Buttons.White.On-Color}';
+        }
+        const iconOnTertiary = iconShade.getShadeOrOnShadeBasedOnContrast(tertiaryShade, lm);
+        if (iconOnTertiary.equals(iconShade)) {
+            tertiaryIcon = '{Icons.Colored.Color}';
+        } else if (iconOnTertiary.equals(Shade.BLACK)) {
+            tertiaryIcon = '{Icons.Dark.Color}';
+        } else {
+            tertiaryIcon = '{Icons.White.Color}';
+        }
+        const hotlinkOnTertiary = hotlinkVars.onTertiary.unvisited.shade;
+        if (hotlinkOnTertiary.equals(hotlinkShade)) {
+            tertiaryHotlink = '{Hotlinks.Colored.Link}';
+        } else if (hotlinkOnTertiary === Shade.BLACK) {
+            tertiaryHotlink = '{Hotlinks.Dark.Link}';
+        } else {
+            tertiaryHotlink = '{Hotlinks.White.Link}';
         }
         const Primary = this.getColorPair(primary, onPrimary);
         const Secondary = this.getColorPair(secondary, onSecondary);
