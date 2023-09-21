@@ -526,29 +526,20 @@ export class JSONGenerator {
             tertiary = '{Theme-Colors.Primary.Color.700}';
             onTertiary = '{Text.White}';
         }
+        // tertiary button
         const buttonOnTertiary = buttonSG.tertiary.shade;
-        if (buttonOnTertiary.equals(buttonShade)) {
-            tertiaryButton = '{Buttons.Colored.Color}';
-            tertiaryOnButton = '{Buttons.Colored.On-Color}';
-        } else if (buttonOnTertiary.equals(Shade.BLACK)) {
+        if (buttonOnTertiary.equals(Shade.BLACK)) {
             tertiaryButton = '{Buttons.Dark.Color}';
             tertiaryOnButton = '{Buttons.Dark.On-Color}';
         } else {
             tertiaryButton = '{Buttons.White.Color}';
             tertiaryOnButton = '{Buttons.White.On-Color}';
         }
-        const iconOnTertiary = iconShade.getShadeOrOnShadeBasedOnContrast(tertiaryShade, lm);
-        if (iconOnTertiary.equals(iconShade)) {
-            tertiaryIcon = '{Icons.Colored.Color}';
-        } else if (iconOnTertiary.equals(Shade.BLACK)) {
-            tertiaryIcon = '{Icons.Dark.Color}';
-        } else {
-            tertiaryIcon = '{Icons.White.Color}';
-        }
+        // tertiary icon
+        tertiaryIcon = onTertiary;
+        // tertiary icon
         const hotlinkOnTertiary = hotlinkVars.onTertiary.unvisited.shade;
-        if (hotlinkOnTertiary.equals(hotlinkShade)) {
-            tertiaryHotlink = '{Hotlinks.Colored.Link}';
-        } else if (hotlinkOnTertiary === Shade.BLACK) {
+        if (hotlinkOnTertiary === Shade.BLACK) {
             tertiaryHotlink = '{Hotlinks.Dark.Link}';
         } else {
             tertiaryHotlink = '{Hotlinks.White.Link}';
@@ -563,8 +554,6 @@ export class JSONGenerator {
         const Black = this.getSolidColor(lm, buttonShade, iconShade, hotlinkShade, Shade.BLACK, "White");
         const White = this.getSolidColor(lm, buttonShade, iconShade, hotlinkShade, Shade.WHITE, "Dark");
         return { Primary, Secondary, Tertiary, Black, White };
-
-        
     }
 
     private getSolidColor(lm: boolean, button: Shade, icon: Shade, hotlink: Shade, compShade: Shade, other: string): any {
