@@ -8,7 +8,7 @@ import {
     PropertyBoolean,
     PropertyPixelSelectable,
     PropertyBackgroundColorStyle,
-    PropertyElevationSelectable,
+    PropertyShadowSelectable,
 } from "../common/props";
 
 /**
@@ -21,8 +21,8 @@ export class ChartLine extends Molecule {
     public lineBackgroundColor: PropertyBackgroundColorStyle;
     /** The line width property */
     public lineWidth: PropertyPixelSelectable;
-    /** The line elevation property */
-    public lineElevation: PropertyElevationSelectable;
+    /** The line shadow property */
+    public lineShadow: PropertyShadowSelectable;
     /** The chart lines display property */
     public chartLinesDisplay: PropertyBoolean;
     /** The Y labels display property */
@@ -32,7 +32,7 @@ export class ChartLine extends Molecule {
         super("Line Chart", molecules);
         this.lineBackgroundColor = new PropertyBackgroundColorStyle("Line Background Color", false, this);
         this.lineWidth = new PropertyPixelSelectable("Line Width", false, this, [1, 2, 3, 4]);
-        this.lineElevation = new PropertyElevationSelectable("Line Elevation", false, this, 0, 9);
+        this.lineShadow = new PropertyShadowSelectable("Line Shadow", false, this);
         this.chartLinesDisplay = new PropertyBoolean("Chart Lines Display", false, this);
         this.yLabelsDisplay = new PropertyBoolean("Y Labels Display", false, this);
     }
@@ -42,7 +42,7 @@ export class ChartLine extends Molecule {
         super.deserialize(obj);
         this.lineBackgroundColor.deserialize(obj.lineBackgroundColor);
         this.lineWidth.deserialize(obj.lineWidth);
-        this.lineElevation.deserialize(obj.lineElevation);
+        this.lineShadow.deserialize(obj.lineShadow);
         this.chartLinesDisplay.deserialize(obj.chartLinesDisplay);
         this.yLabelsDisplay.deserialize(obj.yLabelsDisplay);
     }
@@ -51,7 +51,7 @@ export class ChartLine extends Molecule {
         const obj: any = {};
         obj.lineBackgroundColor = this.lineBackgroundColor.serialize();
         obj.lineWidth = this.lineWidth.serialize();
-        obj.lineElevation = this.lineElevation.serialize();
+        obj.lineShadow = this.lineShadow.serialize();
         obj.chartLinesDisplay = this.chartLinesDisplay.serialize();
         obj.yLabelsDisplay = this.yLabelsDisplay.serialize();
         return obj;

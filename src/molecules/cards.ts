@@ -5,8 +5,7 @@
 import { Molecule } from "./molecule";
 import { IMolecules } from "../interfaces";
 import { PropertyPixel, 
-    PropertyBevelSelectable, 
-    PropertyElevationSelectable,
+    PropertyShadowSelectable, 
     PropertyNumberSelectable,
 } from "../common/props";
 
@@ -26,10 +25,8 @@ export class Cards extends Molecule {
     public padding: PropertyNumberSelectable;
     /** The card content gap property */
     public contentGap: PropertyNumberSelectable;
-    /** The card elevation property */
-    public elevation: PropertyElevationSelectable;
-    /** The card bevel property */
-    public bevel: PropertyBevelSelectable;
+    /** The card shadow property */
+    public shadow: PropertyShadowSelectable;
 
     constructor(molecules: IMolecules) {
         super("Cards", molecules);
@@ -38,8 +35,7 @@ export class Cards extends Molecule {
         this.borderRadius = new PropertyNumberSelectable("Border Radius", false, this, [4/8, 1, 2, 3, 4, 5, 6, 7], 3);
         this.padding = new PropertyNumberSelectable("Padding", false, this, [2, 3, 4, 5], 2);
         this.contentGap = new PropertyNumberSelectable("Content Gap", false, this, [1, 2, 3, 4, 5], 2);
-        this.elevation = new PropertyElevationSelectable("Card Elevation", false, this, 0, 9, 2);
-        this.bevel = new PropertyBevelSelectable("Card Bevel", false, this, 3, 9);
+        this.shadow = new PropertyShadowSelectable("Card Shadow", false, this);
     }
 
     public deserialize(obj: any) {
@@ -50,8 +46,7 @@ export class Cards extends Molecule {
         this.borderRadius.deserialize(obj.borderRadius);
         this.padding.deserialize(obj.padding);
         this.contentGap.deserialize(obj.contentGap);
-        this.elevation.deserialize(obj.elevation);
-        this.bevel.deserialize(obj.bevel);
+        this.shadow.deserialize(obj.shadow);
     }
 
     public serialize(): any {
@@ -61,8 +56,7 @@ export class Cards extends Molecule {
         obj.borderRadius = this.borderRadius.serialize();
         obj.padding = this.padding.serialize();
         obj.contentGap = this.contentGap.serialize();
-        obj.elevation = this.elevation.serialize();
-        obj.bevel = this.bevel.serialize();
+        obj.shadow = this.shadow.serialize();
         return obj;
     }
 }

@@ -2,7 +2,20 @@
  * Copyright (c) 2023 Discover Financial Services
  * Licensed under Apache-2.0 License. See License.txt in the project root for license information
  */
-import { ThemeBuilder, ColorTheme, ColorPair, EventType, Event, EventValueChange, PropertyColorShade, PropertyColorPair, PropertyTitledShade, Shade, CSSVarGroup } from "../index";
+import { 
+    ThemeBuilder, 
+    ColorTheme, 
+    ColorPair, 
+    EventType, 
+    Event, 
+    EventValueChange, 
+    PropertyColorShade, 
+    PropertyShadowSelectable,
+    PropertyColorPair,
+    PropertyTitledShade,
+    Shade,
+    CSSVarGroup
+} from "../index";
 
 let errCnt = 0;
 let buttonSelectablesChangedCount = 0;
@@ -108,6 +121,8 @@ async function test() {
 
     selectColorPair(ct.lightModeBackground, 2);
 
+    ds.molecules.standardButtons.buttonShadow.setValue("Elevation 3");
+
     console.log("TEST: Adding new color after primary was selected");
     colorPalette.addColor("newColor","#0047AB");
     assert(ct.primary.getValue() !== undefined, `Adding a color to the theme should not change the primary color`);
@@ -197,8 +212,10 @@ async function test() {
         //errCnt++;
     }
 
-    console.log(`TEST: JSON lightmode: ${JSON.stringify(ds.code.getJSON(true),null,4)}`);
-    console.log(`TEST: JSON darkmode: ${JSON.stringify(ds.code.getJSON(false),null,4)}`);
+    console.log(`TEST: Shadow selectables: ${JSON.stringify(ds.molecules.standardCards.shadow.getSelectableValues(),null,4)}`);
+    console.log(`TEST: Base JSON : ${JSON.stringify(ds.code.getJSONBase(),null,4)}`);
+    console.log(`TEST: JSON lightmode: ${JSON.stringify(ds.code.getJSONLM(),null,4)}`);
+    console.log(`TEST: JSON darkmode: ${JSON.stringify(ds.code.getJSONDM(),null,4)}`);
 
     await ds.store();
     const md = await themeBuilder.listMetadata();

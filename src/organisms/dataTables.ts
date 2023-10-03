@@ -7,7 +7,7 @@ import { Organism } from "./organism";
 import { 
     PropertyStringSelectable,
     PropertyPixelSelectable,
-    PropertyElevationSelectable,
+    PropertyShadowSelectable,
     PropertyButtonText,
 } from "../common/props";
 
@@ -23,15 +23,15 @@ export class DataTables extends Organism {
     public padding: PropertyPixelSelectable;
     /** The header text property */
     public headerText: PropertyButtonText;
-    /** The elevation property */
-    public elevation: PropertyElevationSelectable;
+    /** The shadow property */
+    public shadow: PropertyShadowSelectable;
 
     constructor(organisms: IOrganisms) {
         super("Data Tables", organisms);
         this.availableColors = new PropertyStringSelectable("Available Colors", false, this, {selectables: ["Colored", "Black", "White"]});
         this.padding = new PropertyPixelSelectable("Table Padding", false, this, [4, 8, 16]);
         this.headerText = new PropertyButtonText("Table Header Text", false, this);
-        this.elevation = new PropertyElevationSelectable("Avatar Elevation", false, this, 0, 9);
+        this.shadow = new PropertyShadowSelectable("Avatar Shadow", false, this);
     }
 
     public deserialize(obj: any) {
@@ -40,7 +40,7 @@ export class DataTables extends Organism {
         this.availableColors.deserialize(obj.availableColors);
         this.padding.deserialize(obj.padding);
         this.headerText.deserialize(obj.headerText);
-        this.elevation.deserialize(obj.elevation);
+        this.shadow.deserialize(obj.shadow);
     }
 
     public serialize(): any {
@@ -48,7 +48,7 @@ export class DataTables extends Organism {
         obj.availableColors = this.availableColors.serialize();
         obj.padding = this.padding.serialize();
         obj.headerText = this.headerText.serialize();
-        obj.elevation = this.elevation.serialize();
+        obj.shadow = this.shadow.serialize();
         return obj;
     }
 }

@@ -4,7 +4,7 @@
  */
 import { Molecule } from "./molecule";
 import { IMolecules } from "../interfaces";
-import { PropertyStringSelectable, PropertyBevelSelectable, PropertyElevationSelectable, PropertyNumberSelectable } from "../common/props";
+import { PropertyStringSelectable, PropertyShadowSelectable, PropertyNumberSelectable } from "../common/props";
 
 /**
  * The standard button molecule.
@@ -22,10 +22,8 @@ export class StandardButtons extends Molecule {
     public horizontalPadding: PropertyNumberSelectable;
     /** The button text property */
     public buttonText: PropertyStringSelectable;
-    /** The button elevation property */
-    public buttonElevation: PropertyElevationSelectable;
-    /** The button bevel property */
-    public buttonBevel: PropertyBevelSelectable;
+    /** The button shadow property */
+    public buttonShadow: PropertyShadowSelectable;
     /** The secondary border property */
     public secondaryBorder: PropertyNumberSelectable;
 
@@ -39,8 +37,7 @@ export class StandardButtons extends Molecule {
             selectables: ["CTA LARGE", "CTA Small"],
             defaultValue: "CTA LARGE",
         });
-        this.buttonElevation = new PropertyElevationSelectable("Button Elevation", false, this, 0, 9, 1);
-        this.buttonBevel = new PropertyBevelSelectable("Button Bevel", false, this, 0, 9);
+        this.buttonShadow = new PropertyShadowSelectable("Button Shadow", false, this);
         this.secondaryBorder = new PropertyNumberSelectable("Secondary Border", false, this, [1, 2, 3, 4], 2);
     }
 
@@ -51,8 +48,7 @@ export class StandardButtons extends Molecule {
         this.radius.deserialize(obj.radius);
         this.horizontalPadding.deserialize(obj.horizontalPadding);
         this.buttonText.deserialize(obj.buttonText);
-        this.buttonElevation.deserialize(obj.buttonElevation);
-        this.buttonBevel.deserialize(obj.buttonBevel);
+        this.buttonShadow.deserialize(obj.buttonShadow);
         this.secondaryBorder.deserialize(obj.secondaryBorder);
     }
 
@@ -62,8 +58,7 @@ export class StandardButtons extends Molecule {
         obj.radius = this.radius.serialize();
         obj.horizontalPadding = this.horizontalPadding.serialize();
         obj.buttonText = this.buttonText.serialize();
-        obj.buttonElevation = this.buttonElevation.serialize();
-        obj.buttonBevel = this.buttonBevel.serialize();
+        obj.buttonShadow = this.buttonShadow.serialize();
         obj.secondaryBorder = this.secondaryBorder.serialize();
         return obj;
     }

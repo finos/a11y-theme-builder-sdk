@@ -4,7 +4,7 @@
  */
 import { Molecule } from "./molecule";
 import { IMolecules } from "../interfaces";
-import { PropertyPixelSelectable, PropertyNumberSelectable, PropertyElevationSelectable, PropertyShadowSelectable } from "../common/props";
+import { PropertyNumberSelectable, PropertyShadowSelectable} from "../common/props";
 
 /**
  * The toasts molecule.
@@ -16,14 +16,14 @@ export class Toasts extends Molecule {
     public handleBorderRadius: PropertyNumberSelectable;
     /** The padding property */
     public padding: PropertyNumberSelectable;
-    /** The elevation property */
-    public elevation: PropertyElevationSelectable;
+    /** The shadow property */
+    public shadow: PropertyShadowSelectable;
 
     constructor(molecules: IMolecules) {
         super("Toasts", molecules);
         this.handleBorderRadius = new PropertyNumberSelectable("Handle Border Radius", false, this, [0,1,2,3,4,5,6,7,8], 1);
         this.padding = new PropertyNumberSelectable("Padding", false, this, [1,2,3], 1);
-        this.elevation = new PropertyElevationSelectable("Toast Elevation", false, this, 0, 9);
+        this.shadow = new PropertyShadowSelectable("Toast Shadow", false, this);
     }
 
     public deserialize(obj: any) {
@@ -31,14 +31,14 @@ export class Toasts extends Molecule {
         super.deserialize(obj);
         this.handleBorderRadius.deserialize(obj.handleBorderRadius);
         this.padding.deserialize(obj.gap);
-        this.elevation.deserialize(obj.elevation);
+        this.shadow.deserialize(obj.shadow);
     }
 
     public serialize(): any {
         const obj: any = {};
         obj.handleBorderRadius = this.handleBorderRadius.serialize();
         obj.gap = this.padding.serialize();
-        obj.elevation = this.elevation.serialize();
+        obj.shadow = this.shadow.serialize();
         return obj;
     }
 }

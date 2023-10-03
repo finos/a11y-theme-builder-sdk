@@ -4,7 +4,7 @@
  */
 import { Molecule } from "./molecule";
 import { IMolecules } from "../interfaces";
-import { PropertyStringSelectable, PropertyNumberSelectable, PropertyElevationSelectable } from "../common/props";
+import { PropertyStringSelectable, PropertyNumberSelectable, PropertyShadowSelectable } from "../common/props";
 
 /**
  * The dropdowns molecule.
@@ -17,8 +17,8 @@ export class Dropdowns extends Molecule {
 
     /** The menu focus state property */
     public menuFocusState: PropertyStringSelectable;
-    /** The menu elevation property */
-    public menuElevation: PropertyElevationSelectable;
+    /** The menu shadow property */
+    public menuShadow: PropertyShadowSelectable;
     /** The border radius property */
     public borderRadius: PropertyNumberSelectable;
 
@@ -28,7 +28,7 @@ export class Dropdowns extends Molecule {
             selectables: [Dropdowns.LEFT_BORDER_ONLY, Dropdowns.FULL_COLOR],
             defaultValue: Dropdowns.LEFT_BORDER_ONLY,
         });
-        this.menuElevation = new PropertyElevationSelectable("Open Dropdown Menu Elevation", true, this, 0, 9, 2);
+        this.menuShadow = new PropertyShadowSelectable("Open Dropdown Menu Shadow", true, this, { defaultValue: "Elevation 1"});
         this.borderRadius = new PropertyNumberSelectable("Dropdown Border Radius", true, this, [0, 0.5, 1, 2], 1);
     }
 
@@ -37,14 +37,14 @@ export class Dropdowns extends Molecule {
         super.deserialize(obj);
         this.menuFocusState.deserialize(obj.menuFocusState);
         this.borderRadius.deserialize(obj.borderRadius);
-        this.menuElevation.deserialize(obj.menuElevation);
+        this.menuShadow.deserialize(obj.menuShadow);
     }
 
     public serialize(): any {
         const obj: any = {};
         obj.menuFocusState = this.menuFocusState.serialize();
         obj.borderRadius = this.borderRadius.serialize();
-        obj.menuElevation = this.menuElevation.serialize();
+        obj.menuShadow = this.menuShadow.serialize();
         return obj;
     }
 }

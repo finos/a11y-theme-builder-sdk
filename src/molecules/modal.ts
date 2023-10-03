@@ -5,7 +5,7 @@
 import { Molecule } from "./molecule";
 import { Atoms, Shade } from "../atoms/index";
 import { IMolecules } from "../interfaces";
-import { PropertyNumberSelectable, PropertyElevationSelectable, PropertyColorShade } from "../common/props";
+import { PropertyNumberSelectable, PropertyShadowSelectable, PropertyColorShade } from "../common/props";
 
 /**
  * The modal molecule.
@@ -17,8 +17,8 @@ export class Modal extends Molecule {
     public color: PropertyColorShade;
     /** The modal border radius property */
     public borderRadius: PropertyNumberSelectable;
-    /** The modal elevation property */
-    public elevation: PropertyElevationSelectable;
+    /** The modal shadow property */
+    public shadow: PropertyShadowSelectable;
     private atoms: Atoms
 
     constructor(molecules: IMolecules) {
@@ -29,7 +29,7 @@ export class Modal extends Molecule {
             defaultValue: Shade.BLACK,
         });
         this.borderRadius = new PropertyNumberSelectable("Border Radius", false, this, [0,1,2,3,4,5,6,7,8], 3);
-        this.elevation = new PropertyElevationSelectable("Modal Elevation", false, this, 0, 9);
+        this.shadow = new PropertyShadowSelectable("Modal Shadow", false, this);
     }
 
     public getColorSelectables(): Shade[][] {
@@ -55,13 +55,13 @@ export class Modal extends Molecule {
         if (!obj) return;
         super.deserialize(obj);
         this.borderRadius.deserialize(obj.borderRadius);
-        this.elevation.deserialize(obj.elevation);
+        this.shadow.deserialize(obj.shadow);
     }
 
     public serialize(): any {
         const obj: any = {};
         obj.borderRadius = this.borderRadius.serialize();
-        obj.elevation = this.elevation.serialize();
+        obj.shadow = this.shadow.serialize();
         return obj;
     }
 
