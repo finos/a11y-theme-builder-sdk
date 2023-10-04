@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2023 Discover Financial Services
- * Licensed under MIT License. See License.txt in the project root for license information
+ * Licensed under Apache-2.0 License. See License.txt in the project root for license information
  */
 import { Logger } from "../util/logger";
 import { IDesignSystem, INode, Event, EventType, EventCallback, EventListener, IProperty, IListenerSubscription } from "../interfaces";
