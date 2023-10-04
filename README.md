@@ -17,7 +17,7 @@ This SDK is designed to be extensible with regard to each of the following:
 
 ### Using the Web App
 
-For both a broad overview of accessibility compliance and a user-friendly web application which you may use in order to build your themes, see the  [Accessibility Theme Builder repository](https://github.com/discoverfinancial/a11y-theme-builder/blob/main/README.md#accessibility-theme-builder).  The web application in that repository uses this SDK to perform it's calculations and to generate output.
+For both a broad overview of accessibility compliance and a user-friendly web application which you may use in order to build your themes, see the  [Accessibility Theme Builder repository](https://github.com/finos/a11y-theme-builder/blob/main/README.md#accessibility-theme-builder).  The web application in that repository uses this SDK to perform it's calculations and to generate output.
 
 ### Using the SDK directly
 
@@ -27,7 +27,7 @@ For more in-depth information about the APIs, see the [SDK API documentation](./
 
 ## Contributing 
 ### Join us
-[Get involved](https://github.com/discoverfinancial/a11y-theme-builder/blob/main/CONTRIBUTE.md) and learn how our project is managed. Our project welcomes passionate contributors. 
+[Get involved](https://github.com/finos/a11y-theme-builder/blob/main/CONTRIBUTE.md) and learn how our project is managed. Our project welcomes passionate contributors. 
 
 ### Developers
 See the [Developer's Guide](./DEV-GUIDE.md) for information on building, developing, and testing code contributions.
