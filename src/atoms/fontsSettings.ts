@@ -37,9 +37,9 @@ export class FontsSettings extends Atom {
         this.baseFontSize = new PropertyNumber("Base font size", false, this, {defaultValue: 16});
         this.fontWeights.push(new PropertyNumber(`Font weight 0`, false, this, {defaultValue: 300}))
         this.fontWeights.push(new PropertyNumber(`Font weight 1`, false, this, {defaultValue: 400}))
-        this.fontWeights.push(new PropertyNumber(`Font weight 2`, false, this, {defaultValue: 500}))
-        this.fontWeights.push(new PropertyNumber(`Font weight 3`, false, this, {defaultValue: 600}))
-        this.fontWeights.push(new PropertyNumber(`Font weight 4`, false, this, {defaultValue: 700}))
+        this.fontWeights.push(new PropertyNumber(`Font weight 2`, false, this, {defaultValue: 600}))
+        this.fontWeights.push(new PropertyNumber(`Font weight 3`, false, this, {defaultValue: 700}))
+        this.fontWeights.push(new PropertyNumber(`Font weight 4`, false, this, {defaultValue: 800}))
         this.standardLineHeight = new PropertyNumber("Standard Line Height", false, this, {defaultValue: 160});
         this.headerLineHeight = new PropertyNumber("Header Line Height", false, this, {defaultValue: 110});
         this.smallLineHeight = new PropertyNumber("Small Text Line Height", false, this, {defaultValue: 100});
