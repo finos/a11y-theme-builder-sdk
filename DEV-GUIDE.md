@@ -116,16 +116,16 @@ The following steps should be taken to add a new atom, molecule, or organism.
 
 ### How to add a new code generator
 
-All code generators at in the [code directory](https://github.com/discoverfinancial/a11y-theme-builder-sdk/tree/main/src/code).
+All code generators at in the [code directory](https://github.com/finos/a11y-theme-builder-sdk/tree/main/src/code).
 
 See the following code generators as examples to follow:
-* [JSON generator](https://github.com/discoverfinancial/a11y-theme-builder-sdk/blob/main/src/code/jsonGenerator.ts#L1)
-* [CSS generator](https://github.com/discoverfinancial/a11y-theme-builder-sdk/blob/main/src/code/cssGenerator.ts#L1)
+* [JSON generator](https://github.com/finos/a11y-theme-builder-sdk/blob/main/src/code/jsonGenerator.ts#L1)
+* [CSS generator](https://github.com/finos/a11y-theme-builder-sdk/blob/main/src/code/cssGenerator.ts#L1)
 
-The [CSS generator](https://github.com/discoverfinancial/a11y-theme-builder-sdk/blob/main/src/code/cssGenerator.ts#L1) is much more complex for two reasons:
+The [CSS generator](https://github.com/finos/a11y-theme-builder-sdk/blob/main/src/code/cssGenerator.ts#L1) is much more complex for two reasons:
 * it supports dynamic updates (i.e. being notified when a CSS variable changes)
 * it supports component-based grouping so that CSS variables can be associated with specific pages in the user interface.
 
 If neither of these are requirements for a new code generator, the [JSON generator]() is a simpler example to follow.
 
-The constructor for any new generator must be called from the [Code constructor](https://github.com/discoverfinancial/a11y-theme-builder-sdk/blob/main/src/code/code.ts#L1).
+The constructor for any new generator must be called from the [Code constructor](https://github.com/finos/a11y-theme-builder-sdk/blob/main/src/code/code.ts#L1).
