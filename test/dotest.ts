@@ -234,7 +234,7 @@ async function test() {
 function initTheme(ct: ColorTheme) {
     selectColorShade(ct.primary, 5);
     selectColorShade(ct.secondary, 3);
-    selectColorShade(ct.tertiary, 6);
+    selectColorShade(ct.tertiary, 3);
     selectColorPair(ct.lightModeBackground, 0);
     selectColorPair(ct.darkModeBackground, 0);
     selectColorShade(ct.gradient1.from, 6);
