@@ -1674,17 +1674,28 @@ export class JSONGenerator {
     }
 
     private getShowColors(): any {
+        const colors = this.atoms.colorPalette.getColors();
+        const theme = this.atoms.colorThemes.getDefaultTheme();
+        let pVal, sVal, tVal: Shade | undefined;
+        let showSecondary = false;
+        let showTertiary = false;
+        if (theme) {
+            pVal = theme.primary.getValue();
+            sVal = theme.secondary.getValue();
+            tVal = theme.tertiary.getValue();
+            showSecondary = sVal != pVal;
+            showTertiary = tVal != sVal && tVal != pVal;
+        }
         const rtn: any = {
             "Secondary": {
-                "value": "true",
-                "type": "boolean"
+                "type": "boolean",
+                "value": showSecondary ? "true" : "false",
             },
             "Tertiary": {
-                "value": "true",
-                "type": "boolean"
+                "type": "boolean",
+                "value": showTertiary ? "true" : "false",
             },
         };
-        const colors = this.atoms.colorPalette.getColors();
         for (let i = 0; i < Math.max(colors.length,12); i++) {
             rtn[`Color-${i+1}`] = {
                 "type": "boolean",
