@@ -1218,8 +1218,11 @@ export class JSONGenerator {
         }
         if (theme) {
             const ref = this.getShadeRef(shade, theme);
-            if (ref && shade.index != undefined) {
-                return "{Theme-Colors." + ref + (onColor ? ".On-Color." : ".Color.") + this.getShadeId(shade) + "}";
+            if (ref) {
+                const id = this.getShadeId(shade);
+                if (id != undefined) {
+                    return "{Theme-Colors." + ref + (onColor ? ".On-Color." : ".Color.") + id + "}";
+                }
             }
         }
         return shade.getRGBA();
