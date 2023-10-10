@@ -435,13 +435,13 @@ export class PropertyShadowSelectable extends PropertyStringCategorySelectable {
         super(name, required,  parent, { 
             selectables: [
                 newStringCategory("None", "", "", "", 0),
-                newStringCategory("Elevations", "Elevation", "elevation", "Elevation", 9),
-                newStringCategory("Bevels", "Bevel", "bevel", "Bevel", 9),
-                newStringCategory("Inset Bevels", "Inset Bevel", "inset-bevel", "InsetBevel", 9),
-                newStringCategory("Grooves", "Groove", "groove", "Groove", 9),
-                newStringCategory("Ridges", "Ridge", "ridge", "Ridge", 9),
-                newStringCategory("Recesses", "Recess", "recess", "Recess", 9),
-                newStringCategory("Glows", "Glow", "glow", "Glow", 8),
+                newStringCategory("Elevations", "Elevation", "elevation", "Elevation-Shadows-elevation", 9),
+                newStringCategory("Bevels", "Bevel", "bevel", "Bevels-bevel", 9),
+                newStringCategory("Inset Bevels", "Inset Bevel", "inset-bevel", "Inverted-Bevels-bevel", 9),
+                newStringCategory("Grooves", "Groove", "groove", "Grooves-groove", 9),
+                newStringCategory("Ridges", "Ridge", "ridge", "Ridges-ridge", 9),
+                newStringCategory("Recesses", "Recess", "recess", "Recesses-recess", 9),
+                newStringCategory("Glows", "Glow", "glow", "Glow-Shadows-glow", 8),
             ],
             defaultValue: opts ? opts.defaultValue : "None" 
         });

@@ -943,7 +943,10 @@ export class JSONGenerator {
         const dropDownShadow = this.molecules.dropdowns.menuShadow;
         const fcn = function (prop: PropertyShadowSelectable): any {
             const ci = prop.getCategoryAndIndex();
-            const value = ci && ci.category.json && ci.memberIndex >= 0 ? `${ci.category.json}-${ci.memberIndex+1}` : undefined;
+            let value: string | undefined = undefined;
+            if (ci && ci.category && ci.category.json && ci.memberIndex >= 0) {
+                value = `{${ci.category.json}-${ci.memberIndex+1}}`;
+            }
             return { type: "boxShadow", value };
         };
         return {
