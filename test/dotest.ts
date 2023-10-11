@@ -70,10 +70,10 @@ async function test() {
         }
     }, [EventType.NodeEnabled]);
     console.log("TEST: Adding cobalt to the color palette");
-    //const blue = colorPalette.addColor("cobalt","#0047AB");
     const blue = colorPalette.addColor("cobalt","#AB5D5D");
-    //const blue = colorPalette.addColor("cobalt","#3ac324");
     console.log("TEST: Added blue to the color palette");
+    const red = colorPalette.addColor("red","#FF0000");
+    console.log("TEST: Added red to the color palette");
     assert(colorThemesAtomEnabled, "ColorThemes atom should be enabled after adding a color");
     ds.removeListener("dsListener");
     assert(colorPalette.isInitialized(), "The color palette atom is not initialized");
@@ -233,8 +233,8 @@ async function test() {
 
 function initTheme(ct: ColorTheme) {
     selectColorShade(ct.primary, 5);
-    selectColorShade(ct.secondary, 3);
-    selectColorShade(ct.tertiary, 3);
+    selectColorShade(ct.secondary, 3, 1);
+    selectColorShade(ct.tertiary, 6);
     selectColorPair(ct.lightModeBackground, 0);
     selectColorPair(ct.darkModeBackground, 0);
     selectColorShade(ct.gradient1.from, 6);
@@ -276,10 +276,11 @@ function ssNotify(event: Event) {
     console.log(`TEST: StateSettings: Received ${event.type} notification for node ${event.node.key}`);
 }
 
-function selectColorShade(prop: PropertyColorShade, idx: number) {
+function selectColorShade(prop: PropertyColorShade, idx: number, idx2?: number) {
     const sels = prop.getSelectableValues();
     if (sels.length === 0) throw new Error(`No selectables`);
-    const row = sels[0];
+    const rowIdx = idx2 != undefined ? idx2 : 0;
+    const row = sels[rowIdx];
     if (row.length === 0) throw new Error(`No first row selectables`);
     idx = Math.min(idx, row.length-1);
     const val = row[idx];

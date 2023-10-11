@@ -1676,15 +1676,18 @@ export class JSONGenerator {
     private getShowColors(): any {
         const colors = this.atoms.colorPalette.getColors();
         const theme = this.atoms.colorThemes.getDefaultTheme();
-        let pVal, sVal, tVal: Shade | undefined;
+        let pVal: Shade | undefined;
+        let sVal: Shade | undefined;
+        let tVal: Shade | undefined;
         let showSecondary = false;
         let showTertiary = false;
         if (theme) {
             pVal = theme.primary.getValue();
             sVal = theme.secondary.getValue();
             tVal = theme.tertiary.getValue();
-            showSecondary = sVal != pVal;
-            showTertiary = tVal != sVal && tVal != pVal;
+            showSecondary = pVal != undefined && sVal != undefined && !sVal.isSameColor(pVal);
+            showTertiary = pVal != undefined && sVal != undefined && tVal != undefined &&
+                           !tVal.isSameColor(pVal) && !tVal.isSameColor(sVal);
         }
         const rtn: any = {
             "Secondary": {
