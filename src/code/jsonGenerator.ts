@@ -585,17 +585,16 @@ export class JSONGenerator {
 
     private getGradientBackgrounds(theme: ColorTheme, lm: boolean): any {
         const self = this;
-        const getShadeName = function (prop: PropertyColorShade, lm: boolean): string | undefined {
+        const getShadeName = function (prop: PropertyColorShade, lm: boolean, onColor?: boolean): string | undefined {
             const shade = prop.getValue();
             if (shade) {
-                return self.getShadeName(shade, lm, theme);
+                return self.getShadeName(shade, lm, theme, onColor);
             }
         };
-        const fcn2 = function (lm: boolean, fromName?: string, toName?: string): any {
-            let color, onColor, button, onButton, icon, hotlink: string | undefined;
+        const fcn2 = function (lm: boolean, fromName?: string, toName?: string, onColor?: string): any {
+            let color, button, onButton, icon, hotlink: string | undefined;
             if (fromName && toName) {
                 color = `linear-gradient(90deg, ${fromName} 0%, ${toName} 100%)`;
-                onColor = fromName;
             }
             button = self.getPropShadeName(theme.button, lm, theme);
             onButton = self.getPropShadeName(theme.button, lm, theme, true);
@@ -614,14 +613,15 @@ export class JSONGenerator {
             }
         };
         const fcn = function (gc: GradientColors, lm: boolean): any {
-            return fcn2(lm, getShadeName(gc.from, lm), getShadeName(gc.to, lm));
+            return fcn2(lm, getShadeName(gc.from, lm), getShadeName(gc.to, lm), getShadeName(gc.from, lm, true));
         };
         const gradient3FromName = lm ? "{Core-Colors.White.Color}" : "{Core-Colors.Gray.Color.900}";
         const gradient3ToName = lm ? "{Core-Colors.Gray.Color.200}" : "{Core-Colors.Gray.Color.900}";
+        const gradient3OnColor = lm ? "{Text.Dark}" : "{Core-Colors.Gray.On-Color.900}";
         return {
             "Gradient-1": fcn(theme.gradient1, lm),
             "Gradient-2": fcn(theme.gradient2, lm),
-            "Gradient-3": fcn2(lm, gradient3FromName, gradient3ToName),
+            "Gradient-3": fcn2(lm, gradient3FromName, gradient3ToName, gradient3OnColor),
         };
     }
 
