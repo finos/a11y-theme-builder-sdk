@@ -699,10 +699,10 @@ export class JSONGenerator {
             "Size-1": { type, value: `${sizing}px` },
             "min-target": { type: "sizing", value: `${minTarget}px` },
             "mobile-min-target": { type: "sizing", value: `${mobileMinTarget}px` },
-            "Button-MinWidth": `${buttonMinWidth}px`,
+            "Button-MinWidth": { type: "sizing", value: `${buttonMinWidth}px` },
             "Sm-Button-Height": fcn(smallButtonHeight),
             "Chip-Height": fcn(chipHeight),
-            "Chip-MinWidth": fcn(chipMinWidth),
+            "Chip-MinWidth": { type: "sizing", value: `${chipMinWidth}px` },
             "Slider-Handle-Height": fcn(sliderHandleHeight),
             "Image-Height": fcn(imageHeight),
         };
