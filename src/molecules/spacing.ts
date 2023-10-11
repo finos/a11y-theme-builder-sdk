@@ -20,7 +20,7 @@ export class Spacing extends Molecule {
     constructor(molecules: IMolecules) {
         super("Spacing", molecules);
         this.sectionPadding = new PropertyNumberSelectable("Section Padding", false, this, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], 3);
-        this.paragraphPadding = new PropertyNumberSelectable("Paragraph Padding", false, this, [1, 2, 3, 4, 5], 2);
+        this.paragraphPadding = new PropertyNumberSelectable("Paragraph Padding", false, this, [2, 3, 4, 5], 2);
     }
 
     public deserialize(obj: any) {
