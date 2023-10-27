@@ -1,5 +1,5 @@
 {
-  "name": "a11y-theme-builder-sdk",
+  "name": "@finos/a11y-theme-builder-sdk",
   "version": "0.0.22",
   "description": "Accessibility Theme Builder SDK",
   "author": "Keith Smith <KeithSmith@discover.com>",
