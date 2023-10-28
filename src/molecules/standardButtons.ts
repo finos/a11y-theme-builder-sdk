@@ -30,7 +30,7 @@ export class StandardButtons extends Molecule {
     constructor(molecules: IMolecules) {
         super("Standard Buttons", molecules);
         this.minWidth = new PropertyNumberSelectable("Button Minimum Width", false, this, [40/8, 44/8, 48/8, 56/8], 44/8);
-        this.height = new PropertyNumber("Button Height", false, this, {defaultValue: 44});
+        this.height = new PropertyNumber("Button Height", false, this, {defaultValue: 44/8});
         this.radius = new PropertyNumberSelectable("Button Radius", false, this, [0, 2/8, 4/8, 1, 2, 3, 4, 5, 6, 7, 8], 3);
         this.horizontalPadding = new PropertyNumberSelectable("Horizontal Padding", false, this, [2, 3, 4, 5], 3);
         this.buttonText = new PropertyStringSelectable("Button Text", false, this, {
