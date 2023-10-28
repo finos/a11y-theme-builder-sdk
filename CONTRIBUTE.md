@@ -11,8 +11,10 @@ Before making a contribution, please take the following steps:
 1. Check whether there's already an open issue related to your proposed contribution. If there is, join the discussion and propose your contribution there.
 2. If there isn't already a relevant issue, create one, describing your contribution and the problem you're trying to solve.
 3. Respond to any questions or suggestions raised in the issue by other developers.
-4. Fork the project repository and prepare your proposed contribution.
+4. Fork the project repository and prepare your proposed contribution.  All contributions should be created using the latest code from the dev branch.
+    * Make sure that your forked repo's dev branch is in sync with the finos/a11y-theme-builder-sdk dev branch prior to creating a pull request.
 5. Submit a pull request.
+    * All pull requests should be made to merge into the finos/a11y-theme-builder-sdk dev branch.
 
 NOTE: All contributors must have a contributor license agreement (CLA) on file with FINOS before their pull requests will be merged. Please review the FINOS [contribution requirements](https://community.finos.org/docs/governance/Software-Projects/contribution-compliance-requirements) and submit (or have your employer submit) the required CLA before submitting a pull request.
 
