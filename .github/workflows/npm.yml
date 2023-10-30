@@ -2,7 +2,7 @@ name: Publish to NPM
 on:
   push:
     branches:
-      - test-npm
+      - main
     paths-ignore:
       - 'docs/**'
 jobs:
