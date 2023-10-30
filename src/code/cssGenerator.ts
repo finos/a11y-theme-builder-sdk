@@ -851,7 +851,7 @@ export class CSSGenerator {
      * @param prop The input property from which the CSS variable value is derived
      */
     public addPropVar(name: string, unit: string, prop: Property<any>, cb?: (propVar: CSSVariableKind) => void) {
-        new CSSDynamicVariableKind(name, unit, [prop], this, cb);
+        new CSSDynamicVariableKind(name, unit, [prop], this, {cb});
     }
 
     /**
@@ -862,8 +862,10 @@ export class CSSGenerator {
      * @param props Any number of properties which are monitored for changes before calling 'cb'.
      * @param cb  The callback called each time all 'props' are initialized and any values change.
      */
-    public addPropsVar(name: string, unit: string, props: Property<any>[], cb: (propVar: CSSVariableKind) => void) {
-        new CSSDynamicVariableKind(name, unit, props, this, cb);
+    public addPropsVar(name: string, unit: string, props: Property<any>[], cb: (propVar: CSSVariableKind) => void, opts?: {or?: boolean}) {
+        opts = opts || {};
+        const newOpts = { cb, or: opts.or};
+        new CSSDynamicVariableKind(name, unit, props, this, newOpts);
     }
 
 }
@@ -998,6 +1000,11 @@ class CSSTheme {
             }
         });
 
+        // Charting color variables
+        log.debug(`CSSTheme.start setting charting color listener`);
+        const chartingVars = [this.theme.primary, this.theme.secondary, this.theme.tertiary, this.theme.lightModeBackground, this.theme.darkModeBackground];
+        this.cssGenerator.addPropsVar("chartingColors", "", chartingVars, this.generateChartingVars.bind(this), {or: true});
+
         log.debug(`CSSTheme.start exit: theme=${this.theme.name}`);
     }
 
@@ -1128,7 +1135,7 @@ class CSSTheme {
         this.cssGenerator.setShadeVar(name, kind, shade);
     }
 
-    private generateDropDownVars(lm: boolean, vk: CSSVariableKind) {
+    private generateDropDownVars(lm: boolean, vk: CSSVariableKind): void {
         log.debug(`generateDropDownVars enter - lm=${lm}`);
         const mfs = this.cssGenerator.molecules.dropdowns.menuFocusState;
         const mfsVal = mfs.getValue();
@@ -1176,6 +1183,226 @@ class CSSTheme {
             });
         }
         log.debug(`generateDropDownVars exit - lm=${lm}`);
+    }
+
+    /*
+     * Generate the charting CSS variables
+     */
+    private generateChartingVars(vk: CSSVariableKind) {
+        log.debug(`generateChartingVars enter`);
+        const primary = this.theme.primary.getValue();
+        const secondary = this.theme.secondary.getValue();
+        const tertiary = this.theme.tertiary.getValue();
+        const lmbg = this.theme.lightModeBackground.getValue();
+        if (primary) {
+            if (secondary) {
+                if (tertiary) {
+                    log.debug(`Primary, secondary, and tertiary are set`);
+                    if (lmbg) {
+                        if (lmbg.lighter) {
+                            this.genCV3LM1(vk);
+                        } else {
+                            this.genCV3LM2(vk);
+                        }
+                    }
+                    this.genCV3DM(vk);
+                } else {
+                    log.debug(`Primary, secondary, and not tertiary are set`);
+                    if (lmbg) {
+                        if (lmbg.lighter) {
+                            this.genCV2LM1(vk);
+                        } else {
+                            this.genCV2LM2(vk);
+                        }
+                    }
+                    this.genCV2DM(vk);
+                }
+            } else {
+                log.debug(`Primary, but not secondary or tertiary are set`);
+                if (lmbg) {
+                    if (lmbg.lighter) {
+                        this.genCV1LM1(vk);
+                    } else {
+                        this.genCV1LM2(vk);
+                    }
+                }
+                this.genCV1DM(vk);
+                this.genComplimentaryColors(vk, primary);
+            }
+        } else {
+            log.debug(`Neither primary, secondary, nor tertiary are set`);
+        }
+        log.debug(`generateChartingVars exit`);
+    }
+
+    private genComplimentaryColors(vk: CSSVariableKind, primary: Shade) {
+        log.debug(`Begin generating complimentary colors`);
+        const shades = primary.buildComplimentaryShades();
+        for (let i = 0; i < shades.length; i++) {
+            const shade = shades[i];
+            this.genComplimentaryColors2(vk, `color${i+1}`, shade.buildLMShades());
+            this.genComplimentaryColors2(vk, `dm-color${i+1}`, shade.buildDMShades());
+        }
+        log.debug(`End generating complimentary colors`);
+    }
+
+    private genComplimentaryColors2(vk: CSSVariableKind, prefix: string, shades: Shade[]) {
+        this.setComplimentaryVar(vk, `${prefix}-050`, shades[0].getHalfShade());
+        for (let i = 0; i < shades.length; i++) {
+            const shade = shades[i];
+            const name = `${prefix}-${(i+1)*100}`;
+            this.setComplimentaryVar(vk, name, shade);
+        }
+    }
+
+    private setComplimentaryVar(vk: CSSVariableKind, name: string, shade: Shade) {
+        const value = shade.getHexOrRGBA();
+        log.debug(`Setting complimentary var: ${name} = ${value}`);
+        vk.setVar(name, value);
+    }
+
+    private genCV1LM1(vk: CSSVariableKind) {
+        this.genCV(vk, true, [
+            "1", "primary-400",
+            "2", "primary-500",
+            "3", "primary-700",
+            "4", "primary-900",
+            "5", "color1-500",
+            "6", "color1-700",
+            "7", "color1-900",
+            "8", "color2-500",
+            "9", "color2-700",
+            "10", "color2-900",
+        ]);
+    }
+
+    private genCV1LM2(vk: CSSVariableKind) {
+        this.genCV(vk, true, [
+            "1", "primary-050",
+            "2", "primary-100",
+            "3", "primary-300",
+            "4", "primary-500",
+            "5", "color1-050",
+            "6", "color1-100",
+            "7", "color1-300",
+            "8", "color2-050",
+            "9", "color2-100",
+            "10", "color2-300",
+        ]);
+    }
+
+    private genCV1DM(vk: CSSVariableKind) {
+        this.genCV(vk, false, [
+            "1", "primary-050",
+            "2", "primary-100",
+            "3", "primary-300",
+            "4", "primary-500",
+            "5", "color1-050",
+            "6", "color1-100",
+            "7", "color1-300",
+            "8", "color2-050",
+            "9", "color2-100",
+            "10", "color2-300",
+        ]);
+    }
+
+    private genCV2LM1(vk: CSSVariableKind) {
+        this.genCV(vk, true, [
+            "1", "primary-400",
+            "2", "primary-500",
+            "3", "primary-700",
+            "4", "primary-900",
+            "5", "secondary-400",
+            "6", "secondary-500",
+            "7", "secondary-700",
+            "8", "secondary-900",
+            "9", "gray-500",
+            "10", "black",
+        ]);
+    }
+
+    private genCV2LM2(vk: CSSVariableKind) {
+        this.genCV(vk, true, [
+            "1", "primary-050",
+            "2", "primary-100",
+            "3", "primary-300",
+            "4", "primary-500",
+            "5", "secondary-050",
+            "6", "secondary-100",
+            "7", "secondary-300",
+            "8", "secondary-500",
+            "9", "grey-300",
+            "10", "white",
+        ]);
+    }
+
+    private genCV2DM(vk: CSSVariableKind) {
+        this.genCV(vk, false, [
+            "1", "primary-050",
+            "2", "primary-100",
+            "3", "primary-300",
+            "4", "primary-500",
+            "5", "secondary-050",
+            "6", "secondary-100",
+            "7", "secondary-300",
+            "8", "secondary-500",
+            "9", "grey-300",
+            "10", "white",
+        ]);
+    }
+
+    private genCV3LM1(vk: CSSVariableKind) {
+        this.genCV(vk, true, [
+            "1", "primary-400",
+            "2", "primary-500",
+            "3", "primary-700",
+            "4", "primary-900",
+            "5", "secondary-500",
+            "6", "secondary-700",
+            "7", "secondary-900",
+            "8", "tertiary-500",
+            "9", "tertiary-700",
+            "10", "tertiary-900",
+        ]);
+    }
+
+    private genCV3LM2(vk: CSSVariableKind) {
+        this.genCV(vk, true, [
+            "1", "primary-050",
+            "2", "primary-100",
+            "3", "primary-300",
+            "4", "primary-500",
+            "5", "secondary-050",
+            "6", "secondary-200",
+            "7", "secondary-400",
+            "8", "tertiary-050",
+            "9", "tertiary-200",
+            "10", "tertiary-400",
+        ]);
+    }
+
+    private genCV3DM(vk: CSSVariableKind) {
+        this.genCV(vk, false, [
+            "1", "primary-050",
+            "2", "primary-100",
+            "3", "primary-300",
+            "4", "primary-500",
+            "5", "secondary-050",
+            "6", "secondary-200",
+            "7", "secondary-400",
+            "8", "tertiary-050",
+            "9", "tertiary-200",
+            "10", "tertiary-400",
+        ]);
+    }
+
+    private genCV(vk: CSSVariableKind, lm: boolean, args: string[]) {
+        for (let i=0; i < args.length; i += 2) {
+            vk.setVar(`${lm?"":"dm-"}chart-${args[i]}`, `var(--${lm?"":"dm-"}${args[i+1]})`);
+        }
+        for (let i=0; i < args.length; i += 2) {
+            vk.setVar(`${lm?"":"dm-"}on-chart-${args[i]}`, `var(--${lm?"":"dm-"}on-${args[i+1]})`);
+        }
     }
 
     private lkey(name: string): string {
@@ -1305,9 +1532,13 @@ export class CSSDynamicVariableKind extends CSSVariableKind {
 
     private cb?: (propVar: CSSVariableKind) => void;
 
-    constructor(name: string, unit: string, props: Property<any>[], cssGenerator: CSSGenerator, cb?: (propVar: CSSVariableKind) => void) {
+    constructor(name: string, unit: string, props: Property<any>[], cssGenerator: CSSGenerator, opts?: {
+        or?: boolean,
+        cb?: (propVar: CSSVariableKind) => void,
+    }) {
         super(name, unit, props, cssGenerator);
-        this.cb = cb;
+        opts = opts || {};
+        this.cb = opts.cb;
         const listenerKey = cssGenerator.lkey(name);
         switch (props.length) {
             case 0:
@@ -1316,8 +1547,8 @@ export class CSSDynamicVariableKind extends CSSVariableKind {
                 props[0].setListener(listenerKey, this.singlePropCallback.bind(this));
                 break;
             default:
-                if (!cb) throw new Error(`Multiple property variable requires a callback (${JSON.stringify(props)})`);
-                new PropertyGroupListener(listenerKey, props, this.multiplePropCallback.bind(this));
+                if (!this.cb) throw new Error(`Multiple property variable requires a callback (${JSON.stringify(props)})`);
+                new PropertyGroupListener(listenerKey, props, this.multiplePropCallback.bind(this), opts);
                 break;
         }
     }
