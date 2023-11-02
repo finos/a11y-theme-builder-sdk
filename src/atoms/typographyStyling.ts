@@ -50,7 +50,7 @@ export class TypographyStyling extends Node {
             getSelectables: this.getFontFamilySelectables.bind(this),
             getDefaultValue: this.getFontFamilyDefaultSelectableValue.bind(this),
         });
-        this.fontSize = new PropertyFontRange("Font Size", false, this, 0, 128, defaultFontSize);
+        this.fontSize = new PropertyFontRange("Font Size", false, this, 0, 256, defaultFontSize);
         this.fontWeight = new PropertyNumberSelectable("Font Weight", false, this, [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000], defaultFontWeight);
         this.lineHeight = new PropertyPercentageSelectable("Line Height", false, this, [130, 160], defaultLineHeight);
         this.letterSpacing = new PropertyPixelRange("Character Spacing", false, this, -2, 10, defaultLetterSpacing);
