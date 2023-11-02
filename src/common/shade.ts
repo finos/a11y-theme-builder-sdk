@@ -133,6 +133,15 @@ export class Shade {
         return new Shade({rgbArray})
     }
 
+    public static fromRGBString(rgb: string): Shade {
+        const m = rgb.match(/rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)/);
+        if (!m) throw new Error(`Not an RGB string: ${rgb}`);
+        const R = Number(m[1]);
+        const G = Number(m[2]);
+        const B = Number(m[3]);
+        return Shade.fromRGB(R,G,B);
+    }
+
     public static fromRGBAString(rgba: string): Shade {
         const m = rgba.match(/rgba\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*([\d\.]+)\s*\)/);
         if (!m) throw new Error(`Not an RGBA string: ${rgba}`);
@@ -976,6 +985,21 @@ export class Shade {
             }
         }
         return rtn;
+    }
+
+    public buildComplimentaryShades(): Shade[] {
+        const ra = this.rgbArray;
+        const rgb = chroma.rgb(ra[0],ra[1],ra[2]);
+        const h = rgb.get('hsv.h');
+        const s = rgb.get('hsv.s');
+        const v = rgb.get('hsv.v') + 180;
+        const h0 = h + 30;
+        const h1 = h - 30;
+        const rgb1 = 'rgb(' + chroma.hsv(h0,s,v).rgb() + ')';
+        const rgb2 = 'rgb(' + chroma.hsv(h1,s,v).rgb() + ')';
+        const shade1 = Shade.fromRGBString(rgb1);
+        const shade2 = Shade.fromRGBString(rgb2);
+        return [shade1, shade2]
     }
 
     public toJSON(): Object {

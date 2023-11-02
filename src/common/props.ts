@@ -162,11 +162,14 @@ export class PropertyGroupListener {
 
     private props: Property<any>[];
     private cb: (pgl: PropertyGroupListener) => void;
+    private or: boolean;
     private lname: string;
     private started = false; 
 
-    constructor(name: string, props: Property<any>[], cb: (pgl: PropertyGroupListener) => void) {
+    constructor(name: string, props: Property<any>[], cb: (pgl: PropertyGroupListener) => void, opts?: { or?: boolean}) {
         this.props = props;
+        opts = opts || {};
+        this.or = opts.or || false;
         this.cb = cb;
         this.lname = `_tb.PropertyGroupListener.${name}`;
         this.start();
@@ -178,7 +181,7 @@ export class PropertyGroupListener {
             prop.setListener(this.lname, this.callback.bind(this));
         });
         this.started = true;
-        if (this.allPropsHaveValues()) {
+        if (this.or || this.allPropsHaveValues()) {
             this.cb(this);
         }
     }
@@ -190,7 +193,7 @@ export class PropertyGroupListener {
     }
 
     private callback(event: Event) {
-        if (this.started && this.allPropsHaveValues()) {
+        if (this.started && (this.or || this.allPropsHaveValues())) {
             log.debug(`Calling the listener for property group ${this.lname} because it is ready`);
             this.cb(this);
         }

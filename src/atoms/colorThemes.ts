@@ -227,6 +227,8 @@ export class ColorTheme extends Node implements IColorTheme {
         this.primary = new PropertyColorShade("Primary", true, this, opts);
         this.secondary = new PropertyColorShade("Secondary", true, this, opts);
         this.tertiary = new PropertyColorShade("Tertiary", true, this, opts);
+        this.secondary.addDependency(this.primary);
+        this.tertiary.addDependency(this.secondary);
         this.lightModeBackground = new PropertyColorPair("Light Mode Background", true, this, []);
         this.lightModeBackground.addDependency(this.primary);
         this.darkModeBackground = new PropertyColorPair("Dark Mode Background", true, this, []);
