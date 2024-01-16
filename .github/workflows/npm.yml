@@ -19,8 +19,8 @@ jobs:
       # prepend '[RELEASE]' so that it can be detected above to prevent looping
       #  this is a commit to main that can be ignored by this GitHub action
       #  use 'patch' to update only the last digit in the version (e.g. 1.1.?)
-      - run: npm version patch -m "[RELEASE] %s"
-      - run: git push
+      # - run: npm version patch -m "[RELEASE] %s"
+      # - run: git push
       # Setup .npmrc file to publish to npm
       - uses: actions/setup-node@v3
         with:
