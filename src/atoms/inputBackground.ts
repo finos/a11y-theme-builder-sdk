@@ -19,7 +19,7 @@ export interface InputBackgroundVariables {
 const log = new Logger("ib");
 
 /**
- * The input backbround atom.
+ * The input background atom.
  * @category Atoms
  */
 export class InputBackground extends Atom implements IInputBackground {
