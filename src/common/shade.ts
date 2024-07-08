@@ -170,13 +170,21 @@ export class Shade {
     public opacity: number = 1;
     /** The onHex value for this shade */
     public onHex: string = "";
+    /** If this is a shade built from the color palette, it is the unique key to the shade node in the tree */
     public key?: string;
+    /** If this is a core shade such as "Black" or "White", it is set to the core shade name. */
     public coreShadeName?: string;
+    /** The cached computed luminance value for this shade */
     private luminance?: number;
+    /** The cached computed lightness value for this shade */
     private lightness?: number;
+    /** The cached computed perceived lightness value for this shade */
     private perceivedLightness?: number;
+    /** The cached computed saturation value for this shade */
     private saturation?: number;
+    /** The cached computed label (e.g. 100, 200, etc) for this shade based upon it's lightness value */
     private label?: number;
+    /** The parent color mode node for this shade if it was generated from the color palette */
     private mode?: ColorMode;
 
     constructor(opts: { hex?: string; rgbArray?: number[]} ) {
@@ -422,9 +430,245 @@ export class Shade {
      * @param lm True for light mode or false for dark mode
      * @returns Shades for this shade
      */
+    /*
     public buildShades(lm: boolean): Shade[] {
-        if (lm) return this.buildLMShades();
-        return this.buildDMShades();
+        log.debug(`buildShades: enter lm=${lm}, hex=${this.hex}`);
+        const shades = this.getLighterAndDarkerShades(lm);
+        for (let i = 0; i < shades.length; i++) {
+            let shade = shades[i];
+            const id = (i * 100).toString();
+            log.debug(`buildShades: adjusted i=${i} to ${shade.hex}`);
+            shade.id = id;
+            shade.index = i;
+        }
+        log.debug(`buildShades: exit lm=${lm}, hex=${this.hex}`);
+        return shades;
+    }
+    */
+
+    public buildShades(lm: boolean): Shade[] {
+        const prime = this.calculateLabel();
+        const rgbArray = this.rgbArray;
+        const color = this.hex;
+        // calculate how many light shades need to get built //
+        var lightColors = (prime/100) + 1;
+        // calculate how many dark shades need to get built //
+        var darkColors = ((900-prime)/100) + 1
+        if (lightColors > 1)  {
+          var lightscale  = chroma.scale([( '#FFFFFF') ,color]).correctLightness(true).colors(lightColors);
+        } else {
+          lightscale = [color]
+        }
+        var darkscale: any;
+        if (darkColors > 1) {
+            var endColor  = this.mixColors('#000000',color.toString(),lm? .95 : .98);
+            darkscale = chroma.scale([color,endColor]).correctLightness(true).colors(darkColors);
+        } else {
+            darkscale = [color]
+        }
+        if (lightscale.length > 0) {
+            lightscale.splice(-1)
+        }
+        var colorScale = [...lightscale, ...darkscale];
+        var i = 0;
+        let newRGB: any;
+        const rtn: Shade[] = [];
+        while (i < 10) {
+          if (i == 0) {
+            var f = chroma.scale([( '#FFFFFF') ,color]);
+            if (lm) {
+              var scale = 100/(prime * 2)
+            } else {
+              var scale = (100/ (prime * 4)) * 3;
+            }
+            newRGB  = f(scale);
+          } else {
+            newRGB = colorScale[i];
+            // adjust saturation of each color to create triangel effect - most saturated color are 600 and 700 //
+          }
+          newRGB = this.triangle(color,i,prime,newRGB);
+          var shade = i * 100;
+          var text_color: number[];
+          if (Shade.fromRGBArray(newRGB).getContrastShade(lm) == Shade.WHITE) {
+              text_color = [255,255,255]; // white
+            } else {
+              text_color = [18,18,18]; // black
+            }
+            // convert the color to hex //
+            newRGB = Util.rgbArrayToHex(newRGB);
+            // based on the mode light or dark - run the appropriate check to see if the color and on color meet the contrats ratio of wcagContrast or if the shade needs to be lighted or darked //
+            // TODO: Pass minRatio of 4.5 for AA and 7.1 for AAA.
+            rtn.push(this.buildShade(lm));
+            //
+            // loop through each shade //
+            i++;
+        }
+        this.rescale(theme)
+        return rtn;
+    }
+
+    private rescale(colorName, mode, lastDarkText ) {
+        // get the lights shade //
+        var startLightShade = rgb2hex($(document).find('#' + colorName + '-'+ mode +'-0 .Hex').css('backgroundColor'));
+        // get the last shade with dark text //
+        var endLightShade  = rgb2hex($(document).find('#' + colorName + '-'+ mode +'-'+ lastDarkText + ' .Hex').css('backgroundColor'));
+        var colorCount = lastDarkText/100 + 1
+        var newLightShades = chroma.scale([startLightShade,endLightShade]).colors(colorCount);
+        // cycle through the new chroma scale and assign to the shades //
+        var firstLightText = lastDarkText + 100
+        var n = 0
+        while (n < firstLightText  ) {
+          var shadeIndex = n/100
+          var newColor = newLightShades[shadeIndex]
+          var newRGB   = hex2rgb(newColor);
+          checkContrast(colorName+'-'+mode+'-'+n, newRGB, mode)
+          n = n + 100
+        }
+        // get the darkest shade //
+        var endDarkShade   = rgb2hex($(document).find('#' + colorName + '-'+mode+'-900 .Hex').css('backgroundColor'));
+        // get the first shade with light text //
+        var startDarkShade = rgb2hex($(document).find('#' + colorName + '-'+ mode +'-'+ firstLightText+' .Hex').css('backgroundColor'));
+        var d = firstLightText
+        while (d <= 900) {
+          if (d == 900) {
+            var endDarkShade   = rgb2hex($(document).find('#' + colorName + '-'+mode+'-900 .Hex').css('backgroundColor'));
+            var newRGB = hex2rgb(endDarkShade)
+            checkContrast(colorName+'-'+mode+'-'+d, newRGB, mode)
+          } else {
+            // cycle through the new chroma scale and assign to the shades //
+            var colorCount = (900 - lastDarkText)/100
+            var newDarkShades = chroma.scale([startDarkShade,endDarkShade]).colors(colorCount);
+            var shadeIndex = (d - firstLightText)/100
+            var newColor = newDarkShades[shadeIndex]
+            var newRGB   = hex2rgb(newColor);
+            checkContrast(colorName+'-'+mode+'-'+d, newRGB, mode)
+          }
+        d = d + 100
+       }
+    }
+
+    // Creates the darkest possible color with dark text and the lightest possible color with white text
+    private adjustToMaxContrast(color,text,mode) {
+        /// get shades as close to contrast requiement as possible ///
+        var i = 0
+        var hex = (chroma(color).darken(i)).toString()
+        var startHex = hex
+        var newText, textArray, rbgArray, contrastRatio
+        // get the dark mode text color //
+        if (text == '#ffffff') {
+           if (mode == 'dark') {
+             newText = lighten(color,mixer).toString()
+             textArray = hextoRGBArray(newText);
+           } else {
+             textArray = [255,255,255]
+           }
+        } else {
+           textArray = darkTextArray
+        }
+    
+        rgbArray = hextoRGBArray(hex);
+        // get the contrast ration of the color against the suggested text color //
+        contrastRatio = contrast(rgbArray, textArray);
+        //alert('start i: ' + i + ', color: ' + hex + ', contrast: ' + contrastRatio)
+        while (contrastRatio > wcagContrast) {
+          i = i + .01
+          if (text == '#ffffff') {
+            hex = lighten(color,1 - i)
+            if (mode == 'dark') {
+              newText = lighten(color,mixer).toString()
+              textArray = hextoRGBArray(newText);
+            } else {
+              textArray = [255,255,255]
+            }
+          } else {
+            hex = (chroma(color).darken(i)).toString()
+            textArray = darkTextArray
+          }
+          rgbArray = hextoRGBArray(hex);
+          contrastRatio = contrast(rgbArray, textArray);
+          //alert('i: ' + i + ', color: ' + hex + ', contrast: ' + contrastRatio)
+        }
+        i = i - .01
+        if (text == '#ffffff') {
+          var hex = lighten(color,1 - i)
+          if (mode == 'dark') {
+            newText = lighten(color,mixer).toString()
+            textArray = hextoRGBArray(newText);
+          } else {
+            textArray = [255,255,255]
+          }
+        } else {
+          hex = (chroma(color).darken(i)).toString()
+          textArray = darkTextArray
+        }
+        rgbArray = hextoRGBArray(hex);
+        contrastRatio = contrast(rgbArray, textArray);
+        if (contrastRatio < wcagContrast || i == 0) {
+          hex = startHex
+          rgbArray = hextoRGBArray(hex);
+          contrastRatio = contrast(rgbArray, textArray);
+        }
+        return(hex)
+    }
+
+    private mixColors(c1: string, c2: string, opacity: number): string {
+        const pn = (n:number) => ('0' + n.toString(16)).slice(-2);
+        const [r0, g0, b0, r1, g1, b1] = [
+          parseInt(c1.slice(1, 3), 16),
+          parseInt(c1.slice(3, 5), 16),
+          parseInt(c1.slice(5, 7), 16),
+          parseInt(c2.slice(1, 3), 16),
+          parseInt(c2.slice(3, 5), 16),
+          parseInt(c2.slice(5, 7), 16),
+        ];
+        const [r, g, b] = [
+          Math.round(r0 * opacity + r1 * (1 - opacity)),
+          Math.round(g0 * opacity + g1 * (1 - opacity)),
+          Math.round(b0 * opacity + b1 * (1 - opacity)),
+        ];
+        return `#${pn(r)}${pn(g)}${pn(b)}`;
+    }
+
+    private lightenColor(color: string, amount: number): string {
+        return this.mixColors(color,'#ffffff',amount);
+    }
+
+    private triangle(color: string, i: number, prime: number, newRGB: number[]) {
+        var maxSaturation = 1;
+        prime = prime/100;
+        var primeHsl = chroma(color).hsl();
+        if (primeHsl[1] > maxSaturation) {
+          maxSaturation = primeHsl[1];
+        }
+        var primeSaturation = primeHsl[1];
+        var ihsl = chroma(newRGB).hsl();
+        var change: number;
+        var newSaturation: number;
+        if (i == prime) {
+          change = 1;
+          newSaturation = primeSaturation * change;
+        } else if (prime <= 7) {
+          if (i <= 7) {
+            change = i/prime;
+          } else {
+            change = (7 - (i - 7) - 2)/prime;
+          }
+          newSaturation  = primeSaturation * change;
+        } else {
+          var seven = (7 - (i - 7) - 2) * primeHsl[1];
+          if (i <= 7) {
+            change = i/7;
+            newSaturation  = seven * change;
+          } else {
+            change = (7 - (i - 7) - 2)/7;
+            newSaturation  = seven * change;
+          }
+        }
+        if (newSaturation > maxSaturation) {
+          newSaturation = maxSaturation;
+        }
+        var newHSL = chroma.hsl(ihsl[0], newSaturation  , ihsl[2]).hex();
+        return newHSL;
     }
 
     /**
@@ -478,24 +722,6 @@ export class Shade {
         }
         log.debug(`Could not find lightmode shade for ${JSON.stringify(this)}`);
         return undefined;
-    }
-
-    /**
-     * Build light mode shades for this shade.
-     * @returns Light mode shades for this shade
-     */
-    public buildLMShades(): Shade[] {
-        log.debug(`buildLMShades: enter shade=${JSON.stringify(this)}`);
-        const shades = this.getLighterAndDarkerShades(true);
-        for (let i = 0; i < shades.length; i++) {
-            let shade = shades[i];
-            const id = (i * 100).toString();
-            log.debug(`buildLMShades: adjusted i=${i} to ${shade.hex}`);
-            shade.id = id;
-            shade.index = i;
-        }
-        log.debug(`buildLMShades: exit shade=${JSON.stringify(this)}`);
-        return shades;
     }
 
     /**
@@ -576,24 +802,6 @@ export class Shade {
     }
 
     /**
-     * Build dark mode shades for this shade.
-     * @returns Dark mode shades for this shade
-     */
-    public buildDMShades(): Shade[] {
-        log.debug(`buildDMShades: enter shade=${JSON.stringify(this)}`);
-        const shades = this.getLighterAndDarkerShades(false);
-        for (let i = 0; i < shades.length; i++) {
-            let shade = shades[i];
-            log.debug(`buildDMShades: adjusted i=${i} to ${shade.hex}`);
-            const id = (i * 100).toString();
-            shade.id = id;
-            shade.index = i;
-        }
-        log.debug(`buildDMShades: exit shade=${JSON.stringify(this)}`);
-        return shades;
-    }
-
-    /**
      * Build 10 shades from this shade, some of which may be lighter and some of which may be darker.
      * The number of lighter and darker depends on where in the spectrum this shade falls.
      * @param lm True if this is for light mode; else false if for dark mode.
@@ -617,8 +825,8 @@ export class Shade {
         // Build the lighter shades
         const shades: Shade[] = [];
         const numLighterShades = this.numLighterShades();
-        if (numLighterShades > 0) {
-            const startScale  = chroma.scale(['#FFFFFF',this.hex]).correctLightness(true).colors(lm ? numLighterShades + 2 : numLighterShades);
+        if (numLighterShades > 1) {
+            const startScale  = chroma.scale(['#FFFFFF',this.hex]).correctLightness(true).colors(numLighterShades);
             /// since padding is not working I will create a scale and get the first 2nd value and then create another scale
             if (startScale.length > (lm ? 1 : 2)) {
                 const scale  = chroma.scale([(startScale[lm ? 1 : 2]),this.hex]).correctLightness(true).colors(numLighterShades)
@@ -627,6 +835,8 @@ export class Shade {
                     if (shades.length > 0) shades.splice(-1);
                 }
             }
+        } else {
+            shades.push(this);
         }
         for (let i = 0; i < shades.length; i++) {
             shades[i] = shades[i].buildShade(lm);
@@ -777,6 +987,27 @@ export class Shade {
         const B = Math.floor(this.B * A + shade.B * opacity);
         const rtnShade = Shade.fromRGB(R,G,B).setMode(this.mode ? this.mode : shade.mode);
         return rtnShade;
+    }
+
+    public mixShade2(shade: Shade, opacity: number): Shade {
+        const c1 = this.hex;
+        const c2 = shade.hex;
+        const [r0, g0, b0, r1, g1, b1] = [
+            parseInt(c1.slice(1, 3), 16),
+            parseInt(c1.slice(3, 5), 16),
+            parseInt(c1.slice(5, 7), 16),
+            parseInt(c2.slice(1, 3), 16),
+            parseInt(c2.slice(3, 5), 16),
+            parseInt(c2.slice(5, 7), 16),
+        ];
+        const [r, g, b] = [
+            Math.round(r0 * opacity + r1 * (1 - opacity)),
+            Math.round(g0 * opacity + g1 * (1 - opacity)),
+            Math.round(b0 * opacity + b1 * (1 - opacity)),
+        ];
+        const pn = (n: number) => ('0' + n.toString(16)).slice(-2);
+        const hex = `#${pn(r)}${pn(g)}${pn(b)}`;
+        return Shade.fromHex(hex);
     }
 
     public numLighterShades(): number {
