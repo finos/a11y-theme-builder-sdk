@@ -356,7 +356,6 @@ export class Shade {
             }
             return shade;
         }
-
         // Get contrast with black and white & return best ratio
         const blackRatio = this.getContrastRatio(Shade.BLACK);
         let whiteRatio = this.getContrastRatio(Shade.WHITE);
@@ -448,12 +447,11 @@ export class Shade {
 
     public buildShades(lm: boolean): Shade[] {
         const prime = this.calculateLabel();
-        const rgbArray = this.rgbArray;
         const color = this.hex;
         // calculate how many light shades need to get built //
-        var lightColors = (prime/100) + 1;
+        const lightColors = (prime/100) + 1;
         // calculate how many dark shades need to get built //
-        var darkColors = ((900-prime)/100) + 1
+        const darkColors = ((900-prime)/100) + 1
         if (lightColors > 1)  {
           var lightscale  = chroma.scale([( '#FFFFFF') ,color]).correctLightness(true).colors(lightColors);
         } else {
@@ -470,21 +468,15 @@ export class Shade {
             lightscale.splice(-1)
         }
         var colorScale = [...lightscale, ...darkscale];
-        var i = 0;
         let newRGB: any;
         const rtn: Shade[] = [];
-        while (i < 10) {
+        for (let i = 0; i < 10; i++) {
           if (i == 0) {
-            var f = chroma.scale([( '#FFFFFF') ,color]);
-            if (lm) {
-              var scale = 100/(prime * 2)
-            } else {
-              var scale = (100/ (prime * 4)) * 3;
-            }
+            const f = chroma.scale([( '#FFFFFF') ,color]);
+            const scale = lm ?  100/(prime * 2) : (100/ (prime * 4)) * 3;
             newRGB  = f(scale);
           } else {
             newRGB = colorScale[i];
-            // adjust saturation of each color to create triangel effect - most saturated color are 600 and 700 //
           }
           newRGB = this.triangle(color,i,prime,newRGB);
           var shade = i * 100;
@@ -546,6 +538,69 @@ export class Shade {
         d = d + 100
        }
     }
+
+    private checkContrast(theme: any, color: any, mode: string) {
+        var lightTextArray = hextoRGBArray(lightText);
+        var rgbArray = hextoRGBArray(rgb2hex(color));
+        var shade = theme.split('-')[2];
+        var newRGB = "rgb(" + rgbArray + ")"
+        var lightArray = lightTextArray
+        var light = contrast(lightArray, rgbArray);
+        var dark = contrast(darkTextArray, rgbArray);
+        var text_color, textTint, contrastRatio
+        var contrastRatio = contrast(lightArray, rgbArray);
+        var elevationHex;
+        if (light > dark) {
+          text_color = lightArray; // white
+          var textTint = 'light';
+          if (mode == 'dark') {
+            var colorHex = rgb2hex(color)
+            /// for dark mode - lighten color light text ///
+            var newText = lighten(colorHex, mixer)
+            var newArray = hextoRGBArray(colorHex);
+            var lightArray = hextoRGBArray(newText)
+            var textHex
+            contrastRatio = contrast(lightArray, newArray);
+            var i = .00
+            while (contrastRatio < wcagContrast) {
+              var hex = (chroma(color).darken(i)).toString()
+              var textHex = (mixColors(hex, '#ffffff', mixer)).toString();
+              var textArray = hextoRGBArray(textHex);
+              var newArray = hextoRGBArray(hex);
+              var contrastRatio = contrast(newArray, textArray);
+              i = i + .01
+            }
+            var newHex = (chroma(rgb2hex(color)).darken(i)).toString()
+            console.log('original color: ' + color + ', i:' + i + ', elevationHex: ' + elevationHex + ', textHex: ' + textHex + ', conttrast: ' + contrastRatio + ' new-color: ' + newHex)
+            var rgbArray = hextoRGBArray(newHex);
+            var textTint = 'light';
+            buildColor(theme, mode, rgbArray, text_color, contrastRatio)
+            return false;
+          }
+        } else {
+          text_color = darkTextArray; // dark
+          var textTint = 'dark';
+          contrastRatio = contrast(text_color, rgbArray);
+        }
+        if (textTint == 'light') {
+          var buildText = lightTextArray
+        } else {
+          var buildText = darkTextArray
+        }
+        contrastRatio = contrastRatio.toFixed(2)
+        if (contrastRatio < wcagContrast) {
+          var darkCount = adjustDarkerCount(theme, newRGB, lightArray, contrastRatio, mode)
+          var lightCount = adjustLighterCount(theme, newRGB, darkTextArray, contrastRatio, mode)
+          if (darkCount < lightCount || shade >= 600) {
+            adjustColorDarker(theme, newRGB, lightArray, contrastRatio, mode)
+          } else {
+            adjustColorLighter(theme, newRGB, darkTextArray, contrastRatio, mode)
+          }
+        } else {
+          console.log('theme: ' + theme + ' ,text color:' + text_color + ', rgbArray' + rgbArray + ', contrastRatio: ' + contrastRatio)
+          buildColor(theme, mode, rgbArray, buildText, contrastRatio)
+        }
+      }
 
     // Creates the darkest possible color with dark text and the lightest possible color with white text
     private adjustToMaxContrast(color,text,mode) {
