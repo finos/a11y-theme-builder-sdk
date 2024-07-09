@@ -3,6 +3,7 @@
  * Licensed under Apache-2.0 License. See License.txt in the project root for license information
  */
 import * as chroma from "chroma-js";
+import { Settings } from "./settings";
 import { Logger } from "../util/logger";
 import { Util } from "../util/util";
 
@@ -36,6 +37,11 @@ interface ColorMode {
     name: string;
     shades: Shade[];
     color: Color;
+}
+
+export interface BuildShadesArgs {
+    lm: boolean;
+    settings: Settings;
 }
 
 export interface SearchShadesArgs {
@@ -445,7 +451,7 @@ export class Shade {
     }
     */
 
-    public buildShades(lm: boolean): Shade[] {
+    public buildShades(args: BuildShadesArgs): Shade[] {
         const prime = this.calculateLabel();
         const color = this.hex;
         // calculate how many light shades need to get built //
@@ -459,7 +465,7 @@ export class Shade {
         }
         var darkscale: any;
         if (darkColors > 1) {
-            var endColor  = this.mixColors('#000000',color.toString(),lm? .95 : .98);
+            var endColor  = this.mixColors('#000000',color.toString(),args.lm? .95 : .98);
             darkscale = chroma.scale([color,endColor]).correctLightness(true).colors(darkColors);
         } else {
             darkscale = [color]
@@ -473,7 +479,7 @@ export class Shade {
         for (let i = 0; i < 10; i++) {
           if (i == 0) {
             const f = chroma.scale([( '#FFFFFF') ,color]);
-            const scale = lm ?  100/(prime * 2) : (100/ (prime * 4)) * 3;
+            const scale = args.lm ?  100/(prime * 2) : (100/ (prime * 4)) * 3;
             newRGB  = f(scale);
           } else {
             newRGB = colorScale[i];
@@ -481,7 +487,7 @@ export class Shade {
           newRGB = this.triangle(color,i,prime,newRGB);
           var shade = i * 100;
           var text_color: number[];
-          if (Shade.fromRGBArray(newRGB).getContrastShade(lm) == Shade.WHITE) {
+          if (Shade.fromRGBArray(newRGB).getContrastShade(args.lm) == Shade.WHITE) {
               text_color = [255,255,255]; // white
             } else {
               text_color = [18,18,18]; // black
@@ -490,16 +496,25 @@ export class Shade {
             newRGB = Util.rgbArrayToHex(newRGB);
             // based on the mode light or dark - run the appropriate check to see if the color and on color meet the contrats ratio of wcagContrast or if the shade needs to be lighted or darked //
             // TODO: Pass minRatio of 4.5 for AA and 7.1 for AAA.
-            rtn.push(this.buildShade(lm));
+            rtn.push(this.buildShade(args.lm));
             //
             // loop through each shade //
             i++;
         }
-        this.rescale(theme)
+        if (!args.lm) {
+            // HERE: 'theme' is the name of the color
+            this.rescale(theme, args.lm) // args don't match up
+        }
         return rtn;
     }
 
-    private rescale(colorName, mode, lastDarkText ) {
+    // There are two groups of colors in each scale: have dark text and light text.
+    // The purpose of this function is to make it so that the jump in colors between these 2 groups is uniform.
+    // Colors between the last shade of the 1st group and 1st shade in the 2nd group.
+    // For the last shade of the 1st group, make it as dark as possible while still meeting WCAG contrast requirements
+    // For the first shade of the 2nd group, make it as light as possible while still meeting WCAG contrast requirements
+    // lastDarkText is the last in the 1st group
+    private rescale(colorName: string, lm: boolean, lastDarkText ) {
         // get the lights shade //
         var startLightShade = rgb2hex($(document).find('#' + colorName + '-'+ mode +'-0 .Hex').css('backgroundColor'));
         // get the last shade with dark text //

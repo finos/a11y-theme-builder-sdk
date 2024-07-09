@@ -2,9 +2,15 @@
 * "contrastRation" var on line 61 is not being used and therefore text_color on lines 46 & 48.  Delete?
 * The call to rescale on line 62 passes "theme" as the 1st arg, but the rescale function (line 505) takes 3 args with colorName as 1st.
      rescale(colorName, mode, lastDarkText )
+* On line 544, explain how "colorName+'-'+mode+'-'+d" equals theme
 * What is the output of the "buildShades" function?  The "checkContrast" function must be setting something globally.
 * What is the value of the "mixer" variable?
 * Verify that buildColor is implemented by buildShade.
 * Are the following settings per Theme?
   WCAGContrast, MaxChoma, dmmaxChroma, darkTextArray
   If any of these are changed, do we need to automatically rebuild the shades?  If automatic, what else should be impacted in the theme?  I think the dependency graph needs to be generalized to include not just "this property depends on the value of this property" but "this group of actions (e.g. buildShades) depends on this property.  So when they switch a theme from AA to AAA, the shades of all colors of the themes would be automatically rebuilt.
+
+
+Mapping of Lise's code to SDK:
+1) buildColor -> src/common/Shade.ts:buildShade
+2) Lise uses the name "theme" sometimes to refer to the colorName

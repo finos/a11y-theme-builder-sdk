@@ -69,7 +69,7 @@ const mixColors = (c1, c2, opacity) => {
     parseInt(c1.slice(1, 3), 16),
     parseInt(c1.slice(3, 5), 16),
     parseInt(c1.slice(5, 7), 16),
-    parseInt(c2.slice(1, 3), 16),
+    parseInt(c2.slice(1, 3), 16)t
     parseInt(c2.slice(3, 5), 16),
     parseInt(c2.slice(5, 7), 16),
   ];
