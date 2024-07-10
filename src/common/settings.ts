@@ -30,6 +30,7 @@ export class Settings {
     public wcag: WCAGSetting = WCAGSetting.AA;
     public lmMaxChroma = 100;
     public dmMaxChroma = 100;
-    public darkText = Shade.OFF_BLACK;
+    public lightText = Shade.WHITE;
+    public darkText = Shade.DARK_TEXT;
 
 }

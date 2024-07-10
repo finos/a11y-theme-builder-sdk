@@ -60,6 +60,8 @@ export class Shade {
     private static coreShadeMap: {[coreShadeName:string]: Shade} = {};
 
     /** The black shade */
+    public static FULL_BLACK = Shade.fromHex("#000000", "Full-Black");
+    /** The black shade */
     public static BLACK = Shade.fromHex("#121212", "Black");
     /** The near black shade */
     public static NEAR_BLACK = Shade.fromHex("#181818", "Near-Black");
@@ -75,6 +77,8 @@ export class Shade {
     public static OFF_WHITE = Shade.fromHex("#FAF9F6", "Off-White");
     /** The gray shade */
     public static GRAY = Shade.fromHex("#FAFAFA", "Gray");
+    /** The dark text shade */
+    public static DARK_TEXT = Shade.fromHex("#23233F", "Dark-Text");
     /** The white dark mode shade */
     public static WHITE_DM = Shade.fromHex("#FFFFFF", "DM-White").setOpacity(0.6);
     /** The half-white dark mode shade */
@@ -366,16 +370,10 @@ export class Shade {
         const blackRatio = this.getContrastRatio(Shade.BLACK);
         let whiteRatio = this.getContrastRatio(Shade.WHITE);
         if (!lm) whiteRatio = whiteRatio * 0.6;
-        if (blackRatio > whiteRatio) {
-            return Shade.BLACK;
-        } else {
-            if (lm) {
-                return Shade.WHITE;
-            }
-            else {
-                return Shade.WHITE_DM;
-            }
-        }
+        // Return the correct shade based on greatest ratio
+        if (blackRatio > whiteRatio) return Shade.BLACK;
+        else if (lm) return Shade.WHITE;
+        return Shade.WHITE_DM;
     }
 
     /**
@@ -486,14 +484,17 @@ export class Shade {
           }
           newRGB = this.triangle(color,i,prime,newRGB);
           var shade = i * 100;
-          var text_color: number[];
-          if (Shade.fromRGBArray(newRGB).getContrastShade(args.lm) == Shade.WHITE) {
-              text_color = [255,255,255]; // white
+          var textShade: Shade;
+          /*
+          if (Shade.fromRGBArray(newRGB).getContrastShade(args.lm).hex == Shade.WHITE.hex) {
+              textShade = Shade.WHITE;
             } else {
-              text_color = [18,18,18]; // black
+              textShade = args.settings.darkText;
             }
             // convert the color to hex //
             newRGB = Util.rgbArrayToHex(newRGB);
+          */
+          
             // based on the mode light or dark - run the appropriate check to see if the color and on color meet the contrats ratio of wcagContrast or if the shade needs to be lighted or darked //
             // TODO: Pass minRatio of 4.5 for AA and 7.1 for AAA.
             rtn.push(this.buildShade(args.lm));
@@ -554,7 +555,7 @@ export class Shade {
        }
     }
 
-    private checkContrast(theme: any, color: any, mode: string) {
+    private checkContrast(args: BuildShadesArgs) {
         var lightTextArray = hextoRGBArray(lightText);
         var rgbArray = hextoRGBArray(rgb2hex(color));
         var shade = theme.split('-')[2];
@@ -737,8 +738,9 @@ export class Shade {
         if (newSaturation > maxSaturation) {
           newSaturation = maxSaturation;
         }
-        var newHSL = chroma.hsl(ihsl[0], newSaturation  , ihsl[2]).hex();
-        return newHSL;
+        const rtn = chroma.hsl(ihsl[0], newSaturation, ihsl[2]).hex();
+        log.debug(`triangle - rtn=${rtn}`);
+        return rtn;
     }
 
     /**

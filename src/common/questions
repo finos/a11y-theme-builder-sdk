@@ -1,3 +1,8 @@
+* 2852 - 2857: "contrast_ration" never used, and thus "text_color"
+
+
+
+
 * What is "lightText" on line 89?
 * "contrastRation" var on line 61 is not being used and therefore text_color on lines 46 & 48.  Delete?
 * The call to rescale on line 62 passes "theme" as the 1st arg, but the rescale function (line 505) takes 3 args with colorName as 1st.
@@ -13,4 +18,5 @@
 
 Mapping of Lise's code to SDK:
 1) buildColor -> src/common/Shade.ts:buildShade
+1) contrast -> src/common/Shade.ts:getContrastShade
 2) Lise uses the name "theme" sometimes to refer to the colorName

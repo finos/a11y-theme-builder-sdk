@@ -3420,7 +3420,7 @@ $(document).ready(function() {
     function getLowestMiddleHighest(rgbIntArray) {
       let highest = {val:-1,index:-1};
       let lowest = {val:Infinity,index:-1};
- 
+
       rgbIntArray.map((val,index)=>{
         if(val>highest.val){
           highest = {val:val,index:index};
@@ -3429,7 +3429,7 @@ $(document).ready(function() {
           lowest = {val:val,index:index};
         }
       });
- 
+
       if(lowest.index===highest.index){
         lowest.index=highest.index+1;
       }
@@ -3557,6 +3557,7 @@ $(document).ready(function() {
     }
 
     function checkContrast(theme, color, mode) {
+      // Determine the contrast of "color" to both a light text background and dark text background
       var lightTextArray = hextoRGBArray(lightText);
       var rgbArray       = hextoRGBArray(rgb2hex(color));
       var shade = theme.split('-')[2];
@@ -3567,10 +3568,10 @@ $(document).ready(function() {
       var text_color, textTint, contrastRatio
       var contrastRatio = contrast(lightArray, rgbArray);
       var elevationHex;
-      if ( light > dark ) {
+      if ( light > dark ) { // The contrast is greater on a light text background
         text_color = lightArray; // white
         var textTint = 'light';
-        if (mode == 'dark') {
+        if (mode == 'dark') { 
           var colorHex = rgb2hex(color)
           /// for dark mode - lighten color light text ///
           var newText = lighten(colorHex,mixer)
@@ -3579,6 +3580,7 @@ $(document).ready(function() {
           var elevationHex, textHex
           contrastRatio = contrast(lightArray, newArray);
           var i = .00
+          // Darken the shade until the contrast ratio to light text background meets WCAG
           while (contrastRatio < wcagContrast) {
             var hex = (chroma(color).darken(i)).toString()
             var textHex =  (mixColors(hex,'#ffffff',mixer )).toString();
@@ -3593,7 +3595,7 @@ $(document).ready(function() {
           buildColor(theme,mode,rgbArray,text_color,contrastRatio)
           return false;
         }
-      } else {
+      } else { // The contrast is greater on a dark text background
         text_color = darkTextArray; // dark
         var textTint = 'dark';
         contrastRatio = contrast(text_color, rgbArray);
