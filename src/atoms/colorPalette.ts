@@ -10,6 +10,7 @@ import { Shade } from "../common/shade";
 import { Logger } from "../util/logger";
 import { PropertyStringSelectable, PropertyString } from "../common/props";
 import { IAtoms, IColorPalette, IColor, ColorListener, ShadeFilter, EventValueChange } from "../interfaces";
+import { ShadeBuilder, ShadeBuilderCfgPerColor } from "../common/shadeBuilder";
 
 const log = new Logger("cp");
 
@@ -229,6 +230,8 @@ export class Color extends Node implements IColor {
     public light!: ColorMode;
     /** The generated dark mode shades for the color */
     public dark!: ColorMode;
+    /** Color specific Shade builder config */
+    public shadeBuilderCfg: ShadeBuilderCfgPerColor;
 
     private palette: ColorPalette;
 
@@ -239,6 +242,7 @@ export class Color extends Node implements IColor {
         this.hex = new PropertyString("hex", false, this);
         this.hex.setValue(hex);
         this.hex.setListener("_tb.colorListener", this.buildShades.bind(this));
+        this.shadeBuilderCfg = new ShadeBuilderCfgPerColor(this);
         log.debug(this.toString());
     }
 
@@ -302,7 +306,8 @@ export class ColorMode extends Node {
         const hex = this.color.hex.getValue();
         if (!hex) throw new Error('No hex value');
         const shade = Shade.fromHex(hex);
-        const shades = shade.buildShades(lm);
+        const sb: ShadeBuilder = new ShadeBuilder(true, ds.shadeBuilderCfg, this.color.shadeBuilderCfg);
+        const shades = sb.buildShades(shade);
         for (let i = 0; i < shades.length; i++) {
             let shade = shades[i];
             shade.key = `${this.key}[${i}]`;

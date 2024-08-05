@@ -1,3 +1,5 @@
+import * as chroma from "chroma-js";
+
 /*
  * Copyright (c) 2023 Discover Financial Services
  * Licensed under Apache-2.0 License. See License.txt in the project root for license information
@@ -17,11 +19,11 @@ export class ShadeUtil {
     /**
      * Darken a color and return resulting color.
      * @param hexColor The hex representation of the color to darken.
-     * @param opacity The opacity value to darken, between [0,1];
+     * @param opacity The opacity value to darken [0.01,100];
      * @returns The hex representation of the darkened color.
      */
     public static darken(hexColor: string, opacity: number): string {
-        return ShadeUtil.mixColors(hexColor, '#000000', opacity);
+        return ShadeUtil.mixColors(hexColor, '#121212', opacity);
     }
 
     /**
@@ -43,4 +45,10 @@ export class ShadeUtil {
         const [r, g, b] = [
           Math.round(r0 * opacity + r1 * (1 - opacity)),
           Math.round(g0 * opacity + g1 * (1 - opacity)),
-          Math.round(b0 * opacity + b1 * (1 - opacit
+          Math.round(b0 * opacity + b1 * (1 - opacity)),
+        ];
+        const pn = (n:number) => ('0' + n.toString(16)).slice(-2);
+        return `#${pn(r)}${pn(g)}${pn(b)}`;
+    }
+
+}

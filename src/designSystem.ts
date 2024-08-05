@@ -11,6 +11,12 @@ import { Code } from "./code/code";
 import { Shade } from "./common/shade";
 import { IThemeBuilder, IDesignSystem, IDesignSystemMetadata, INode, IVarGroup, IProperty } from "./interfaces";
 import { Logger } from "./util/logger";
+import { ShadeBuilderCfgPerDesignSystem } from "./common/shadeBuilder";
+import {
+    PropertyWCAGSelectable,
+    PropertyString,
+    PropertyNumberRange,
+} from "./common/props";
 
 const log = new Logger("ds");
 
@@ -31,7 +37,9 @@ export class DesignSystem extends Node implements IDesignSystem {
     public readonly layers: Layers;
     /** All code generators for this design system. */
     public readonly code: Code;
-
+    /** WCAG level */
+    public shadeBuilderCfg: ShadeBuilderCfgPerDesignSystem;
+    /** Design system metadata */
     private metadata: IDesignSystemMetadata;
     private readonly dsShades: {[key: string]: Shade} = {};
 
@@ -44,7 +52,10 @@ export class DesignSystem extends Node implements IDesignSystem {
         this.organisms = new Organisms(this);
         this.layers = new Layers(this);
         this.code = new Code(this);
+        this.shadeBuilderCfg = new ShadeBuilderCfgPerDesignSystem(this);
+        // timestamp
         const now = Date.now();
+        // Metadata
         this.metadata = {
             sample: opts.sample || false,
             time: {

@@ -5,6 +5,7 @@
 import { Node, ListenerSubscription } from "./node";
 import { Event, EventType, EventValueChange, EventCallback, EventValueChangeCallback, IProperty } from "../interfaces";
 import { Shade } from "./shade";
+import { WCAGLevel } from "./wcag";
 import { Logger } from "../util/logger";
 
 const log = new Logger("prop");
@@ -358,6 +359,13 @@ export class PropertyPixelSelectable extends PropertySelectable<number[],number>
         super(name, required, parent, { selectables: pixels, defaultValue });
     }
 
+}
+
+export class PropertyWCAGSelectable extends PropertySelectable<WCAGLevel[],WCAGLevel> {
+
+    constructor(name: string, required: boolean, parent: Node) {
+        super(name, required, parent, { selectables: [WCAGLevel.AA, WCAGLevel.AAA], defaultValue: WCAGLevel.AA});
+    }
 
 }
 

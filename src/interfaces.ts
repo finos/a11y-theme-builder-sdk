@@ -4,6 +4,7 @@
  */
 import { Storage } from "./storage/index";
 import { Shade } from "./common/shade";
+import { ShadeBuilderCfgPerDesignSystem } from "./common/shadeBuilder";
 import { PropertyTitledShade, PropertyStringSelectable, PropertyString } from "./common";
 
 /**
@@ -141,6 +142,7 @@ export interface IDesignSystem extends INode {
     atoms: IAtoms;
     molecules: IMolecules;
     organisms: IOrganisms;
+    shadeBuilderCfg: ShadeBuilderCfgPerDesignSystem;
     registerNode(node: INode): void;
     getNode(key: string): INode | undefined;
     registerShade(key: string, shade: Shade): void;

@@ -90,6 +90,7 @@ export class StateSetting {
 
     public readonly name: string;
     public readonly prop: PropertyString;
+    public readonly ss: StateSettings;
     public lmShade: Shade = new Shade({hex: Shade.WHITE.hex});
     public dmShade: Shade = new Shade({hex: Shade.BLACK.hex});
     public lmShades = [] as Shade[];
@@ -99,6 +100,7 @@ export class StateSetting {
     constructor(name: string, defaultValue: string, ss: StateSettings) {
         this.name = name;
         this.atoms = ss.atoms;
+        this.ss = ss;
         this.prop = new PropertyString(name, false, ss, {defaultValue});
         this.prop.setPropertyListener(`_tb.StateSetting.${name}`, this.setShadesListener.bind(this));
         ss.all.push(this);

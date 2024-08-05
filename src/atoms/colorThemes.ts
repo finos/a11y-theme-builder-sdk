@@ -465,7 +465,7 @@ export class ColorTheme extends Node implements IColorTheme {
         const buttonShadeGroup = {
             shade: shade,
             halfShade: Shade.fromHex(shade.hex).setOpacity(0.5).setMode(shade.getMode()),
-            onShade: shade.getOnShade2(lm),
+            onShade: shade.getOnShade(),
         };
         const white = this.getShadeGroup(shade, Shade.WHITE, lm, lm? 1: 0.6);
         const black = this.getShadeGroup(shade, Shade.BLACK, lm, 1);
@@ -484,7 +484,7 @@ export class ColorTheme extends Node implements IColorTheme {
     }
 
     public getShadeGroup(shade: Shade, compShade: Shade, lm: boolean, multiplier: number): ShadeGroup {
-        return shade.getShadeOrOnShadeBasedOnContrast(compShade, lm, multiplier).getShadeGroup(lm);
+        return shade.getShadeOrOnShadeBasedOnContrast(compShade, lm).getShadeGroup(lm);
     }
 
     private findDMShade(shade: Shade): Shade {
