@@ -4,11 +4,12 @@
  */
 import { Atom } from "./atom";
 import { ColorTheme } from "./colorThemes";
-import { IAtoms, EventValueChange } from "../interfaces";
+import { IDesignSystem, IAtoms, EventValueChange } from "../interfaces";
 import { Shade } from "../common/shade";
 import { PropertyString, PropertyBoolean, PropertyGroupListener } from "../common/props";
 import { Logger } from "../util/logger";
 import { Util } from "../util";
+import { ShadeBuilder, ShadeBuilderCfgPerColor } from "../common/shadeBuilder";
 
 const log = new Logger("ss");
 
@@ -30,6 +31,10 @@ export class StateSettings extends Atom {
     public readonly all: StateSetting[] = [];
     /** Property set to true when everything is ready */
     public readonly ready: PropertyBoolean;
+    /** Color-specific shade builder config for all state setting shades */
+    public shadeBuilderCfg: ShadeBuilderCfgPerColor; // color-specific shade builder config
+    /** Design system */
+    public designSystem: IDesignSystem;
 
     constructor(atoms: IAtoms) {
         super("State Settings", false, atoms);
@@ -38,8 +43,10 @@ export class StateSettings extends Atom {
         this.success = new StateSetting("success", "#327D35", this);
         this.warning = new StateSetting("warning", "#A06B1A", this);
         this.danger = new StateSetting("danger", "#D62B2B", this);
+        this.shadeBuilderCfg = new ShadeBuilderCfgPerColor(this);
         this.ready = new PropertyBoolean("ready", false, this, {defaultValue: false});
         this.atoms.colorThemes.defaultTheme.setPropertyListener(`_tb.StateSettings`, this.setDefaultTheme.bind(this));
+        this.designSystem = this.getDesignSystem();
     }
 
     private setDefaultTheme(_: EventValueChange<string>) {
@@ -121,8 +128,8 @@ export class StateSetting {
         const hex = this.prop.getValue() || "";
         const shade = new Shade({hex: hex}); 
         // Build up 10 shades for each lm & dm
-        this.lmShades = shade.buildShades(true);      
-        this.dmShades = shade.buildShades(false);      
+        this.lmShades = this.buildShades(shade, true);      
+        this.dmShades = this.buildShades(shade, false);      
         // Find the lm shade for hex value & get corresponding dm shade
         let index = -1;
         let min = 9999999;
@@ -148,6 +155,12 @@ export class StateSetting {
         this.setLMShade(theme, lmStart);
         this.setDMShade(theme, dmStart);
         log.debug(`StateSettings.setShades exit: name=${this.name}`);
+    }
+
+    private buildShades(shade: Shade, lm: boolean): Shade[] {
+        const ds = this.ss.designSystem;
+        const sb = new ShadeBuilder(lm, ds.shadeBuilderCfg, this.ss.shadeBuilderCfg);
+        return sb.buildShades(shade);
     }
 
     private setLMShade(theme: ColorTheme, shade: Shade) {
