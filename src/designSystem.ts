@@ -11,7 +11,7 @@ import { Code } from "./code/code";
 import { Shade } from "./common/shade";
 import { IThemeBuilder, IDesignSystem, IDesignSystemMetadata, INode, IVarGroup, IProperty } from "./interfaces";
 import { Logger } from "./util/logger";
-import { ShadeBuilderCfgPerDesignSystem } from "./common/shadeBuilder";
+import { ShadeBuilderCfgPerDesignSystem, ShadeBuilderCfgPerColor } from "./common/shadeBuilder";
 import {
     PropertyWCAGSelectable,
     PropertyString,
@@ -37,8 +37,10 @@ export class DesignSystem extends Node implements IDesignSystem {
     public readonly layers: Layers;
     /** All code generators for this design system. */
     public readonly code: Code;
-    /** WCAG level */
+    /** Per design system config for shade building */
     public shadeBuilderCfg: ShadeBuilderCfgPerDesignSystem;
+    /** Default per color config for shade building */
+    public defaultColorShadeBuilderCfg: ShadeBuilderCfgPerColor;
     /** Design system metadata */
     private metadata: IDesignSystemMetadata;
     private readonly dsShades: {[key: string]: Shade} = {};
@@ -47,12 +49,14 @@ export class DesignSystem extends Node implements IDesignSystem {
         super(name);
         opts = opts || {};
         this.themeBuilder = themeBuilder;
+        this.shadeBuilderCfg = new ShadeBuilderCfgPerDesignSystem(this);
+        this.defaultColorShadeBuilderCfg = new ShadeBuilderCfgPerColor(this);
+        Shade.setDefaultBuilder(this.shadeBuilderCfg, this.defaultColorShadeBuilderCfg);
         this.atoms = new Atoms(this);
         this.molecules = new Molecules(this);
         this.organisms = new Organisms(this);
         this.layers = new Layers(this);
         this.code = new Code(this);
-        this.shadeBuilderCfg = new ShadeBuilderCfgPerDesignSystem(this);
         // timestamp
         const now = Date.now();
         // Metadata

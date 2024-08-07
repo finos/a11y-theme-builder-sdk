@@ -38,15 +38,15 @@ export class StateSettings extends Atom {
 
     constructor(atoms: IAtoms) {
         super("State Settings", false, atoms);
+        this.designSystem = this.getDesignSystem();
+        this.shadeBuilderCfg = new ShadeBuilderCfgPerColor(this);
         this.addDependency(atoms.colorThemes);
         this.info = new StateSetting("info", "#0066EF", this);
         this.success = new StateSetting("success", "#327D35", this);
         this.warning = new StateSetting("warning", "#A06B1A", this);
         this.danger = new StateSetting("danger", "#D62B2B", this);
-        this.shadeBuilderCfg = new ShadeBuilderCfgPerColor(this);
         this.ready = new PropertyBoolean("ready", false, this, {defaultValue: false});
         this.atoms.colorThemes.defaultTheme.setPropertyListener(`_tb.StateSettings`, this.setDefaultTheme.bind(this));
-        this.designSystem = this.getDesignSystem();
     }
 
     private setDefaultTheme(_: EventValueChange<string>) {

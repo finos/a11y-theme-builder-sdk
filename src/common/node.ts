@@ -48,7 +48,7 @@ export class Node implements INode {
     private readonly props: IProperty[] = [];
     protected readonly dsNodes: {[key: string]: Node} = {};
 
-    constructor(name: string, parent?: INode) {
+    constructor(name: string, parent?: INode, tmpNode?: boolean) {
         this.name = name;
         const p = parent as Node;
         this.key = (!p || !p.parent ? name: `${p.key}/${name}`).replace(/\s/g, '');
@@ -56,7 +56,7 @@ export class Node implements INode {
         if (p) {
             p.children.push(this);
         }
-        this.getDesignSystem().registerNode(this);
+        if (!tmpNode) this.getDesignSystem().registerNode(this);
     }
 
     /** Get the design system */

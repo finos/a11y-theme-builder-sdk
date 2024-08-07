@@ -21,9 +21,9 @@ export class ShadeBuilder {
 
     public readonly lm: boolean;
     public readonly designSystemCfg: ShadeBuilderCfgPerDesignSystem;
-    public readonly colorCfg: ShadeBuilderCfgPerColor;
+    public readonly colorCfg?: ShadeBuilderCfgPerColor;
 
-    constructor(lm: boolean, designSystemCfg: ShadeBuilderCfgPerDesignSystem, colorCfg: ShadeBuilderCfgPerColor) {
+    constructor(lm: boolean, designSystemCfg: ShadeBuilderCfgPerDesignSystem, colorCfg?: ShadeBuilderCfgPerColor) {
         this.lm = lm;
         this.designSystemCfg = designSystemCfg;
         this.colorCfg = colorCfg;
@@ -79,7 +79,12 @@ export class ShadeBuilder {
         if (this.getWCAGLevel().shouldSmoothTransition(this.lm)) {
             this.smoothTransition(shades);
         }
-        for (const shade of shades) {
+        for (let i = 0; i < shades.length; i++) {
+            let shade = shades[i];
+            log.debug(`buildShades: adjusted i=${i} to ${shade.hex}`);
+            const id = (i * 100).toString();
+            shade.id = id;
+            shade.index = i;
             shade.setShadeBuilder(this);
         }
         return shades;
@@ -260,7 +265,8 @@ export class ShadeBuilder {
     }
 
     public getMaxChroma(): number {
-        return this.colorCfg.getMaxChroma(this.lm);
+        if (this.colorCfg) return this.colorCfg.getMaxChroma(this.lm);
+        return this.designSystemCfg.getMaxChroma(this.lm);
     }
 
     public getLightTextShade(): Shade {
@@ -307,7 +313,34 @@ export class ShadeBuilder {
 
 }
 
-export class ShadeBuilderCfgPerDesignSystem {
+/**
+ * Per color configuration properties for a shade builder.
+ */
+export class ShadeBuilderCfgPerColor {
+
+    public lmMaxChroma: PropertyNumber;
+    public dmMaxChroma: PropertyNumber;
+
+    constructor(parent: Node) {
+        this.lmMaxChroma = new PropertyNumberRange("Max Chroma in Light Mode", true, parent, 0, 100, 80);
+        this.dmMaxChroma = new PropertyNumberRange("Max Chroma in Dark Mode", true, parent, 0, 100, 60);
+    }
+
+    /**
+     * Get the max chroma setting
+     * @param lm True if light mode; false if dark mode.
+     */
+    public getMaxChroma(lm: boolean): number {
+        if (lm) return this.lmMaxChroma.getValue() as number;
+        return this.dmMaxChroma.getValue() as number;
+    }
+
+}
+
+/**
+ * Per design system configuration properties for a shade builder.
+ */
+export class ShadeBuilderCfgPerDesignSystem extends ShadeBuilderCfgPerColor {
 
     public wcagLevel: PropertyStringSelectable;
     public lightText: PropertyString;
@@ -316,6 +349,7 @@ export class ShadeBuilderCfgPerDesignSystem {
     public dmLightTextOpacity: PropertyNumber;
 
     constructor(parent: Node) {
+        super(parent);
         this.wcagLevel = new PropertyStringSelectable("WCAG level", true, parent, { selectables: ["AA", "AAA"], defaultValue: "AA" });
         this.lightText = new PropertyString("Light Text - Light Mode", true, parent, { defaultValue: Shade.WHITE.hex });
         this.darkText = new PropertyString("Dark text - Light Mode", true, parent, { defaultValue: Shade.DARK_TEXT.hex });
@@ -394,23 +428,18 @@ export class ShadeBuilderCfgPerDesignSystem {
     }
 
 }
+export class DefaultShadeBuilder {
 
-export class ShadeBuilderCfgPerColor {
-    public lmMaxChroma: PropertyNumber;
-    public dmMaxChroma: PropertyNumber;
+    public readonly designSystemCfg: ShadeBuilderCfgPerDesignSystem;
+    public readonly colorCfg?: ShadeBuilderCfgPerColor;
+    public readonly lm: ShadeBuilder;
+    public readonly dm: ShadeBuilder;
 
-    constructor(parent: Node) {
-        this.lmMaxChroma = new PropertyNumberRange("Max Chroma in Light Mode", true, parent, 0, 100, 80);
-        this.dmMaxChroma = new PropertyNumberRange("Max Chroma in Dark Mode", true, parent, 0, 100, 60);
-    }
-
-    /**
-     * Get the max chroma setting
-     * @param lm True if light mode; false if dark mode.
-     */
-    public getMaxChroma(lm: boolean): number {
-        if (lm) return this.lmMaxChroma.getValue() as number;
-        return this.dmMaxChroma.getValue() as number;
+    constructor(designSystemCfg: ShadeBuilderCfgPerDesignSystem, colorCfg?: ShadeBuilderCfgPerColor) {
+        this.designSystemCfg = designSystemCfg;
+        this.colorCfg = colorCfg;
+        this.lm = new ShadeBuilder(true, this.designSystemCfg, this.colorCfg);
+        this.dm = new ShadeBuilder(false, this.designSystemCfg, this.colorCfg);
     }
 
 }

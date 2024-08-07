@@ -4,10 +4,11 @@
  */
 import * as chroma from "chroma-js";
 import { Logger } from "../util/logger";
-import { ShadeBuilder } from "./shadeBuilder";
+import { ShadeBuilder, ShadeBuilderCfgPerDesignSystem, ShadeBuilderCfgPerColor, DefaultShadeBuilder } from "./shadeBuilder";
 import { ShadeUtil } from "./shadeUtil";
 import { Util } from "../util/util";
 import { Color as ColorImpl, ColorMode as ColorModeImpl} from "../atoms/colorPalette";
+import { Node } from "./node";
 
 const log = new Logger("shd");
 
@@ -84,6 +85,11 @@ export class Shade {
     public static DARK_BLUE = Shade.fromHex("#1D1D1F", "Dark-Blue");
     public static DARKEN_MULTIPLIER = 0.99;
     public static LIGHTEN_MULTIPLIER = 1.01;
+    /** Lists of light and dark shades */
+    public static LIGHT_SHADES = [this.WHITE, this.HALF_WHITE, this.OFF_WHITE, this.WHITE_DM, this.HALF_WHITE_DM];
+    public static DARK_SHADES = [this.FULL_BLACK, this.BLACK, this.HALF_BLACK, this.NEAR_BLACK, this.OFF_BLACK, this.GRAY, this.DARK_TEXT, this.DARK_BLUE];
+    /** default shade builder */
+    public static defaultBuilder: DefaultShadeBuilder;
     
     /**
      * Get a core shade given the core shade name.
@@ -159,6 +165,10 @@ export class Shade {
         return Shade.fromRGB(R,G,B).setOpacity(opacity);
     }
 
+    public static setDefaultBuilder(dsCfg: ShadeBuilderCfgPerDesignSystem, colorCfg: ShadeBuilderCfgPerColor) {
+        Shade.defaultBuilder = new DefaultShadeBuilder(dsCfg, colorCfg);
+    }
+
     /** The shade's hex value */
     public hex!: string;
     /** The shade's RGB array */
@@ -211,9 +221,10 @@ export class Shade {
         return this.builder !== undefined;
     }
 
-    public getShadeBuilder(): ShadeBuilder {
+    public getShadeBuilder(lm: boolean): ShadeBuilder {
         if (this.builder) return this.builder;
-        throw new Error("This shade has no shade builder");
+        if (Shade.defaultBuilder) return lm ? Shade.defaultBuilder.lm : Shade.defaultBuilder.dm;
+        throw new Error(`No shade builder or default shade builder found for ${lm? "lightmode" : "darkmode"}`);
     }
 
     public setShadeBuilder(builder: ShadeBuilder) {
@@ -360,11 +371,11 @@ export class Shade {
     }
 
     public getOnShade(): Shade {
-        return this.getShadeBuilder().getOnShade(this, true);
+        return this.getOnShade2(true);
     }
 
     public getOnShade2(lm: boolean): Shade {
-        return this.getShadeBuilder().getOnShade(this, lm);
+        return this.getShadeBuilder(lm).getOnShade(this, lm);
     }
 
     public getShadeGroup(lm: boolean): ShadeGroup {
@@ -405,7 +416,7 @@ export class Shade {
      * @returns This shade or the onShade
      */
     public getShadeOrOnShadeBasedOnContrast(shade: Shade, lm: boolean): Shade {
-        const sb = this.getShadeBuilder();
+        const sb = this.getShadeBuilder(lm);
         const multiplier = lm ? 1 : 0.6;
         const contrast = this.getContrastRatio(shade) * multiplier;
         if (contrast >= sb.getMinContrastRatioForNonText()) {
@@ -750,7 +761,7 @@ export class Shade {
      * @returns 
      */
     public getContrastShade(lm: boolean): Shade {
-        return this.getShadeBuilder().getContrastShade(this, lm);
+        return this.getShadeBuilder(lm).getContrastShade(this, lm);
     }
 
     /**
@@ -761,8 +772,8 @@ export class Shade {
      */
     public mix(shade: Shade, ratio: number): Shade {
         if (ratio < 0 || ratio > 1) throw new Error(`Expecting a ratio between [0,1] but found ${ratio}`);
-        const hex: any = chroma.mix(this.hex, shade.hex, ratio, "rgb");
-        const rtn = Shade.fromHex(hex).setMode(this.mode ? this.mode : shade.mode);
+        const color = chroma.mix(this.hex, shade.hex, ratio);
+        const rtn = Shade.fromHex(color.hex()).setMode(this.mode ? this.mode : shade.mode);
         return rtn;
     }
 
@@ -791,7 +802,9 @@ export class Shade {
      * @returns A new shade object.
      */
     public clone(): Shade {
-        return this.fromHex().setOpacity(this.opacity);
+        const shade = this.fromHex().setOpacity(this.opacity);
+        if (this.builder) shade.setShadeBuilder(this.builder);
+        return shade;
     }
 
     public equals(shade: Shade): boolean {
