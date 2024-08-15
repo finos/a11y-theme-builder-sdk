@@ -69,9 +69,9 @@ export class BevelSettingsProps {
         this.verticalShadowLength = new PropertyNumberRange(`${p} Vertical Shadow Length`, false, bs, 0, 10, 6);
         this.blurRadius = new PropertyNumberRange(`${p} Blur Radius`, false, bs, 0, 10, 6);
         this.spreadRadius = new PropertyNumberRange(`${p} Spread Radius`, false, bs, 0, 10, 1);
-        this.lightGlowOpacity = new PropertyNumberRange(`${p} Light Glow Opacity`, false, bs, 0, 100, 30);
-        this.darkShadowOpacity = new PropertyNumberRange(`${p} Dark Shadow Opacity`, false, bs, 0, 100, 50);
-        this.percentageChange = new PropertyPercentage(`${p} Percentage Change`, false, bs, 20);
+        this.lightGlowOpacity = new PropertyNumberRange(`${p} Light Glow Opacity`, false, bs, 0, 100, 17);
+        this.darkShadowOpacity = new PropertyNumberRange(`${p} Dark Shadow Opacity`, false, bs, 0, 100, 10);
+        this.percentageChange = new PropertyPercentage(`${p} Percentage Change`, false, bs, 17);
     }
 
     public deserialize(obj: any) {
