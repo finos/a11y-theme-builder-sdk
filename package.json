@@ -1,6 +1,6 @@
 {
   "name": "@finos/a11y-theme-builder-sdk",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Accessibility Theme Builder SDK",
   "author": "Keith Smith <KeithSmith@discover.com>",
   "license": "Apache-2.0",
