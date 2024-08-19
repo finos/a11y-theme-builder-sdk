@@ -4,6 +4,7 @@
  */
 import { Logger } from "../util/logger";
 import { IDesignSystem, INode, Event, EventType, EventCallback, EventListener, IProperty, IListenerSubscription } from "../interfaces";
+import { Property } from "./props";
 
 const log = new Logger("node");
 
@@ -48,15 +49,19 @@ export class Node implements INode {
     private readonly props: IProperty[] = [];
     protected readonly dsNodes: {[key: string]: Node} = {};
 
-    constructor(name: string, parent?: INode, tmpNode?: boolean) {
+    constructor(name: string, parent?: INode) {
         this.name = name;
         const p = parent as Node;
-        this.key = (!p || !p.parent ? name: `${p.key}/${name}`).replace(/\s/g, '');
+        this.key = (!p || !p.parent) ? name.replace(/\s/g,'') : p.getChildKey(name);
         this.parent = p;
         if (p) {
             p.children.push(this);
         }
-        if (!tmpNode) this.getDesignSystem().registerNode(this);
+        this.getDesignSystem().registerNode(this);
+    }
+
+    public getChildKey(name: string): string {
+        return `${this.key}/${name}`.replace(/\s/g, '');
     }
 
     /** Get the design system */
@@ -66,6 +71,20 @@ export class Node implements INode {
             node = node.parent;
         }
         return node as any;
+    }
+
+    /** 
+     * Find a property by name by walking the tree upwards.
+     * As soon as the property is found at a node, we stop searching.
+     * This allows us to generically configure an arbitrary property at various levels and we always find the value closest to us in the tree.
+     */
+    public findProperty<T>(propName: string): Property<T> {
+        // Walk up the node tree until we find a property named 'name'
+        for (let node: Node | undefined = this; node !== undefined; node = (node as Node).parent) {
+            if (!node.hasOwnProperty(propName)) continue;
+            return (node as any)[propName];
+        }
+        throw new Error(`Property '${propName}' was not found at ${this.name} or above`);
     }
 
     /** Add a dependency to another node in the tree */

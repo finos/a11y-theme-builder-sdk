@@ -1,36 +1,111 @@
 /*
- * Copyright (c) 2023 Discover Financial Services
+ * Copyright (c) 2024 Discover Financial Services
  * Licensed under Apache-2.0 License. See License.txt in the project root for license information
  */
 import * as chroma from "chroma-js";
 import { Logger } from "../util/logger";
 import { Node } from "./node";
-import { PropertyString, PropertyStringSelectable, PropertyNumber, PropertyNumberRange } from "./props";
+import { Property, PropertyNumber, PropertyString, PropertyGroupListener } from "./props";
 import { Shade } from "./shade";
 import { ShadeUtil } from "./shadeUtil";
 import { WCAGLevel } from "./wcag";
+import { IColor } from "../interfaces";
 
 const log = new Logger("shb");
 
-/**
- * A shade builder.
- * 
- * @category Utilities
- */
-export class ShadeBuilder {
+export class ShadeBuilderCfg {
 
-    public readonly lm: boolean;
-    public readonly designSystemCfg: ShadeBuilderCfgPerDesignSystem;
-    public readonly colorCfg?: ShadeBuilderCfgPerColor;
+    private lightMode;
 
-    constructor(lm: boolean, designSystemCfg: ShadeBuilderCfgPerDesignSystem, colorCfg?: ShadeBuilderCfgPerColor) {
-        this.lm = lm;
-        this.designSystemCfg = designSystemCfg;
-        this.colorCfg = colorCfg;
+    constructor(lightMode: boolean) {
+        this.lightMode = lightMode;
     }
 
-    public buildShades(shade: Shade): Shade[] {
-        const prime = shade.getLabel();
+    public isLightMode(): boolean {
+        return this.lightMode;
+    }
+
+    public getWCAGLevel(): WCAGLevel {
+        return WCAGLevel.AA;
+    }
+
+    public getLightText(): string {
+        return Shade.WHITE.hex;   
+    }
+
+    public getDarkText(): string {
+        return Shade.DARK_TEXT.hex;   
+    }
+
+    public getLightModeLightTextOpacity(): number {
+        return 1;
+    }
+
+    public getDarkModeLightTextOpacity(): number {
+        return 0.6;
+    }
+
+    public getLightModeMaxChroma(): number {
+        return 80;
+    }
+
+    public getDarkModeMaxChroma(): number {
+        return 60;
+    }
+
+    public getCSSPrefix(): string {
+        return "";
+    }
+}
+
+export class ShadeBuilder {
+
+    public static lmDefault = new ShadeBuilder("lmDefault", new ShadeBuilderCfg(true));
+    public static dmDefault = new ShadeBuilder("dmDefault", new ShadeBuilderCfg(false));
+    static {
+        const all = [this.lmDefault, this.dmDefault];
+        this.lmDefault.setAll(all);
+        this.dmDefault.setAll(all);
+    }
+
+    public readonly name: string;
+    public readonly cfg: ShadeBuilderCfg;
+    public readonly color?: IColor;
+    private all?: ShadeBuilder[];
+    private other?: ShadeBuilder;
+
+    constructor(name: string, cfg: ShadeBuilderCfg, color?: IColor) {
+        this.name = name;
+        this.cfg = cfg;
+        this.color = color;
+    }
+
+    public getAll(): ShadeBuilder[] {
+        if (this.all) return this.all;
+        throw new Error("'all' has not been set");
+    }
+
+    public getOther(): ShadeBuilder {
+        if (this.other) return this.other;
+        throw new Error("No other has been set");
+    }
+
+    public setAll(all: ShadeBuilder[]) {
+        this.all = all;
+        const lm = this.isLightMode();
+        const wcag = this.getWCAGLevel();
+        for (const sb of all) {
+            if (wcag == sb.getWCAGLevel() && lm != sb.isLightMode()) {
+                this.other = sb;
+                break;
+            }
+        }
+        if (!this.other) throw new Error("'other' was not found");
+    }
+
+    public build(inputShade: Shade): Shade[] {
+        log.debug(`sb: begin building ${this.name} shades for ${inputShade.toString()}`);
+        const prime = inputShade.getLabel();
         // calculate how many lighter shades need to get built //
         const numLighterShades = (prime / 100) + 1;
         // calculate how many darker shades need to get built //
@@ -38,17 +113,17 @@ export class ShadeBuilder {
         // build hex values for lighter shades
         let lightScale: string[];
         if (numLighterShades > 1) {
-            lightScale = chroma.scale(['#FFFFFF', shade.hex]).correctLightness(true).colors(numLighterShades);
+            lightScale = chroma.scale(['#FFFFFF', inputShade.hex]).correctLightness(true).colors(numLighterShades);
         } else {
-            lightScale = [shade.hex]
+            lightScale = [inputShade.hex]
         }
         // build hex values for darker shades
         let darkScale: string[];
         if (numDarkerShades > 1) {
-            const endShade = shade.mix(Shade.FULL_BLACK, this.isLightMode() ? .95 : .98);
-            darkScale = chroma.scale([shade.hex, endShade.hex]).correctLightness(true).colors(numDarkerShades);
+            const endShade = inputShade.mix(Shade.FULL_BLACK, this.isLightMode() ? .95 : .98);
+            darkScale = chroma.scale([inputShade.hex, endShade.hex]).correctLightness(true).colors(numDarkerShades);
         } else {
-            darkScale = [shade.hex]
+            darkScale = [inputShade.hex]
         }
         // remove the final lighter shade because it is pure white
         if (lightScale.length > 0) {
@@ -57,11 +132,11 @@ export class ShadeBuilder {
         // Merge light and dark scale values into a single colorScale
         const colorScale = [...lightScale, ...darkScale];
         // Generate a shade for each color scale
-        const shades: Shade[] = [];
+        const outputShades: Shade[] = [];
         for (let i = 0; i < colorScale.length; i++) {
             let newHex: string;
             if (i == 0) {
-                const fcn = chroma.scale(['#FFFFFF', shade.hex]);
+                const fcn = chroma.scale(['#FFFFFF', inputShade.hex]);
                 const scale = this.isLightMode() ? 100 / (prime * 2) : (100 / (prime * 4)) * 3;
                 newHex = fcn(scale).toString();
             } else {
@@ -69,30 +144,33 @@ export class ShadeBuilder {
             }
             let newShade = Shade.fromHex(newHex);
             // Triangularize the shade 
-            newShade = this.triangularize(shade, newShade);
+            newShade = this.triangularize(inputShade, newShade);
             // based on the mode light or dark - run the appropriate check to see if the color and on color meet the contrast ratio of wcagContrast or
             // if the shade needs to be lighted or darked
             newShade = this.adjustShadeToMeetRequirements(newShade);
             newShade.setIndex(i);
-            shades.push(newShade);
+            outputShades.push(newShade);
         }
-        if (this.getWCAGLevel().shouldSmoothTransition(this.lm)) {
-            this.smoothTransition(shades);
+        if (this.getWCAGLevel().shouldSmoothTransition(this.cfg.isLightMode())) {
+            this.smoothTransition(outputShades);
         }
-        for (let i = 0; i < shades.length; i++) {
-            let shade = shades[i];
+        for (let i = 0; i < outputShades.length; i++) {
+            let shade = outputShades[i];
             log.debug(`buildShades: adjusted i=${i} to ${shade.hex}`);
             const id = (i * 100).toString();
             shade.id = id;
             shade.index = i;
-            shade.setShadeBuilder(this);
+            shade.setBuilder(this);
+            if (this.color) shade.setColor(this.color);
         }
-        return shades;
+        log.debug(`sb: finished building ${this.name} shades: ${JSON.stringify(outputShades)}`);
+        return outputShades;
     }
 
     // Smooth the transition between the last shade with dark text background and the first shade with light text background
     private smoothTransition(shades: Shade[]): Shade[] {
         // Divide the list of shades into two groups: those with dark text and those with light text backgrounds
+        log.debug(`sb: smoothing transition for ${this.name}`);
         const firstLight = this.findFirstShadeWithLightText(shades);
         const lastDark = shades[firstLight.index - 1] as Shade;
         const first = shades[0] as Shade;
@@ -111,6 +189,7 @@ export class ShadeBuilder {
             shades[i] = shade;
             shade.setIndex(i);
         }
+        log.debug(`sb: smoothed transition for ${this.name}`);
         return shades;
     }
 
@@ -124,7 +203,7 @@ export class ShadeBuilder {
     }
 
     private isOnShadeBlack(shade: Shade): boolean {
-        shade = this.getOnShade(shade, this.lm);
+        shade = this.getOnShade(shade, this.cfg.isLightMode());
         return shade.hex == Shade.BLACK.hex;
     }
 
@@ -253,28 +332,28 @@ export class ShadeBuilder {
     }
 
     public isLightMode(): boolean {
-        return this.lm;
+        return this.cfg.isLightMode();
     }
 
     public isDarkMode(): boolean {
-        return !this.lm;
+        return !this.isLightMode();
     }
 
     public getWCAGLevel(): WCAGLevel {
-        return this.designSystemCfg.getWCAGLevel();
+        return this.cfg.getWCAGLevel();
     }
 
     public getMaxChroma(): number {
-        if (this.colorCfg) return this.colorCfg.getMaxChroma(this.lm);
-        return this.designSystemCfg.getMaxChroma(this.lm);
+        if (this.isLightMode()) return this.cfg.getLightModeMaxChroma();
+        else return this.cfg.getDarkModeMaxChroma();
     }
 
     public getLightTextShade(): Shade {
-        return this.designSystemCfg.getLightTextShade();
+        return Shade.fromHex(this.cfg.getLightText()).setBuilder(this);
     }
 
     public getDarkTextShade(): Shade {
-        return this.designSystemCfg.getDarkTextShade();
+        return Shade.fromHex(this.cfg.getDarkText()).setBuilder(this);
     }
 
     public getMinContrastRatioForSmallText(): number {
@@ -290,7 +369,7 @@ export class ShadeBuilder {
     }
 
     public getDarkModeLightTextOpacity(): number {
-        return this.designSystemCfg.getDarkModeLightTextOpacity();
+        return this.cfg.getDarkModeLightTextOpacity();
     }
 
     public getMixer(): number {
@@ -311,135 +390,166 @@ export class ShadeBuilder {
         return this.getWCAGLevel().isAAA();
     }
 
-}
-
-/**
- * Per color configuration properties for a shade builder.
- */
-export class ShadeBuilderCfgPerColor {
-
-    public lmMaxChroma: PropertyNumber;
-    public dmMaxChroma: PropertyNumber;
-
-    constructor(parent: Node) {
-        this.lmMaxChroma = new PropertyNumberRange("Max Chroma in Light Mode", true, parent, 0, 100, 80);
-        this.dmMaxChroma = new PropertyNumberRange("Max Chroma in Dark Mode", true, parent, 0, 100, 60);
-    }
-
-    /**
-     * Get the max chroma setting
-     * @param lm True if light mode; false if dark mode.
-     */
-    public getMaxChroma(lm: boolean): number {
-        if (lm) return this.lmMaxChroma.getValue() as number;
-        return this.dmMaxChroma.getValue() as number;
+    public getCSSPrefix(): string {
+        return this.cfg.getCSSPrefix();
     }
 
 }
 
-/**
- * Per design system configuration properties for a shade builder.
- */
-export class ShadeBuilderCfgPerDesignSystem extends ShadeBuilderCfgPerColor {
+export class ShadeBuilderViewCfg extends ShadeBuilderCfg {
 
-    public wcagLevel: PropertyStringSelectable;
-    public lightText: PropertyString;
-    public darkText: PropertyString;
-    public lmLightTextOpacity: PropertyNumber;
-    public dmLightTextOpacity: PropertyNumber;
+    public readonly wcagLevel: WCAGLevel;
+    public readonly cssPrefix: string;
+    public readonly lightText: PropertyString;
+    public readonly darkText: PropertyString;
+    public readonly lightModeLightTextOpacity: PropertyNumber;
+    public readonly darkModeLightTextOpacity: PropertyNumber;
+    public readonly lightModeMaxChroma: PropertyNumber;
+    public readonly darkModeMaxChroma: PropertyNumber;
+    public readonly allProps: Property<any>[];
 
-    constructor(parent: Node) {
-        super(parent);
-        this.wcagLevel = new PropertyStringSelectable("WCAG level", true, parent, { selectables: ["AA", "AAA"], defaultValue: "AA" });
-        this.lightText = new PropertyString("Light Text - Light Mode", true, parent, { defaultValue: Shade.WHITE.hex });
-        this.darkText = new PropertyString("Dark text - Light Mode", true, parent, { defaultValue: Shade.DARK_TEXT.hex });
-        this.lmLightTextOpacity = new PropertyNumberRange("Light Text Opacity in Light Mode", true, parent, 0, 1, 1);
-        this.dmLightTextOpacity = new PropertyNumberRange("Light Text Opacity in Dark Mode", true, parent, 0, 1, 0.6);
+    constructor(lm: boolean, wcagLevel: WCAGLevel, cssPrefix: string, node: Node) {
+        super(lm);
+        this.wcagLevel = wcagLevel;
+        this.cssPrefix = cssPrefix;
+        this.lightText = node.findProperty("lightText");
+        this.darkText = node.findProperty("darkText");
+        this.lightModeLightTextOpacity = node.findProperty("lightModeLightTextOpacity");
+        this.darkModeLightTextOpacity = node.findProperty("darkModeLightTextOpacity");
+        this.lightModeMaxChroma = node.findProperty("lightModeMaxChroma");
+        this.darkModeMaxChroma = node.findProperty("darkModeMaxChroma");
+        this.allProps = [this.lightText, this.darkText, this.lightModeLightTextOpacity, this.darkModeLightTextOpacity, this.lightModeMaxChroma, this.darkModeMaxChroma];
     }
 
-    /**
-     * Get the WCAG level
-     * @returns Returns "AA" or "AAA"
-     */
     public getWCAGLevel(): WCAGLevel {
-        const name = this.wcagLevel.getValue() as string;
-        const wl = WCAGLevel.findByName(name);
-        if (!wl) throw new Error(`Invalid value for WCAG level: ${name}`);
-        return wl;
+        return this.wcagLevel;
     }
 
-    /**
-     * Get the min contrast ratio for small text
-     * @returns the min contrast ratio
-     */
-    public getMinContrastRatioForSmallText(): number {
-        return this.getWCAGLevel().minContrastRatioForSmallText;
+    public getLightText(): string {
+        return this.lightText.getValue() || super.getLightText();
     }
 
-    /**
-     * Get the min contrast ratio for large text
-     * @returns the min contrast ratio
-     */
-    public getMinContrastRatioForLargeText(): number {
-        return this.getWCAGLevel().minContrastRatioForLargeText;
+    public getDarkText(): string {
+        return this.darkText.getValue() || super.getDarkText();
     }
 
-    /**
-     * Get the min contrast ratio for non text
-     * @returns the min contrast ratio
-     */
-    public getMinContrastRatioForNonText(): number {
-        return this.getWCAGLevel().minContrastRatioForNonText;
+    public getLightModeLightTextOpacity(): number {
+        return this.lightModeLightTextOpacity.getValue() || super.getLightModeLightTextOpacity();
     }
 
-    /**
-     * Get the light text shade
-     */
-    public getLightTextShade(): Shade {
-        return Shade.fromHex(this.lightText.getValue() as string);
-    }
-
-    /**
-     * Get the dark text shade
-     */
-    public getDarkTextShade(): Shade {
-        return Shade.fromHex(this.darkText.getValue() as string);
-    }
-
-    /**
-     * Get the dark mode opacity for light text as a value from [0,1].
-     */
     public getDarkModeLightTextOpacity(): number {
-       return this.dmLightTextOpacity.getValue() as number;
+        return this.darkModeLightTextOpacity.getValue() || super.getDarkModeLightTextOpacity();
     }
 
-    /**
-     * Determine if AA
-     */
-    public isAA(): boolean {
-        return this.getWCAGLevel().isAA();
+    public getLightModeMaxChroma(): number {
+        return this.lightModeMaxChroma.getValue() || super.getLightModeMaxChroma();
     }
 
-    /**
-     * Determine if AAA
-     */
-    public isAAA(): boolean {
-        return this.getWCAGLevel().isAAA();
+    public getDarkModeMaxChroma(): number {
+        return this.darkModeMaxChroma.getValue() || super.getDarkModeMaxChroma();
+    }
+
+    public getCSSPrefix(): string {
+        return this.cssPrefix;
     }
 
 }
-export class DefaultShadeBuilder {
 
-    public readonly designSystemCfg: ShadeBuilderCfgPerDesignSystem;
-    public readonly colorCfg?: ShadeBuilderCfgPerColor;
-    public readonly lm: ShadeBuilder;
-    public readonly dm: ShadeBuilder;
+export type ShadeBuilderViewListener = () => void;
 
-    constructor(designSystemCfg: ShadeBuilderCfgPerDesignSystem, colorCfg?: ShadeBuilderCfgPerColor) {
-        this.designSystemCfg = designSystemCfg;
-        this.colorCfg = colorCfg;
-        this.lm = new ShadeBuilder(true, this.designSystemCfg, this.colorCfg);
-        this.dm = new ShadeBuilder(false, this.designSystemCfg, this.colorCfg);
+export interface ShadeBuilderViewShades {
+    light: Shade[];
+    dark: Shade[];
+}
+
+/**
+ * ShadeBuilderView contains 4 shade builders:
+ * 1) light mode AA
+ * 2) dark mode AA
+ * 3) light mode AAA
+ * 4) dark mode AAA
+ * In this case, lightMode and wcagLevel are static variables and all other variables are dynamic properties.
+ */
+export class ShadeBuilderView {
+
+    public node: Node;
+    public shade: Shade;
+    public color?: IColor;
+    public readonly lmAA: ShadeBuilder;
+    public readonly dmAA: ShadeBuilder;
+    public readonly lmAAA: ShadeBuilder;
+    public readonly dmAAA: ShadeBuilder;
+    public readonly all: ShadeBuilder[];
+
+    private readonly listeners: ShadeBuilderViewListener[] = [];
+    private readonly pgl: PropertyGroupListener;
+
+    constructor(node: Node, shade: Shade, color?: IColor) {
+        this.node = node;
+        this.shade = shade;
+        this.color = color;
+        this.lmAA = this.newShadeBuilder("lmAA", true, WCAGLevel.AA, "");
+        this.dmAA = this.newShadeBuilder("dmAA", false, WCAGLevel.AA, "dm-");
+        this.lmAAA = this.newShadeBuilder("lmAAA", true, WCAGLevel.AAA, "aaa-");
+        this.dmAAA = this.newShadeBuilder("dmAAA", false, WCAGLevel.AAA, "dm-aaa-");
+        this.all = [this.lmAA, this.dmAA, this.lmAAA, this.dmAAA];
+        const ds = node.getDesignSystem();
+        for (const sb of this.all) {
+            sb.setAll(this.all);
+            ds.registerByKey(node.getChildKey(sb.name), sb);
+        }
+        const cfg = new ShadeBuilderViewCfg(true, WCAGLevel.AA, "", node);
+        this.pgl = new PropertyGroupListener(`ShadeBuilderView.${node.key}`, cfg.allProps, () => this.notifyListeners.bind(this));
+    }
+
+    public getShades(wcagLevel: WCAGLevel): ShadeBuilderViewShades {
+        log.debug(`sbv: getting shades for WCAG ${wcagLevel.name}`);
+        let rtn: ShadeBuilderViewShades;
+        if (wcagLevel == WCAGLevel.AA) {
+            rtn = {
+                light: this.lmAA.build(this.shade),
+                dark: this.dmAA.build(this.shade),
+            };
+        } else if (wcagLevel == WCAGLevel.AAA) {
+            rtn = {
+                light: this.lmAAA.build(this.shade),
+                dark: this.dmAAA.build(this.shade),
+            };
+        } else {
+            throw new Error(`Invalid WCAG level: ${wcagLevel.name}`);
+        }
+        log.debug(`sbv: finished getting shades for WCAG ${wcagLevel.name}`);
+        return rtn;
+    }
+
+    public addListener(listener: ShadeBuilderViewListener) {
+        this.listeners.push(listener);
+    }
+
+    private notifyListeners() {
+        log.debug(`sbv: notifying ${this.listeners.length} listeners`);
+        for (const l of this.listeners) l();
+    }
+
+    public getShadeBuilder(lm: boolean, wcagLevel: WCAGLevel): ShadeBuilder {
+        if (wcagLevel == WCAGLevel.AA) {
+            if (lm) return this.lmAA;
+            else return this.dmAA;
+        } else if (wcagLevel == WCAGLevel.AAA) {
+            if (lm) return this.lmAAA;
+            else return this.dmAAA;
+        } else {
+            throw new Error(`Invalid WCAGLevel: ${wcagLevel.name}`);
+        }
+    }
+
+    public updateColor(color: Shade) {
+        this.shade = color;
+        this.notifyListeners();
+    }
+
+    private newShadeBuilder(name: string, lm: boolean, wcagLevel: WCAGLevel, cssPrefix: string): ShadeBuilder {
+        return new ShadeBuilder(this.node.getChildKey(name), new ShadeBuilderViewCfg(lm, wcagLevel, cssPrefix, this.node), this.color);
     }
 
 }

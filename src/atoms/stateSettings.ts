@@ -4,12 +4,13 @@
  */
 import { Atom } from "./atom";
 import { ColorTheme } from "./colorThemes";
-import { IDesignSystem, IAtoms, EventValueChange } from "../interfaces";
+import { IDesignSystem, IAtoms, EventValueChange, IColor } from "../interfaces";
 import { Shade } from "../common/shade";
-import { PropertyString, PropertyBoolean, PropertyGroupListener } from "../common/props";
+import { PropertyString, PropertyBoolean, PropertyNumberRange, PropertyGroupListener } from "../common/props";
 import { Logger } from "../util/logger";
+import { WCAGLevel } from "../common/wcag";
 import { Util } from "../util";
-import { ShadeBuilder, ShadeBuilderCfgPerColor } from "../common/shadeBuilder";
+import { ShadeBuilderView } from "../common/shadeBuilder";
 
 const log = new Logger("ss");
 
@@ -31,20 +32,23 @@ export class StateSettings extends Atom {
     public readonly all: StateSetting[] = [];
     /** Property set to true when everything is ready */
     public readonly ready: PropertyBoolean;
-    /** Color-specific shade builder config for all state setting shades */
-    public shadeBuilderCfg: ShadeBuilderCfgPerColor; // color-specific shade builder config
     /** Design system */
     public designSystem: IDesignSystem;
+    /** Color specific Shade builder config */
+    public lightModeMaxChroma: PropertyNumberRange;
+    public darkModeMaxChroma: PropertyNumberRange;
 
     constructor(atoms: IAtoms) {
         super("State Settings", false, atoms);
         this.designSystem = this.getDesignSystem();
-        this.shadeBuilderCfg = new ShadeBuilderCfgPerColor(this);
+        this.lightModeMaxChroma = new PropertyNumberRange("Max Chroma in Light Mode", true, this, 0, 100, 80);
+        this.darkModeMaxChroma = new PropertyNumberRange("Max Chroma in Dark Mode", true, this, 0, 100, 60);
         this.addDependency(atoms.colorThemes);
-        this.info = new StateSetting("info", "#0066EF", this);
-        this.success = new StateSetting("success", "#327D35", this);
-        this.warning = new StateSetting("warning", "#A06B1A", this);
-        this.danger = new StateSetting("danger", "#D62B2B", this);
+        const firstIndex = 10000;
+        this.info = new StateSetting("info", firstIndex, "#0066EF", this);
+        this.success = new StateSetting("success", firstIndex+1, "#327D35", this);
+        this.warning = new StateSetting("warning", firstIndex+2, "#A06B1A", this);
+        this.danger = new StateSetting("danger", firstIndex+3, "#D62B2B", this);
         this.ready = new PropertyBoolean("ready", false, this, {defaultValue: false});
         this.atoms.colorThemes.defaultTheme.setPropertyListener(`_tb.StateSettings`, this.setDefaultTheme.bind(this));
     }
@@ -75,41 +79,45 @@ export class StateSettings extends Atom {
     public deserialize(obj: any) {
         if (!obj) return;
         super.deserialize(obj);
-        this.info.prop.deserialize(obj.information);
-        this.success.prop.deserialize(obj.success);
-        this.warning.prop.deserialize(obj.warning);
-        this.danger.prop.deserialize(obj.danger);
+        this.info.hex.deserialize(obj.information);
+        this.success.hex.deserialize(obj.success);
+        this.warning.hex.deserialize(obj.warning);
+        this.danger.hex.deserialize(obj.danger);
         this.init();
     }
 
     public serialize(): any {
         const obj: any = {};
-        obj.information = this.info.prop.serialize();
-        obj.success = this.success.prop.serialize();
-        obj.warning = this.warning.prop.serialize();
-        obj.danger = this.danger.prop.serialize();
+        obj.information = this.info.hex.serialize();
+        obj.success = this.success.hex.serialize();
+        obj.warning = this.warning.hex.serialize();
+        obj.danger = this.danger.hex.serialize();
         return obj;
     }
 
 }
 
-export class StateSetting {
+export class StateSetting implements IColor {
 
     public readonly name: string;
+    public readonly index: number;
+    public readonly hex: PropertyString;
     public readonly prop: PropertyString;
     public readonly ss: StateSettings;
     public lmShade: Shade = new Shade({hex: Shade.WHITE.hex});
     public dmShade: Shade = new Shade({hex: Shade.BLACK.hex});
-    public lmShades = [] as Shade[];
-    public dmShades = [] as Shade[];
+    public shades: ShadeBuilderView;
     private atoms: IAtoms;
 
-    constructor(name: string, defaultValue: string, ss: StateSettings) {
+    constructor(name: string, index: number, defaultValue: string, ss: StateSettings) {
         this.name = name;
+        this.index = index;
         this.atoms = ss.atoms;
         this.ss = ss;
-        this.prop = new PropertyString(name, false, ss, {defaultValue});
-        this.prop.setPropertyListener(`_tb.StateSetting.${name}`, this.setShadesListener.bind(this));
+        this.shades = new ShadeBuilderView(ss, Shade.fromHex(defaultValue), this);
+        this.hex = new PropertyString(name, false, ss, {defaultValue});
+        this.prop = this.hex;  // Duplicate variable for backwards compatibility
+        this.hex.setPropertyListener(`_tb.StateSetting.${name}`, this.setShadesListener.bind(this));
         ss.all.push(this);
     }
 
@@ -125,16 +133,16 @@ export class StateSetting {
 
     public setShades() {
         log.debug(`StateSettings.setShades enter: name=${this.name}`);
-        const hex = this.prop.getValue() || "";
-        const shade = new Shade({hex: hex}); 
-        // Build up 10 shades for each lm & dm
-        this.lmShades = this.buildShades(shade, true);      
-        this.dmShades = this.buildShades(shade, false);      
+        const hex = this.hex.getValue() || "";
+        this.shades.updateColor(Shade.fromHex(hex));
+        const shades = this.shades.getShades(WCAGLevel.AA); // TODO: Where do we get the WCAG level?  Always AA for now
+        const lmShades = shades.light;
+        const dmShades = shades.dark;
         // Find the lm shade for hex value & get corresponding dm shade
         let index = -1;
         let min = 9999999;
-        for (var i = 0; i < this.lmShades.length; i++) {
-            const diff = this.getDiffColor(this.lmShades[i].hex, hex);
+        for (var i = 0; i < lmShades.length; i++) {
+            const diff = this.getDiffColor(lmShades[i].hex, hex);
             if (diff < min) {
                 min = diff;
                 index = i;
@@ -145,8 +153,8 @@ export class StateSetting {
             log.debug(`StateSettings.setShades could not find ${hex} in built lmShades`);
             return;
         }
-        const lmStart = this.lmShades[index];
-        const dmStart = this.dmShades[index];
+        const lmStart = lmShades[index];
+        const dmStart = dmShades[index];
         const theme = this.atoms.colorThemes.getDefaultTheme() as ColorTheme;
         if (!theme) {
             log.debug(`StateSettings.setShades exit (no default theme): name=${this.name}`);
@@ -155,12 +163,6 @@ export class StateSetting {
         this.setLMShade(theme, lmStart);
         this.setDMShade(theme, dmStart);
         log.debug(`StateSettings.setShades exit: name=${this.name}`);
-    }
-
-    private buildShades(shade: Shade, lm: boolean): Shade[] {
-        const ds = this.ss.designSystem;
-        const sb = new ShadeBuilder(lm, ds.shadeBuilderCfg, this.ss.shadeBuilderCfg);
-        return sb.buildShades(shade);
     }
 
     private setLMShade(theme: ColorTheme, shade: Shade) {

@@ -2,11 +2,12 @@
  * Copyright (c) 2023 Discover Financial Services
  * Licensed under Apache-2.0 License. See License.txt in the project root for license information
  */
-import { Atoms, Shade, ColorTheme, ShadeGroup, ModeShadeGroups, BevelSettingsProps, HotlinkModeVariables, OnHotlink, TypographyStyling} from "../atoms/index";
+import { Atoms, Shade, ColorTheme, ShadeGroup, ModeShadeGroups, BevelSettingsProps, HotlinkModeVariables, OnHotlink, TypographyStyling } from "../atoms/index";
 import { Molecules, Dropdowns } from "../molecules/index";
 import { Organisms, Hero } from "../organisms/index";
 import { PropertyColorShade, PropertyPercentage, PropertyGroupListener, PropertyShadowSelectable, PropertyColorPair, Property, ListenerSubscription, ColorPair } from "../common/index";
 import { IDesignSystem, EventValueChange, VarListener, IVarGroup, IColor, EventType } from "../interfaces";
+import { Color } from "../atoms/colorPalette";
 
 import { Logger } from "../util/logger";
 
@@ -23,10 +24,10 @@ export class CSSGenerator {
     public readonly atoms: Atoms;
     public readonly molecules: Molecules;
     public readonly organisms: Organisms;
-    private readonly cssVars: {[key:string]: string} = {};
-    private readonly cssVarListeners: {[key:string]: VarListener} = {};
-    private readonly varGroups: {[key:string]: CSSVarGroup} = {};
-    private readonly cssColors: {[name: string]: CSSColor} = {};
+    private readonly cssVars: { [key: string]: string } = {};
+    private readonly cssVarListeners: { [key: string]: VarListener } = {};
+    private readonly varGroups: { [key: string]: CSSVarGroup } = {};
+    private readonly cssColors: { [name: string]: CSSColor } = {};
     private defaultTheme?: CSSTheme;
 
     constructor(ds: IDesignSystem) {
@@ -57,12 +58,12 @@ export class CSSGenerator {
         return {
             "min-target": "44px",
             "primaryFont": "OpenDyslexic", // TODO: get correct font
-            "secondaryFont" : "OpenDyslexic", // TODO: get correct font
+            "secondaryFont": "OpenDyslexic", // TODO: get correct font
             "standard-LineHeight": "180%",
             "sm-LineHeight": "150%",
         };
     }
-        
+
     public getMotionSensitivityAsObject(): Object {
         return {
             "animation-speed": "0s",
@@ -91,7 +92,7 @@ export class CSSGenerator {
         return r.join("\n");
     }
 
-    public getVars(): {[name: string]: string} {
+    public getVars(): { [name: string]: string } {
         return this.cssVars;
     }
 
@@ -100,7 +101,7 @@ export class CSSGenerator {
     }
 
     private setStaticVars() {
-        const vk = new CSSVariableKind("static","",[], this);
+        const vk = new CSSVariableKind("static", "", [], this);
         vk.setVars({
             "zoom": "1",
             "meshSVGfill": "rgb(0,102,239)",
@@ -177,9 +178,9 @@ export class CSSGenerator {
             //"on-background-secondary":  "var(--on-gray-0)",
             //"dm-on-background-secondary":  "var(--dm-white)",
             "background-tertiary": "var(--primary)",
-            "on-background-tertiary":  "var(--on-primary)",
+            "on-background-tertiary": "var(--on-primary)",
             "dm-background-tertiary": "var(--dm-primary-800)",
-            "dm-on-background-tertiary":  "var(--dm-white)",
+            "dm-on-background-tertiary": "var(--dm-white)",
             "gradient-1": "linear-gradient(45deg, var(--gradient1-a) 0%, var(--gradient1-b) 100%)",
             "gradient-2": "linear-gradient(45deg, var(--gradient2-a) 0%, var(--gradient2-b) 100%)",
             "gradient-3": "linear-gradient(45deg, var(--gradient3-a) 0%, var(--gradient3-b) 100%)",
@@ -191,7 +192,7 @@ export class CSSGenerator {
             "dm-on-gradient-2": "var(--dm-on-gradient2-a)",
             "dm-on-gradient-3": "var(--dm-on-gradient3-a)",
             "dm-text-gradient": "linear-gradient(45deg, var(--dm-text-gradient-a) 0%, var(--dm-text-gradient-b) 100%)",
-            "dm-on-surface":  "var(--dm-on-background)",
+            "dm-on-surface": "var(--dm-on-background)",
             "white-bg": "#ffffff",
             "quiet": "68%",
             "disabled": "38%",
@@ -251,11 +252,11 @@ export class CSSGenerator {
         const dhs = atoms.displayAndHeaderStyles;
         this.addPropVar("headerChange", "", dhs.percentChangeInHeaderDisplaySizes); //, function(vk) {
         this.addPropVar("headerWeight", "", dhs.headingDisplayFontWeight);
-        for (var i=0; i<dhs.displayStyles.length; i++) {
-            this.generateTypographyVars(dhs.displayStyles[i], "Display"+(i+1));
+        for (var i = 0; i < dhs.displayStyles.length; i++) {
+            this.generateTypographyVars(dhs.displayStyles[i], "Display" + (i + 1));
         }
-        for (var i=0; i<dhs.headerStyles.length; i++) {
-            this.generateTypographyVars(dhs.headerStyles[i], "h"+(i+1));
+        for (var i = 0; i < dhs.headerStyles.length; i++) {
+            this.generateTypographyVars(dhs.headerStyles[i], "h" + (i + 1));
         }
         const dhsVK = new CSSVariableKind("_tb.dhs", "", [dhs.headingDisplayFontWeight], this);
         dhsVK.setVars({
@@ -297,21 +298,21 @@ export class CSSGenerator {
     }
 
     private generateTypographyVars(typography: TypographyStyling, prefix: string) {
-        this.addPropVar(prefix+"FontSize", "px", typography.fontSize);
-        this.addPropVar(prefix+"FontWeight", "", typography.fontWeight);
-        this.addPropVar(prefix+"FontFamily", "", typography.fontFamily);
-        this.addPropVar(prefix+"LetterSpacing", "%", typography.letterSpacing);
-        this.addPropVar(prefix+"LineHeight", "%", typography.lineHeight);
-        const vk = new CSSVariableKind("molecules.topograpy","",[typography.fontSize], this);
-        vk.setVar(`${prefix}TextDecoration`,"none");   // TODO: if not static, where does this come from?
-        vk.setVar(`${prefix}TextTransform`,"none");   // TODO: if not static, where does this come from?
+        this.addPropVar(prefix + "FontSize", "px", typography.fontSize);
+        this.addPropVar(prefix + "FontWeight", "", typography.fontWeight);
+        this.addPropVar(prefix + "FontFamily", "", typography.fontFamily);
+        this.addPropVar(prefix + "LetterSpacing", "%", typography.letterSpacing);
+        this.addPropVar(prefix + "LineHeight", "%", typography.lineHeight);
+        const vk = new CSSVariableKind("molecules.topograpy", "", [typography.fontSize], this);
+        vk.setVar(`${prefix}TextDecoration`, "none");   // TODO: if not static, where does this come from?
+        vk.setVar(`${prefix}TextTransform`, "none");   // TODO: if not static, where does this come from?
     }
 
     private setMoleculeVars() {
         const ms = this.molecules;
         // dropdowns
         const dd = ms.dropdowns;
-        const dropdownVk = new CSSVariableKind("dropdowns","",[dd.menuShadow], this);
+        const dropdownVk = new CSSVariableKind("dropdowns", "", [dd.menuShadow], this);
         this.addPropVar("dropdown-shadow", "", dd.menuShadow, shadowToCSS);
         this.addPropVar("dropdown-radius", "", dd.borderRadius);
         dropdownVk.setVars({
@@ -323,8 +324,8 @@ export class CSSGenerator {
         });
         // standard button
         const stb = ms.standardButtons;
-        const buttonVk = new CSSVariableKind("stb","",[stb.buttonText], this);
-        stb.buttonText.setListener(this.lkey("stb.buttonText"), function(event) {
+        const buttonVk = new CSSVariableKind("stb", "", [stb.buttonText], this);
+        stb.buttonText.setListener(this.lkey("stb.buttonText"), function (event) {
             const buttonText = stb.buttonText.getValue();
             let prefix, transform: string;
             if (buttonText === "CTA Small") {
@@ -340,7 +341,7 @@ export class CSSGenerator {
                 "buttonTextTransform": `var(--${prefix}TextTransform)`,
                 "buttonLetterSpacing": `var(--${prefix}LetterSpacing)`,
                 "CTATextTransform": transform,
-            });    
+            });
         })
         this.addPropVar("button-padding", "", stb.horizontalPadding);
         this.addPropVar("button-border", "", stb.secondaryBorder);
@@ -350,40 +351,40 @@ export class CSSGenerator {
         this.addPropVar("button-shadow", "", stb.buttonShadow, shadowToCSS);
         // small button
         const smb = ms.smallButtons;
-        const smbVK = new CSSVariableKind("smb","",[smb.visibleHeight], this);
+        const smbVK = new CSSVariableKind("smb", "", [smb.visibleHeight], this);
         this.addPropVar("sm-button-height", "", smb.visibleHeight);
         this.addPropVar("sm-button-padding", "", smb.horizontalPadding);
-        smb.buttonText.setListener(this.lkey("smb.buttonText"), function(event) {
+        smb.buttonText.setListener(this.lkey("smb.buttonText"), function (event) {
             const ctaSize = (smb.buttonText.getValue() == "CTA Small") ? "CTA-Small" : "CTA"
             smbVK.setVars({
                 "sm-buttonTypography": `var(--${ctaSize}FontWeight) var(--${ctaSize}FontSize) / var(--${ctaSize}LineHeight) var(--${ctaSize}FontFamily)`,
                 "sm-buttonTextDecoration": `var(--${ctaSize}TextDecoration)`,
                 "sm-buttonTextTransform": `var(--${ctaSize}TextTransform)`,
                 "sm-buttonLetterSpacing": `var(--${ctaSize}LetterSpacing)`,
-            });    
+            });
         });
         smbVK.setVars({
             "groupButton-radius": "calc(var(--radius-1) * var(--button-radius) * 1.6)",
         });
         // chip
         const chip = ms.chips;
-        const chipVK = new CSSVariableKind("chip","",[chip.minWidth], this);
+        const chipVK = new CSSVariableKind("chip", "", [chip.minWidth], this);
         this.addPropVar("chip-minwidth", "px", chip.minWidth);
         this.addPropVar("chip-height", "", chip.visibleHeight);
         this.addPropVar("chip-radius", "", chip.radius);
         this.addPropVar("chip-padding", "", chip.horizontalPadding);
         this.addPropVar("chip-shadow", "", chip.shadow, shadowToCSS);
-        this.addPropVar("chip-text", "", chip.text, function(vk: CSSVariableKind) {
+        this.addPropVar("chip-text", "", chip.text, function (vk: CSSVariableKind) {
             const typography = (chip.text.getValue() === "Caption") ? "caption" : "caption-bold";
             chipVK.setVars({
                 "chipTypography": `var(--${typography}FontWeight) var(--${typography}FontSize) / var(--${typography}LineHeight) var(--${typography}FontFamily)`,
                 "chipTextTransform": `var(--${typography}TextTransform)`,
                 "chipLetterSpacing": `var(--${typography}LetterSpacing)`,
-            });    
+            });
         });
         // cards
         const card = ms.standardCards;
-        const cardsVK = new CSSVariableKind("card","",[card.padding], this);
+        const cardsVK = new CSSVariableKind("card", "", [card.padding], this);
         this.addPropVar("card-padding", "", card.padding);
         this.addPropVar("card-gap", "", card.contentGap);
         this.addPropVar("card-radius", "", card.borderRadius);
@@ -394,7 +395,7 @@ export class CSSGenerator {
         });
         // modals
         const modal = ms.modal;
-        const modalVK = new CSSVariableKind("modal","",[modal.borderRadius], this);
+        const modalVK = new CSSVariableKind("modal", "", [modal.borderRadius], this);
         this.addPropVar("modal-radius", "", modal.borderRadius);
         this.addPropVar("modal-shadow", "", modal.shadow, shadowToCSS);
         this.addPropVar("modal-overlay", "", modal.color, colorToCSS);
@@ -402,7 +403,7 @@ export class CSSGenerator {
             "modal-padding": "2", // TODO: static?
             "modal-border": "var(--spacing-2)",
         });
-        const ttVK = new CSSVariableKind("tooltip","",[], this);
+        const ttVK = new CSSVariableKind("tooltip", "", [], this);
         ttVK.setVars({
             // TODO: Do I need to set tooltip-color & tooltip-oncolor for lm & dm?  If yes, how to determine them?
             "dmtooltip": "",
@@ -446,7 +447,7 @@ export class CSSGenerator {
     private setOrganismVars() {
         const org = this.organisms;
         const fc = org.footerAndCopyright;
-        const footer = new CSSVariableKind("fc","",[fc.footerVerticalPadding], this);
+        const footer = new CSSVariableKind("fc", "", [fc.footerVerticalPadding], this);
         this.addPropVar("footer-padding", "", fc.footerVerticalPadding);
         this.addPropVar("copyright-padding", "", fc.copyrightVerticalPadding);
         footer.setVars({
@@ -462,28 +463,28 @@ export class CSSGenerator {
         // navbar primary
         const pnav = org.primaryNav;
         this.addPropVar("navbarPrimary-padding", "", pnav.verticalPadding);
-        this.addPropVar("navbarPrimary-position", "", pnav.fixed, function(vk: CSSVariableKind) {
+        this.addPropVar("navbarPrimary-position", "", pnav.fixed, function (vk: CSSVariableKind) {
             vk.setVar(vk.name, pnav.fixed.getValue() ? "fixed" : "relative");
         });
         // navbar secondary /
         const snav = org.secondaryNav;
         this.addPropVar("navbarSecondary-padding", "", snav.verticalPadding);
-        this.addPropVar("navbarSecondary-position", "", snav.sticky, function(vk: CSSVariableKind) {
+        this.addPropVar("navbarSecondary-position", "", snav.sticky, function (vk: CSSVariableKind) {
             vk.setVar(vk.name, snav.sticky.getValue() ? "sticky" : "fixed");
         });
-        const nbsVk = new CSSVariableKind("hero","",[snav.horizontalTabPadding], this);
+        const nbsVk = new CSSVariableKind("hero", "", [snav.horizontalTabPadding], this);
         nbsVk.setVars({
-          "navbarSecondary-stickyTop": "0",
-          "leftNav": "var(--gray-100)",
-          "on-leftNav": "var(--on-gray-100)",
-          "leftNavPadding": "var(--spacing-2)",
+            "navbarSecondary-stickyTop": "0",
+            "leftNav": "var(--gray-100)",
+            "on-leftNav": "var(--on-gray-100)",
+            "leftNavPadding": "var(--spacing-2)",
         });
         // hero
         const hero = org.hero;
-        const heroVk = new CSSVariableKind("hero","",[hero.verticalGap], this);
+        const heroVk = new CSSVariableKind("hero", "", [hero.verticalGap], this);
         this.addPropVar("hero-gap", "", hero.verticalGap);
         this.addPropVar("hero-padding", "", hero.verticalPadding);
-        hero.title.setPropertyListener(this.lkey("heroTitle"), function(vc: EventValueChange<string>) {
+        hero.title.setPropertyListener(this.lkey("heroTitle"), function (vc: EventValueChange<string>) {
             const val = vc.newValue;
             if (!val) return;
             let p: string;
@@ -495,7 +496,7 @@ export class CSSGenerator {
             heroVk.setVar("hero-titleTransform", `var(--${p}TextTransform)`);
             heroVk.setVar("hero-titleSpacing", `var(--${p}LetterSpacing)`);
         });
-        hero.body.setPropertyListener(this.lkey("heroBody"), function(vc: EventValueChange<string>) {
+        hero.body.setPropertyListener(this.lkey("heroBody"), function (vc: EventValueChange<string>) {
             const val = vc.newValue;
             if (!val) return;
             let p: string;
@@ -514,7 +515,7 @@ export class CSSGenerator {
             "hero-justify-content": "flex-start",
         });
         // tables
-        const tableVk = new CSSVariableKind("tables","",[], this);
+        const tableVk = new CSSVariableKind("tables", "", [], this);
         tableVk.setVars({
             "tableheaderTypography": "var(--label-1FontWeight) var(--label-1FontSize) / var(--label-1LineHeight) var(--label-1FontFamily)",
             "tableheaderSpacing": "var(--label-1LetterSpacing)",
@@ -562,14 +563,14 @@ export class CSSGenerator {
         vk = new CSSVariableKind("", "", [atoms.elevationSettings.percentageChange], this);
         this.addPercentToDecimal("elevation-change", atoms.elevationSettings.percentageChange);
         for (let i = 2; i <= 9; i++) vk.setVar(`change-${i}`, `calc(1 + calc(var(--elevation-change) * ${i}))`);
-        const emitChangeVars = function(name: string) {
+        const emitChangeVars = function (name: string) {
             for (let i = 2; i <= 9; i++) vk.setVar(`${name}-${i}`, `calc(var(--${name}) * var(--change-${i}))`);
         }
-        atoms.elevationSettings.horizontalShadowLength.setListener("css.coreSystemSettings", function(vc: EventValueChange<number>) {
+        atoms.elevationSettings.horizontalShadowLength.setListener("css.coreSystemSettings", function (vc: EventValueChange<number>) {
             vk.setVar(`elevation-horizontal`, `${vc.newValue}px`);
             vk.setVar(`reverse-elevation-horizontal`, `-${vc.newValue}px`);
         }, [EventType.ValueChanged]);
-        atoms.elevationSettings.verticalShadowLength.setListener("css.coreSystemSettings", function(vc: EventValueChange<number>) {
+        atoms.elevationSettings.verticalShadowLength.setListener("css.coreSystemSettings", function (vc: EventValueChange<number>) {
             vk.setVar(`elevation-vertical`, `${vc.newValue}px`);
             vk.setVar(`reverse-elevation-vertical`, `-${vc.newValue}px`);
         }, [EventType.ValueChanged]);
@@ -587,14 +588,14 @@ export class CSSGenerator {
         emitChangeVars("base-elevation-blur");
         this.addPropVar("base-elevation-spread", "px", atoms.elevationSettings.baseSpreadRadius);
         emitChangeVars("base-elevation-spread");
-        this.addPropVar("elevation-rgb", "", atoms.elevationSettings.shadowColor, this.shadowColorListener.bind(this)); 
+        this.addPropVar("elevation-rgb", "", atoms.elevationSettings.shadowColor, this.shadowColorListener.bind(this));
         this.addPercentToDecimal("elevation-opacity", atoms.elevationSettings.colorOpacity);
         this.addPercentToDecimal("base-elevation-opacity", atoms.elevationSettings.baseColorOpacity);
         // elevations
         vk.setVar("elevation-0", "0 0 0 0 rgba(0,0,0,0)");
         for (let i = 1; i <= 9; i++) {
             const vc = `var(--change-${i})`;
-            vk.setVar( `elevation-${i}`, 
+            vk.setVar(`elevation-${i}`,
                 `calc(var(--elevation-horizontal) * ${vc}) ` +
                 `calc(var(--elevation-vertical) * ${vc}) ` +
                 `calc(var(--elevation-blur) * ${vc}) ` +
@@ -610,14 +611,14 @@ export class CSSGenerator {
         this.addBevelProps(atoms.bevelSettings.inverse);
         this.addPropsVar("focusBlur", "", [atoms.gridSettings.grid, atoms.focusStates.addFocusBlur], this.generateFocusBlurVariable.bind(this));
         // glow settings
-        this.addPropVar("glow-rgb", "", atoms.glowSettings.color, function(vk: CSSVariableKind) {
+        this.addPropVar("glow-rgb", "", atoms.glowSettings.color, function (vk: CSSVariableKind) {
             log.debug(`glow-rgb callback`);
             const val = self.atoms.glowSettings.color.getValue();
             if (val !== undefined) {
                 const shade = Shade.fromHex(val);
                 vk.setVar("glow-rgb", `${shade.R}, ${shade.G}, ${shade.B}`);
             }
-        }); 
+        });
         this.addPropVar("glow-blur", "px", atoms.glowSettings.blurRadius);
         this.addPropVar("glow-spread", "px", atoms.glowSettings.spreadRadius);
         this.addPercentToDecimal("glow-opacity", atoms.glowSettings.colorOpacity);
@@ -640,7 +641,7 @@ export class CSSGenerator {
             vk.setVar("bevel-0", "0 0 0 0 rgba(0,0,0,0)");
             for (let i = 1; i <= 9; i++) {
                 const bc = `calc(1 + calc(var(--bevel-change) * ${i}))`;
-                vk.setVar(`bevel-${i}`, 
+                vk.setVar(`bevel-${i}`,
                     `inset calc(var(--bevel-horizontal) * ${bc}) ` +
                     `calc(var(--bevel-vertical) * ${bc}) ` +
                     `var(--bevel-blur) ` +
@@ -657,8 +658,8 @@ export class CSSGenerator {
                 vk.setVar(`reverse-bevel-${i}`,
                     `inset calc(var(--inbevel-horizontal) * calc(1 - calc(var(--inbevel-change) * ${i}))) ` +
                     `calc(var(--inbevel-vertical) * calc(1 - calc(var(--inbevel-change) * .${i}))) ` +
-                    `calc(var(--inbevel-blur) * .${10-i}) ` +
-                    `calc(var(--inbevel-spread) * .${10-i}) ` +
+                    `calc(var(--inbevel-blur) * .${10 - i}) ` +
+                    `calc(var(--inbevel-spread) * .${10 - i}) ` +
                     `rgba(0,0,0, calc(var(--inbevel-dark-opacity)  * calc(1 + calc(var(--inbevel-change) * .${i})) ))`);
             }
         }
@@ -700,7 +701,7 @@ export class CSSGenerator {
         const val = vk.props[0].getValue();
         if (val !== undefined) {
             // Convert from percentage to decimal value
-            vk.setVar(varName, `${val/100}`);
+            vk.setVar(varName, `${val / 100}`);
         }
     }
 
@@ -714,7 +715,7 @@ export class CSSGenerator {
             return;
         }
         if (focusBlur) {
-            this.setVar(name, unit, vk, `${grid/2}`);
+            this.setVar(name, unit, vk, `${grid / 2}`);
         } else {
             this.setVar(name, unit, vk, '0');
         }
@@ -736,7 +737,7 @@ export class CSSGenerator {
         if (this.atoms.stateSettings.ready) {
             this.atoms.stateSettings.all.forEach(ss => {
                 const gen = this;
-                this.addPropVar("ss"+ss.name, "", ss.prop, function(vk1: CSSVariableKind) {
+                this.addPropVar("ss" + ss.name, "", ss.hex, function (vk1: CSSVariableKind) {
                     gen.setVar(ss.name, "", vk, ss.lmShade.hex);
                     gen.setVar(`on-${ss.name}`, "", vk, ss.lmShade.getOnShade2(true).getRGBA());
                     gen.setVar(`dm-${ss.name}`, "", vk, ss.dmShade.hex);
@@ -822,13 +823,13 @@ export class CSSGenerator {
         // set the variable in the appropriate groups, one group for each atom, molecule, or organism.
         kind.componentKeys.forEach(key => this.getVarGroup(key).setVar(cssName, cssValue));
         //if (cssValue !== undefined) {
-            this.cssVars[cssName] = cssValue;
+        this.cssVars[cssName] = cssValue;
         //} else {
-            // Delete CSS variable
+        // Delete CSS variable
         //    delete this.cssVars[cssName];
         //}
         // Notify listeners of change
-        Object.values(this.cssVarListeners).forEach((l) => l(cssName,cssValue));
+        Object.values(this.cssVarListeners).forEach((l) => l(cssName, cssValue));
     }
 
     public lkey(name: string): string {
@@ -851,7 +852,7 @@ export class CSSGenerator {
      * @param prop The input property from which the CSS variable value is derived
      */
     public addPropVar(name: string, unit: string, prop: Property<any>, cb?: (propVar: CSSVariableKind) => void) {
-        new CSSDynamicVariableKind(name, unit, [prop], this, {cb});
+        new CSSDynamicVariableKind(name, unit, [prop], this, { cb });
     }
 
     /**
@@ -862,9 +863,9 @@ export class CSSGenerator {
      * @param props Any number of properties which are monitored for changes before calling 'cb'.
      * @param cb  The callback called each time all 'props' are initialized and any values change.
      */
-    public addPropsVar(name: string, unit: string, props: Property<any>[], cb: (propVar: CSSVariableKind) => void, opts?: {or?: boolean}) {
+    public addPropsVar(name: string, unit: string, props: Property<any>[], cb: (propVar: CSSVariableKind) => void, opts?: { or?: boolean }) {
         opts = opts || {};
-        const newOpts = { cb, or: opts.or};
+        const newOpts = { cb, or: opts.or };
         new CSSDynamicVariableKind(name, unit, props, this, newOpts);
     }
 
@@ -872,13 +873,13 @@ export class CSSGenerator {
 
 class CSSColor {
 
-    private color: IColor;
+    private color: Color;
     private cssGenerator: CSSGenerator;
     private lname: string = '_tb.CssColor';
     private varKind: CSSVariableKind;
 
     constructor(color: IColor, cssGenerator: CSSGenerator) {
-        this.color = color;
+        this.color = color as Color;
         this.cssGenerator = cssGenerator;
         this.varKind = new CSSVariableKind("color", "", [color.hex as Property<string>], cssGenerator);
         this.start();
@@ -893,28 +894,18 @@ class CSSColor {
     }
 
     private listener(vc: EventValueChange<string>): void {
-        for (const shade of this.color.light.shades) {
-            const name = getShadeVarName(shade);
-            log.debug(`Shade listener for light mode shade ${name} = ${shade.toString()}`);
-            if (name) {
-                this.cssGenerator.setShadeVar(name, this.varKind, shade);
-                this.cssGenerator.setShadeVar(`on-${name}`, this.varKind, shade.getOnShade2(true));
-            } else {
-                log.warn(`Unable to set CSS variable for shade ${shade.toString()} because no variable name can be determined`);
-            }
-        }
-        for (const shade of this.color.dark.shades) {
-            let name = "";
-            if (shade.hasMode() && shade.index >= 0) {
-                const color = shade.getMode().color;
-                name = `${color.name}-${shade.index*100}`;
-            }
-            log.debug(`Shade listener for dark mode shade ${name} = ${shade.toString()}`);
-            if (name) {
-                this.cssGenerator.setShadeVar(`dm-${name}`, this.varKind, shade);
-                this.cssGenerator.setShadeVar(`dm-on-${name}`, this.varKind, shade.getOnShade2(false));
-            } else {
-                log.warn(`Unable to set CSS variable for shade ${shade.toString()} because no variable name can be determined`);
+        const hex = this.color.hex.getValue();
+        if (!hex) return;
+        for (const sb of this.color.shades.all) {
+            for (const shade of sb.build(Shade.fromHex(hex))) {
+                const name = getShadeVarName(shade);
+                log.debug(`Shade listener for light mode shade ${name} = ${shade.toString()}`);
+                if (name) {
+                    this.cssGenerator.setShadeVar(name, this.varKind, shade);
+                    this.cssGenerator.setShadeVar(`on-${name}`, this.varKind, shade.getOnShade2(true));
+                } else {
+                    log.warn(`Unable to set CSS variable for shade ${shade.toString()} because no variable name can be determined`);
+                }
             }
         }
     }
@@ -940,17 +931,17 @@ class CSSTheme {
         const self = this;
 
         // Listen for changes to the primary, secondary, and tertiary shades
-        const dm: DMShadeListenerArgs  = { corresponding: true };
-        this.setShadeListener({name: "primary", pcs: this.theme.primary, on: true, dm, palette: true, half: true, quarter: true});
-        this.cssGenerator.addPropVar("cssColorThemePrimary", "", this.theme.primary, function(vk: CSSVariableKind) {
+        const dm: DMShadeListenerArgs = { corresponding: true };
+        this.setShadeListener({ name: "primary", pcs: this.theme.primary, on: true, dm, palette: true, half: true, quarter: true });
+        this.cssGenerator.addPropVar("cssColorThemePrimary", "", this.theme.primary, function (vk: CSSVariableKind) {
             const vars = self.theme.getDarkBGShades();
             if (vars) {
                 vk.setShadeVar("primaryDarkBG", vars.primary);
                 vk.setShadeVar("secondaryDarkBG", vars.secondary);
             }
         });
-        this.setShadeListener({name: "secondary", pcs: this.theme.secondary, on: true, dm, palette: true});
-        this.setShadeListener({name: "tertiary", pcs: this.theme.tertiary, on: true, dm, palette: true});
+        this.setShadeListener({ name: "secondary", pcs: this.theme.secondary, on: true, dm, palette: true });
+        this.setShadeListener({ name: "tertiary", pcs: this.theme.tertiary, on: true, dm, palette: true });
 
         // light and dark mode backgrounds
         log.debug(`CSSTheme.start setting light and dark mode background listeners`);
@@ -963,10 +954,10 @@ class CSSTheme {
 
         // gradients
         log.debug(`CSSTheme.start setting gradients listeners`);
-        this.setShadeListener({name: "gradient1-a", pcs: this.theme.gradient1.from, on: true, dm: {}});
-        this.setShadeListener({name: "gradient1-b", pcs: this.theme.gradient1.to, on: true, dm: {}});
-        this.setShadeListener({name: "gradient2-a", pcs: this.theme.gradient2.from, on: true, dm: {}});
-        this.setShadeListener({name: "gradient2-b", pcs: this.theme.gradient2.to, on: true, dm: {}});
+        this.setShadeListener({ name: "gradient1-a", pcs: this.theme.gradient1.from, on: true, dm: {} });
+        this.setShadeListener({ name: "gradient1-b", pcs: this.theme.gradient1.to, on: true, dm: {} });
+        this.setShadeListener({ name: "gradient2-a", pcs: this.theme.gradient2.from, on: true, dm: {} });
+        this.setShadeListener({ name: "gradient2-b", pcs: this.theme.gradient2.to, on: true, dm: {} });
 
         // button
         log.debug(`CSSTheme.start setting button listener`);
@@ -978,12 +969,12 @@ class CSSTheme {
 
         // text gradient
         log.debug(`CSSTheme.start setting text gradient listeners`);
-        this.setShadeListener({name: "text-gradient-a", pcs: this.theme.gradientHeaderText.from, on: true, dm: {}});
-        this.setShadeListener({name: "text-gradient-b", pcs: this.theme.gradientHeaderText.to, on: true, dm: {}});
+        this.setShadeListener({ name: "text-gradient-a", pcs: this.theme.gradientHeaderText.from, on: true, dm: {} });
+        this.setShadeListener({ name: "text-gradient-b", pcs: this.theme.gradientHeaderText.to, on: true, dm: {} });
 
         // accent
         log.debug(`CSSTheme.start setting accent listener`);
-        this.setShadeListener({name: "accent", pcs: this.theme.accent, dm: {}, palette: true, on: true});
+        this.setShadeListener({ name: "accent", pcs: this.theme.accent, dm: {}, palette: true, on: true });
 
         // dropdown related variables
         log.debug(`CSSTheme.start setting dropdown listeners`);
@@ -993,9 +984,9 @@ class CSSTheme {
         this.cssGenerator.addPropsVar("dm-dropdowns", "", [...props, this.theme.darkModeBackground], this.generateDropDownVars.bind(this, false));
 
         log.debug(`CSSTheme.start setting hotlinks listener`);
-        this.theme.addTheme.setListener("hotlinks", function(event) {
+        this.theme.addTheme.setListener("hotlinks", function (event) {
             if (event.type === EventType.NodeEnabled) {
-                const vk = new CSSVariableKind("hotlinks","",[], self.cssGenerator);
+                const vk = new CSSVariableKind("hotlinks", "", [], self.cssGenerator);
                 self.cssGenerator.generateHotlinkVariables(vk);
             }
         });
@@ -1003,7 +994,7 @@ class CSSTheme {
         // Charting color variables
         log.debug(`CSSTheme.start setting charting color listener`);
         const chartingVars = [this.theme.primary, this.theme.secondary, this.theme.tertiary, this.theme.lightModeBackground, this.theme.darkModeBackground];
-        this.cssGenerator.addPropsVar("chartingColors", "", chartingVars, this.generateChartingVars.bind(this), {or: true});
+        this.cssGenerator.addPropsVar("chartingColors", "", chartingVars, this.generateChartingVars.bind(this), { or: true });
 
         log.debug(`CSSTheme.start exit: theme=${this.theme.name}`);
     }
@@ -1023,24 +1014,29 @@ class CSSTheme {
         const shade = vc.newValue;
         if (shade) {
             const name = args.name;
-            const pcs = args.dm !== undefined ? [args.pcs,this.theme.darkModeBackground] : [args.pcs];
-            const vk = new CSSVariableKind(name,"", pcs, this.cssGenerator);
+            const pcs = args.dm !== undefined ? [args.pcs, this.theme.darkModeBackground] : [args.pcs];
+            const vk = new CSSVariableKind(name, "", pcs, this.cssGenerator);
+            let sb = shade.getBuilder(true);
             const dmPrefix = args.dm ? args.dm.prefix || "dm-" : undefined;
-            this.setShadeVars(name, true, "", args, shade, vk);
+            this.setShadeVars(name, true, sb.getCSSPrefix(), args, shade, vk);
             if (dmPrefix) {
                 log.debug(`Getting dark mode shade for ${args.name}`);
-                let dmShade = args.dm?.corresponding ? shade.getCorrespondingDarkModeShade() : this.theme.getDarkModeShade(shade);
+                let dmShade = args.dm?.corresponding ? shade.buildShades(false)[shade.index] : this.theme.getDarkModeShade(shade);
                 if (dmShade) {
                     log.debug(`Got dark mode shade for ${args.name}: ${dmShade.getHexOrRGBA()}`);
-                    this.setShadeVars(name, false, dmPrefix, args, dmShade, vk);
+                    sb = dmShade.getBuilder(false);
+                    this.setShadeVars(name, false, sb.getCSSPrefix(), args, dmShade, vk);
                 } else {
-                   log.debug(`Did not find dark mode shade for ${args.name}; therefore, not setting CSS variable ${name}`);
+                    log.debug(`Did not find dark mode shade for ${args.name}; therefore, not setting CSS variable ${name}`);
                 }
             }
             if (args.palette) {
-                const color = shade.getMode().color;
-                this.setPaletteVars(name, true, "", args, color.light.shades, vk);
-                if (dmPrefix) this.setPaletteVars(name, false, dmPrefix, args, color.dark.shades, vk);
+                let sb = shade.getBuilder(true);
+                this.setPaletteVars(name, true, sb.getCSSPrefix(), args, sb.build(shade), vk);
+                if (dmPrefix) {
+                    sb = shade.getBuilder(false);
+                    this.setPaletteVars(name, false, sb.getCSSPrefix(), args, sb.build(shade), vk);
+                }
             }
         }
     }
@@ -1078,7 +1074,7 @@ class CSSTheme {
         const vars = this.theme.getBackgroundVariables(pcp);
         if (!vars) return;
         log.debug(`backgroundListener entry - name=${name}`)
-        const vk = new CSSVariableKind(name,"", [pcp], this.cssGenerator);
+        const vk = new CSSVariableKind(name, "", [pcp], this.cssGenerator);
         const prefix = lm ? "" : "dm-";
         vk.setShadeVarRef(`${prefix}background`, vars.primary);
         vk.setShadeVarRef(`${prefix}background-secondary`, vars.secondary);
@@ -1101,14 +1097,14 @@ class CSSTheme {
     }
 
     private setElevationsListener(lm: boolean) {
-        const ls = this.theme.darkModeBackground.setListener(this.lkey("css.elevations"), this.elevationsListener.bind(this,lm));
+        const ls = this.theme.darkModeBackground.setListener(this.lkey("css.elevations"), this.elevationsListener.bind(this, lm));
         this.listenerSubscriptions.push(ls);
     }
 
     private elevationsListener(lm: boolean, _: EventValueChange<ColorPair>) {
         log.debug(`elevationsListener entry`)
         const pcp = this.theme.darkModeBackground;
-        const vk = new CSSVariableKind("css.elevations","", [pcp], this.cssGenerator);
+        const vk = new CSSVariableKind("css.elevations", "", [pcp], this.cssGenerator);
         const prefix = lm ? "" : "dm-";
         // Set elevation backgrounds
         const lmeShades = this.theme.getElevationShades(lm);
@@ -1162,7 +1158,7 @@ class CSSTheme {
         if (mfsVal === Dropdowns.FULL_COLOR) {
             vk.setVar(var1, "100%");
             vk.setVar(var2, buttonShade.getOnShade2(lm).getRGBA());
-            vk.setVar(var3, surfaceShade.mix(buttonShade,0.5).getContrastShade(lm).hex);
+            vk.setVar(var3, surfaceShade.mix(buttonShade, 0.5).getContrastShade(lm).hex);
         } else if (mfsVal === Dropdowns.LEFT_BORDER_ONLY) {
             vk.setVar(var1, "var(--spacing-half)");
             const onSurfaceHex = surfaceShade.getOnShade2(lm).getRGBA();
@@ -1240,8 +1236,10 @@ class CSSTheme {
         const shades = primary.buildComplimentaryShades();
         for (let i = 0; i < shades.length; i++) {
             const shade = shades[i];
-            this.genComplimentaryColors2(vk, `color${i+1}`, shade.buildLMShades());
-            this.genComplimentaryColors2(vk, `dm-color${i+1}`, shade.buildDMShades());
+            const shadeBuilders = shade.getBuilder().getAll();
+            for (const sb of shadeBuilders) {
+                this.genComplimentaryColors2(vk, `${sb.getCSSPrefix()}color${i + 1}`, sb.build(shade));
+            }
         }
         log.debug(`End generating complimentary colors`);
     }
@@ -1250,7 +1248,7 @@ class CSSTheme {
         this.setComplimentaryVar(vk, `${prefix}-050`, shades[0].getHalfShade());
         for (let i = 0; i < shades.length; i++) {
             const shade = shades[i];
-            const name = `${prefix}-${(i+1)*100}`;
+            const name = `${prefix}-${(i + 1) * 100}`;
             this.setComplimentaryVar(vk, name, shade);
         }
     }
@@ -1397,11 +1395,11 @@ class CSSTheme {
     }
 
     private genCV(vk: CSSVariableKind, lm: boolean, args: string[]) {
-        for (let i=0; i < args.length; i += 2) {
-            vk.setVar(`${lm?"":"dm-"}chart-${args[i]}`, `var(--${lm?"":"dm-"}${args[i+1]})`);
+        for (let i = 0; i < args.length; i += 2) {
+            vk.setVar(`${lm ? "" : "dm-"}chart-${args[i]}`, `var(--${lm ? "" : "dm-"}${args[i + 1]})`);
         }
-        for (let i=0; i < args.length; i += 2) {
-            vk.setVar(`${lm?"":"dm-"}on-chart-${args[i]}`, `var(--${lm?"":"dm-"}on-${args[i+1]})`);
+        for (let i = 0; i < args.length; i += 2) {
+            vk.setVar(`${lm ? "" : "dm-"}on-chart-${args[i]}`, `var(--${lm ? "" : "dm-"}on-${args[i + 1]})`);
         }
     }
 
@@ -1430,7 +1428,7 @@ export class CSSVariableKind {
         this.cssGenerator.setVar(name, this.unit, this, value);
     }
 
-    public setVars(vars: {[name: string]: string}) {
+    public setVars(vars: { [name: string]: string }) {
         Object.keys(vars).forEach(key => this.setVar(key, vars[key]));
     }
 
@@ -1466,7 +1464,7 @@ export class CSSVariableKind {
             if (lm) {
                 const onPrimary = vars["--on-primary"];
                 this.cssGenerator.setVar(`${type}OnTertiary`, "", this, onPrimary);
-                const color = (onPrimary == "#121212") ? "#FFFFFF" : "#121212" ;
+                const color = (onPrimary == "#121212") ? "#FFFFFF" : "#121212";
                 this.cssGenerator.setVar(`on${type}OnTertiary`, "", this, color);
                 const hColor = (onPrimary == "#121212") ? "rgba(255,255,255,0.5)" : "rgba(0,0,0,0.5)";
                 this.cssGenerator.setVar(`on${type}HalfOnTertiary`, "", this, hColor);
@@ -1476,7 +1474,7 @@ export class CSSVariableKind {
                 this.cssGenerator.setVar(`dmon${type}OnTertiary`, "", this, "#121212");
                 this.cssGenerator.setVar(`dmHalf${type}HalfOnTertiary`, "", this, "rgba(255,255,255,0.3)");
             }
-        } 
+        }
         // Shade isn't correct, so hardcode for now
         else if (name === "Gradient3") {
             const vars = this.cssGenerator.getVars();
@@ -1491,7 +1489,7 @@ export class CSSVariableKind {
                 this.cssGenerator.setVar(`dmon${type}OnGradient3`, "", this, "#121212");
                 this.cssGenerator.setVar(`dmHalf${type}HalfOnGradient3`, "", this, "rgba(255,255,255,0.3)");
             }
-        } 
+        }
         else {
             const prefix = lm ? "" : "dm";
             this.setShadeVarRef(`${prefix}${type}On${name}`, sg.shade);
@@ -1581,8 +1579,8 @@ interface ShadeListenerArgs {
     name: string;
     pcs: PropertyColorShade;
     half?: boolean;
-    quarter?: boolean;   
-    on?: boolean;   
+    quarter?: boolean;
+    on?: boolean;
     dm?: DMShadeListenerArgs;
     palette?: boolean;
 }
@@ -1608,8 +1606,8 @@ export type CSSVarGroupListener = (vg: CSSVarGroup) => void;
 export class CSSVarGroup implements IVarGroup {
 
     public readonly name: string;
-    public readonly vars: {[name: string]: string} = {};
-    private listeners: {[key: string]: CSSVarGroupListener} = {};
+    public readonly vars: { [name: string]: string } = {};
+    private listeners: { [key: string]: CSSVarGroupListener } = {};
 
     constructor(name: string) {
         this.name = name;
@@ -1641,7 +1639,7 @@ export class CSSVarGroup implements IVarGroup {
         listeners.forEach(listener => {
             try {
                 listener(this);
-            } catch(e) {
+            } catch (e) {
                 console.log(`ERROR: failed calling VarGroup listener`, e);
             }
         });
@@ -1649,11 +1647,11 @@ export class CSSVarGroup implements IVarGroup {
 }
 
 function getShadeVarName(shade: Shade): string | undefined {
-    if (shade.hasMode() && shade.index >= 0 && shade.opacity === 1) {
-        const mode = shade.getMode();
-        const prefix = mode.name === 'dm' ? 'dm-' : '';
-        const color = mode.color;
-        return `${prefix}${color.name}-${shade.index*100}`;
+    if (shade.hasBuilder() && shade.hasColor() && shade.index >= 0 && shade.opacity === 1) {
+        const builder = shade.getBuilder();
+        const prefix = builder.getCSSPrefix();
+        const color = shade.getColor();
+        return `${prefix}${color.name}-${shade.index * 100}`;
     }
     return getCoreShadeVarName(shade);
 }
@@ -1671,7 +1669,7 @@ function shadowToCSS(vk: CSSVariableKind) {
     if (!ci || !ci.category.css || ci.memberIndex < 0) {
         vk.setVar(vk.name, undefined);
     } else {
-        vk.setVar(vk.name, `var(--${ci.category.css}-${ci.memberIndex+1})`);
+        vk.setVar(vk.name, `var(--${ci.category.css}-${ci.memberIndex + 1})`);
     }
 }
 
