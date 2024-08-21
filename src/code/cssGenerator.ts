@@ -13,6 +13,11 @@ import { Logger } from "../util/logger";
 
 const log = new Logger("css");
 
+interface ShadeVarNames {
+    name: string;
+    onName: string;
+}
+
 /**
  * 
  * The CSS code generator.
@@ -898,11 +903,11 @@ class CSSColor {
         if (!hex) return;
         for (const sb of this.color.shades.all) {
             for (const shade of sb.build(Shade.fromHex(hex))) {
-                const name = getShadeVarName(shade);
-                log.debug(`Shade listener for light mode shade ${name} = ${shade.toString()}`);
-                if (name) {
-                    this.cssGenerator.setShadeVar(name, this.varKind, shade);
-                    this.cssGenerator.setShadeVar(`on-${name}`, this.varKind, shade.getOnShade2(true));
+                const names = getShadeVarNames(shade);
+                log.debug(`Shade listener for light mode shade ${JSON.stringify(names)} = ${shade.toString()}`);
+                if (names) {
+                    this.cssGenerator.setShadeVar(names.name, this.varKind, shade);
+                    this.cssGenerator.setShadeVar(names.onName, this.varKind, shade.getOnShade2(true));
                 } else {
                     log.warn(`Unable to set CSS variable for shade ${shade.toString()} because no variable name can be determined`);
                 }
@@ -1499,7 +1504,13 @@ export class CSSVariableKind {
     }
 
     public setShadeVarRef(name: string, shade: Shade, core?: boolean) {
-        const varName = core ? getCoreShadeVarName(shade) : getShadeVarName(shade);
+        let varName: string | undefined;
+        if (core) {
+            varName = getCoreShadeVarName(shade);
+        } else {
+            const names = getShadeVarNames(shade);
+            if (names) varName = names.name;
+        }
         if (varName) {
             this.cssGenerator.setVar(name, "", this, `var(--${varName})`);
         } else {
@@ -1646,14 +1657,20 @@ export class CSSVarGroup implements IVarGroup {
     }
 }
 
-function getShadeVarName(shade: Shade): string | undefined {
+function getShadeVarNames(shade: Shade): ShadeVarNames | undefined {
     if (shade.hasBuilder() && shade.hasColor() && shade.index >= 0 && shade.opacity === 1) {
         const builder = shade.getBuilder();
         const prefix = builder.getCSSPrefix();
         const color = shade.getColor();
-        return `${prefix}${color.name}-${shade.index * 100}`;
+        const base = `${color.name}-${shade.index * 100}`;
+        const name = `${prefix}${base}`;
+        const onName = `${prefix}on-${base}`;
+        return {name, onName};
     }
-    return getCoreShadeVarName(shade);
+    const name = getCoreShadeVarName(shade);
+    if (name) {
+        return { name, onName: `on-${name}`};
+    }
 }
 
 function getCoreShadeVarName(shade: Shade): string | undefined {

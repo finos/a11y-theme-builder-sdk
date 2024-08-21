@@ -110,6 +110,7 @@ export class ShadeBuilder {
         const numLighterShades = (prime / 100) + 1;
         // calculate how many darker shades need to get built //
         const numDarkerShades = ((900 - prime) / 100) + 1
+        log.debug(`sb: prime=${prime}, numLighterShades=${numLighterShades}`);
         // build hex values for lighter shades
         let lightScale: string[];
         if (numLighterShades > 1) {
@@ -117,6 +118,7 @@ export class ShadeBuilder {
         } else {
             lightScale = [inputShade.hex]
         }
+        log.debug(`sb: lightScale=${JSON.stringify(lightScale)}`);
         // build hex values for darker shades
         let darkScale: string[];
         if (numDarkerShades > 1) {
@@ -125,6 +127,7 @@ export class ShadeBuilder {
         } else {
             darkScale = [inputShade.hex]
         }
+        log.debug(`sb: darkScale=${JSON.stringify(darkScale)}`);
         // remove the final lighter shade because it is pure white
         if (lightScale.length > 0) {
             lightScale.splice(-1)
@@ -143,12 +146,17 @@ export class ShadeBuilder {
                 newHex = colorScale[i];
             }
             let newShade = Shade.fromHex(newHex);
+            newShade.setIndex(i);
             // Triangularize the shade 
+            log.debug(`i=${i} before triangularize: ${JSON.stringify(newShade)}`);
             newShade = this.triangularize(inputShade, newShade);
+            log.debug(`i=${i} after triangularize: ${JSON.stringify(newShade)}`);
+            newShade.setIndex(i);
             // based on the mode light or dark - run the appropriate check to see if the color and on color meet the contrast ratio of wcagContrast or
             // if the shade needs to be lighted or darked
             newShade = this.adjustShadeToMeetRequirements(newShade);
             newShade.setIndex(i);
+            log.debug(`i=${i} after adjustToMeetRequirements: ${JSON.stringify(newShade)}`);
             outputShades.push(newShade);
         }
         if (this.getWCAGLevel().shouldSmoothTransition(this.cfg.isLightMode())) {
@@ -212,11 +220,13 @@ export class ShadeBuilder {
     }
 
     public getContrastShade(shade: Shade, lm: boolean): Shade {
+        log.debug(`getContrastShade - enter shade=${JSON.stringify(shade)}, lm=${lm}`);
         if (shade.onHex) {
             shade = Shade.fromHex(shade.onHex);
             if (!lm && shade.onHex === this.getLightTextShade().hex) {
                 shade.setOpacity(this.getDarkModeLightTextOpacity());
             }
+            log.debug(`getContrastShade - exit shade=${JSON.stringify(shade)}, lm=${lm}`);
             return shade;
         }
         // Get contrast with black and white & return best ratio
@@ -224,12 +234,15 @@ export class ShadeBuilder {
         let whiteRatio = shade.getContrastRatio(Shade.WHITE);
         if (!lm) whiteRatio = whiteRatio * this.getDarkModeLightTextOpacity();
         if (blackRatio > whiteRatio) {
+            log.debug(`getContrastShade - exit black`);
             return Shade.BLACK;
         } else {
             if (lm) {
+                log.debug(`getContrastShade - exit white`);
                 return Shade.WHITE;
             }
             else {
+                log.debug(`getContrastShade - exit white DM`);
                 return Shade.WHITE_DM;
             }
         }
@@ -240,24 +253,27 @@ export class ShadeBuilder {
     // See https://colorspace.r-forge.r-project.org/articles/hcl_palettes.html for more info.
     private triangularize(shade1: Shade, shade2: Shade): Shade {
         const primeHsl = chroma.hex(shade1.hex).hsl();
+        log.debug(`triangulatize: primeHsl=${JSON.stringify(primeHsl)}`);
         const primeSaturation = primeHsl[1];
         const maxSaturation = Math.max(primeSaturation, this.getMaxChroma());
         const ihsl = chroma.hex(shade2.hex).hsl();
         let newSaturation: number;
-        if (shade1.index == shade2.index) {
+        const shade1Index = shade1.getLabel()/100;
+        const shade2Index = shade2.getLabel()/100;
+        if (shade1Index == shade2Index) {
             newSaturation = primeSaturation;
-        } else if (shade1.index <= 7) {
+        } else if (shade1Index <= 7) {
             let change: number;
-            if (shade2.index <= 7) {
-                change = shade2.index / shade1.index;
+            if (shade2Index <= 7) {
+                change = shade2Index / shade1Index;
             } else {
-                change = (7 - (shade2.index - 7) - 2) / shade1.index;
+                change = (7 - (shade2Index - 7) - 2) / shade1Index;
             }
             newSaturation = primeSaturation * change;
         } else {
-            const base = (7 - (shade2.index - 7) - 2);
+            const base = (7 - (shade2Index - 7) - 2);
             const seven = base * primeSaturation;
-            const change = shade2.index <= 7 ? shade2.index / 7 : base / 7;
+            const change = shade2Index <= 7 ? shade2Index / 7 : base / 7;
             newSaturation = seven * change;
         }
         newSaturation = Math.min(newSaturation, maxSaturation);
@@ -277,7 +293,7 @@ export class ShadeBuilder {
         if (lightContrastRatio > darkContrastRatio) {
             // The contrast ratio is larger on a light text background
             if (this.isDarkMode()) {
-                shade = this.darkenToMeetWCAG(shade);
+                //shade = this.darkenToMeetWCAG(shade);
             }
         } else {
             shade = this.adjustShadeByContrastRatio(shade);
@@ -316,6 +332,7 @@ export class ShadeBuilder {
         throw new Error(`Unable to find a shade for ${shade.hex} with a ratio of ${minContrastRatio} or greater`)
     }
 
+    /*
     private darkenToMeetWCAG(shade: Shade): Shade {
         const lightenedShade = shade.lighten(this.getDarkModeLightTextOpacity());
         let contrastRatio = shade.getContrastRatio(lightenedShade)
@@ -328,6 +345,26 @@ export class ShadeBuilder {
             const text = Shade.fromHex(ShadeUtil.mixColors(background.hex, "#FFFFFF", this.getMixer()));
             contrastRatio = background.getContrastRatio(text);
         }
+        return background;
+    }
+    */
+    private darkenToMeetWCAG(shade: Shade): Shade {
+        log.debug(`shb: enter darkenToMeetWCAG shade=${shade.toString()}`);
+        const lightenedShade = shade.lighten(this.getDarkModeLightTextOpacity());
+        let contrastRatio = shade.getContrastRatio(lightenedShade)
+        let background: Shade = shade;
+        let amount = 0.01;
+        const minContrastRatio = this.getMinContrastRatioForSmallText();
+        const mixer = this.getMixer();
+        log.debug(`shb: minContrastRatio=${minContrastRatio}, mixer=${mixer}`);
+        for (let i = 0; contrastRatio < minContrastRatio; i++) {
+            if (i > 100) throw new Error(`too many iterations`);
+            background = Shade.fromHex(ShadeUtil.darken(background.hex, amount));
+            const text = Shade.fromHex(ShadeUtil.mixColors(background.hex, "#FFFFFF", this.getMixer()));
+            contrastRatio = background.getContrastRatio(text);
+            log.debug(`shb: contrastRatio=${contrastRatio}, text=${text.hex}, background=${background.hex}`);
+        }
+        log.debug(`shb: exit darkenToMeetWCAG shade=${background.toString()}`);
         return background;
     }
 
