@@ -5,6 +5,7 @@
 import { Node, ListenerSubscription } from "./node";
 import { Event, EventType, EventValueChange, EventCallback, EventValueChangeCallback, IProperty } from "../interfaces";
 import { Shade } from "./shade";
+import { WCAGLevel } from "./wcag";
 import { Logger } from "../util/logger";
 
 const log = new Logger("prop");
@@ -46,8 +47,12 @@ export class Property<T> extends Node implements IProperty {
         }
     }
 
+    public hasValue(): boolean {
+        return this.value !== undefined;
+    }
+
     public getValue(): T | undefined {
-        if (this.value !== undefined) {
+        if (this.hasValue()) {
             return this.value;
         }
         return this.getDefaultValue();
@@ -127,21 +132,18 @@ export class Property<T> extends Node implements IProperty {
         if (!shade) return undefined;
         if (shade.coreShadeName) return {coreShadeName: shade.coreShadeName};
         if (shade.key) return {key: shade.key};
-        return {hex: shade.hex, opacity: shade.opacity, mode: shade.hasMode() ? shade.getMode().key : undefined}
+        return {hex: shade.hex, opacity: shade.opacity, builder: shade.hasBuilder() ? shade.getBuilder().name : undefined};
     }
 
     protected getShadeFromRef(ref: any): Shade | undefined {
         if (!ref) return undefined;
         if (ref.coreShadeName) return Shade.getCoreShade(ref.coreShadeName);
-        if (ref.key) return this.getDesignSystem().findShade(ref.key);
+        const ds = this.getDesignSystem();
+        if (ref.key) return ds.findShade(ref.key);
         if (ref.hex) {
             const shade = Shade.fromHex(ref.hex);
             if (ref.opacity) shade.setOpacity(ref.opacity);
-            if (ref.mode) {
-                const mode = this.getDesignSystem().getNode(ref.mode);
-                if (!mode) throw new Error(`Mode node was not found at ${ref.mode}`);
-                shade.setMode(mode as any);
-            }
+            if (ref.builder) shade.setBuilder(ds.getByKey(ref.builder));
             return shade;
         }
         throw new Error(`Invalid shade reference: ${JSON.stringify(ref)}`);
@@ -229,6 +231,10 @@ export class PropertyPixel extends Property<number> {
 }
 
 export class PropertyTime extends Property<number> {
+
+}
+
+export class PropertyShade extends Property<Shade> {
 
 }
 
@@ -358,6 +364,13 @@ export class PropertyPixelSelectable extends PropertySelectable<number[],number>
         super(name, required, parent, { selectables: pixels, defaultValue });
     }
 
+}
+
+export class PropertyWCAGSelectable extends PropertySelectable<WCAGLevel[],WCAGLevel> {
+
+    constructor(parent: Node) {
+        super("WCAG Level", false, parent, { selectables: [WCAGLevel.AA, WCAGLevel.AAA], defaultValue: WCAGLevel.AA});
+    }
 
 }
 

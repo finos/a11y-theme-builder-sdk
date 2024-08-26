@@ -6,7 +6,7 @@ import { Atoms, Shade, Color, ColorTheme, GradientColors, StateSetting, BevelSet
 import { Molecules } from "../molecules/index";
 import { Organisms } from "../organisms/index";
 import { PropertyColorShade, PropertyShadowSelectable } from "../common/index";
-import { IDesignSystem } from "../interfaces";
+import { IDesignSystem, IColor } from "../interfaces";
 
 import { Logger } from "../util/logger";
 
@@ -391,11 +391,14 @@ export class JSONGenerator {
 
     private getAllColors(lm: boolean): any {
         const rtn: any = {};
-        this.atoms.colorPalette.getColors().forEach(color => {
+        this.atoms.colorPalette.getColors().forEach((color: Color) => {
+            const hex = color.hex.getValue();
+            if (!hex) return;
+            const shade = Shade.fromHex(hex);
             const colorObj: any = {};
             const onColorObj: any = {};
             rtn[this.getColorId(color)] = { "Color": colorObj, "On-Color": onColorObj };
-            const shades = lm ? color.light.shades : color.dark.shades;
+            const shades = lm ? color.shades.lmAA.build(shade) : color.shades.dmAA.build(shade);
             shades.forEach(shade => {
                 const id = this.getShadeId(shade);
                 colorObj[id] = this.getColor(shade.getRGB());
@@ -412,10 +415,9 @@ export class JSONGenerator {
             if (!shade) return;
             if (!lm) shade = theme.findDarkModeShade(shade);
             // Set theme colors
-            if (!shade.hasMode()) return;
             const color: any = {};
             const onColor: any = {};
-            shade.getMode().shades.forEach(shade => {
+            shade.buildShades(lm).forEach(shade => {
                 const colorId = self.getColorIdForShade(shade);
                 const shadeId = self.getShadeId(shade);
                 color[shadeId] = self.getColor(`{All-Colors.${colorId}.Color.${shadeId}}`);
@@ -1264,10 +1266,10 @@ export class JSONGenerator {
     }
 
     private getColorIdForShade(shade: Shade): string {
-        return this.getColorId(shade.getMode().color as Color);
+        return this.getColorId(shade.getColor());
     }
 
-    private getColorId(color: Color): string {
+    private getColorId(color: IColor): string {
         return `Color-${color.index + 1}`;
     }
 
