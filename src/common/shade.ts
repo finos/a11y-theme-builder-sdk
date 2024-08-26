@@ -17,6 +17,24 @@ export interface ShadeGroup {
     onShade: Shade;
 }
 
+export interface HSL {
+    H: number;   // hue
+    S: number;   // saturation
+    L: number;   // lightness
+}
+
+export interface HCL {
+    H: number;   // hue
+    C: number;   // chroma
+    L: number;   // lightness
+}
+
+export interface HSLOpts {
+    H?: number;
+    S?: number;
+    L?: number;
+}
+
 interface IV {
     idx: number;
     val: number;
@@ -26,11 +44,6 @@ interface LMH {
     low: IV;
     mid: IV;
     high: IV;
-}
-
-interface Color {
-    name: string;
-    shades: ShadeBuilderView;
 }
 
 export interface SearchShadesArgs {
@@ -126,6 +139,22 @@ export class Shade {
      */
     public static fromRGB(R: number, G: number, B: number): Shade {
         return Shade.fromRGBArray([R,G,B]);
+    }
+
+    /**
+     * Create a shade object from it's HSL values.
+     * @returns The shade object
+     */
+    public static fromHSL(hsl:HSL): Shade {
+        return Shade.fromHex(chroma.hsl(hsl.H, hsl.S, hsl.L).hex());
+    }
+
+    /**
+     * Create a shade object from it's R, G, and B values.
+     * @returns The shade object
+     */
+    public static fromHCL(hcl:HCL): Shade {
+        return Shade.fromHex(chroma.hcl(hcl.H, hcl.C, hcl.L).hex());
     }
 
     /**
@@ -287,6 +316,42 @@ export class Shade {
         return this;
     }
 
+    public hsl(): HSL {
+       const hsl = chroma.hex(this.hex).hsl();
+       return { H: hsl[0], S: hsl[1], L: hsl[2] };
+    }
+
+    public hcl(): HCL {
+       const hcl = chroma.hex(this.hex).hcl();
+       return { H: hcl[0], C: hcl[1], L: hcl[2] };
+    }
+
+    public adjustHSL(opts: HSLOpts): Shade {
+        const hsl = this.hsl();
+        if ('H' in opts) hsl.H = opts.H as number;
+        if ('S' in opts) hsl.S = opts.S as number;
+        if ('L' in opts) hsl.L = opts.L as number;
+        return Shade.fromHSL(hsl);
+    }
+
+    public setH(h: number): Shade {
+        return this.adjustHSL({H: h});
+    }
+
+    public setS(s: number): Shade {
+        return this.adjustHSL({S: s});
+    }
+
+    public setL(l: number): Shade {
+        return this.adjustHSL({L: l});
+    }
+
+    public setChroma(c: number): Shade {
+        const hcl = this.hcl();
+        hcl.C = c;
+        return Shade.fromHCL(hcl);
+    }
+
     /**
      * Determine if this shade is a core shade.
      * @returns True if this is a core shade; false, otherwise.
@@ -335,7 +400,7 @@ export class Shade {
     }
 
     public getOnShade2(lm: boolean): Shade {
-        return this.getBuilder().getOnShade(this, lm);
+        return this.getBuilder(lm).getOnShade(this);
     }
 
     public getShadeGroup(lm: boolean): ShadeGroup {
@@ -356,6 +421,10 @@ export class Shade {
             this.label = this.calculateLabel();
         }
         return this.label as number;
+    }
+
+    public getLabelIndex(): number {
+        return this.getLabel() / 100;
     }
 
     /**
@@ -709,7 +778,7 @@ export class Shade {
      * @returns 
      */
     public getContrastShade(lm: boolean): Shade {
-        return this.getBuilder(lm).getContrastShade(this, lm);
+        return this.getBuilder(lm).getContrastShade(this);
     }
 
     /**

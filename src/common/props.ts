@@ -47,8 +47,12 @@ export class Property<T> extends Node implements IProperty {
         }
     }
 
+    public hasValue(): boolean {
+        return this.value !== undefined;
+    }
+
     public getValue(): T | undefined {
-        if (this.value !== undefined) {
+        if (this.hasValue()) {
             return this.value;
         }
         return this.getDefaultValue();
@@ -364,8 +368,8 @@ export class PropertyPixelSelectable extends PropertySelectable<number[],number>
 
 export class PropertyWCAGSelectable extends PropertySelectable<WCAGLevel[],WCAGLevel> {
 
-    constructor(name: string, required: boolean, parent: Node) {
-        super(name, required, parent, { selectables: [WCAGLevel.AA, WCAGLevel.AAA], defaultValue: WCAGLevel.AA});
+    constructor(parent: Node) {
+        super("WCAG Level", false, parent, { selectables: [WCAGLevel.AA, WCAGLevel.AAA], defaultValue: WCAGLevel.AA});
     }
 
 }

@@ -115,6 +115,9 @@ export class ShadeBuilder {
         let lightScale: string[];
         if (numLighterShades > 1) {
             lightScale = chroma.scale(['#FFFFFF', inputShade.hex]).correctLightness(true).colors(numLighterShades);
+            const startShade = inputShade.setL(this.isLightMode() ? 0.97 : 0.95);
+            log.debug(`sb: lighter startShade=${startShade.hex}`);
+            lightScale = chroma.scale([startShade.hex, inputShade.hex]).correctLightness(true).colors(numLighterShades);
         } else {
             lightScale = [inputShade.hex]
         }
@@ -122,7 +125,8 @@ export class ShadeBuilder {
         // build hex values for darker shades
         let darkScale: string[];
         if (numDarkerShades > 1) {
-            const endShade = inputShade.mix(Shade.FULL_BLACK, this.isLightMode() ? .95 : .98);
+            const endShade = inputShade.setL(this.isLightMode() ? 0.1 : 0.08);
+            log.debug(`sb: darker endShade=${endShade.hex}`);
             darkScale = chroma.scale([inputShade.hex, endShade.hex]).correctLightness(true).colors(numDarkerShades);
         } else {
             darkScale = [inputShade.hex]
@@ -211,24 +215,17 @@ export class ShadeBuilder {
     }
 
     private isOnShadeBlack(shade: Shade): boolean {
-        shade = this.getOnShade(shade, this.cfg.isLightMode());
+        shade = this.getOnShade(shade);
         return shade.hex == Shade.BLACK.hex;
     }
 
-    public getOnShade(shade: Shade, lm: boolean): Shade {
-        return this.getContrastShade(shade, lm);
+    public getOnShade(shade: Shade): Shade {
+        return this.getContrastShade(shade);
     }
 
-    public getContrastShade(shade: Shade, lm: boolean): Shade {
+    public getContrastShade(shade: Shade): Shade {
+        const lm = this.isLightMode();
         log.debug(`getContrastShade - enter shade=${JSON.stringify(shade)}, lm=${lm}`);
-        if (shade.onHex) {
-            shade = Shade.fromHex(shade.onHex);
-            if (!lm && shade.onHex === this.getLightTextShade().hex) {
-                shade.setOpacity(this.getDarkModeLightTextOpacity());
-            }
-            log.debug(`getContrastShade - exit shade=${JSON.stringify(shade)}, lm=${lm}`);
-            return shade;
-        }
         // Get contrast with black and white & return best ratio
         const blackRatio = shade.getContrastRatio(Shade.BLACK);
         let whiteRatio = shade.getContrastRatio(Shade.WHITE);
@@ -251,34 +248,43 @@ export class ShadeBuilder {
     // Increases the chroma or saturation of a color until about 700 and then comes back down.
     // This is most significant for the way it looks in light mode.
     // See https://colorspace.r-forge.r-project.org/articles/hcl_palettes.html for more info.
-    private triangularize(shade1: Shade, shade2: Shade): Shade {
-        const primeHsl = chroma.hex(shade1.hex).hsl();
-        log.debug(`triangulatize: primeHsl=${JSON.stringify(primeHsl)}`);
-        const primeSaturation = primeHsl[1];
-        const maxSaturation = Math.max(primeSaturation, this.getMaxChroma());
-        const ihsl = chroma.hex(shade2.hex).hsl();
-        let newSaturation: number;
-        const shade1Index = shade1.getLabel()/100;
-        const shade2Index = shade2.getLabel()/100;
-        if (shade1Index == shade2Index) {
-            newSaturation = primeSaturation;
-        } else if (shade1Index <= 7) {
+    // 'input' is the input shade added by the user
+    // 'gen' is the generated shade
+    private triangularize(input: Shade, gen: Shade): Shade {
+        const inputHCL = input.hcl();
+        log.debug(`triangulatize: inputShade=${JSON.stringify(input)}, inputHCL=${JSON.stringify(inputHCL)}`);
+        const maxSaturation = Math.min(inputHCL.C, this.getMaxChroma());
+        const prime = input.getLabelIndex();
+        const i = gen.getLabelIndex();
+        let newChroma: number;
+        if (i == prime) {
+            newChroma = inputHCL.C;
+        } else if (prime < 7) {
             let change: number;
-            if (shade2Index <= 7) {
-                change = shade2Index / shade1Index;
+            if (i == 0) {
+                change = this.isLightMode() ? 0.5 / prime : 0.75 / prime;
+            } else if (i <= 7) {
+                change = i / prime;
             } else {
-                change = (7 - (shade2Index - 7) - 2) / shade1Index;
+                change = (7 - (i - 7) - 1) / 7;
             }
-            newSaturation = primeSaturation * change;
+            newChroma = inputHCL.C * change;
         } else {
-            const base = (7 - (shade2Index - 7) - 2);
-            const seven = base * primeSaturation;
-            const change = shade2Index <= 7 ? shade2Index / 7 : base / 7;
-            newSaturation = seven * change;
+            let seven = (7/(7 - (prime - 7) -1)) * inputHCL.C;
+            if (seven > inputHCL.C) {
+                seven = inputHCL.C;
+            }
+            let change: number;
+            if (i <= 7) {
+                if (i == 0) change = .75/7;
+                else change = i/7;
+            } else {
+                change = (7 - (i - 7) - 1)/7
+            }
+            newChroma = seven * change;
         }
-        newSaturation = Math.min(newSaturation, maxSaturation);
-        const hex = chroma.hsl(ihsl[0], newSaturation, ihsl[2]).hex();
-        return Shade.fromHex(hex);
+        newChroma = Math.max(Math.min(newChroma, maxSaturation),4);
+        return gen.setChroma(newChroma);
     }
 
     /**
@@ -437,25 +443,25 @@ export class ShadeBuilderViewCfg extends ShadeBuilderCfg {
 
     public readonly wcagLevel: WCAGLevel;
     public readonly cssPrefix: string;
-    public readonly lightText: PropertyString;
-    public readonly darkText: PropertyString;
-    public readonly lightModeLightTextOpacity: PropertyNumber;
-    public readonly darkModeLightTextOpacity: PropertyNumber;
-    public readonly lightModeMaxChroma: PropertyNumber;
-    public readonly darkModeMaxChroma: PropertyNumber;
+    public readonly lightTextProps: PropertyString[];
+    public readonly darkTextProps: PropertyString[];
+    public readonly lightModeLightTextOpacityProps: PropertyNumber[];
+    public readonly darkModeLightTextOpacityProps: PropertyNumber[];
+    public readonly lightModeMaxChromaProps: PropertyNumber[];
+    public readonly darkModeMaxChromaProps: PropertyNumber[];
     public readonly allProps: Property<any>[];
 
     constructor(lm: boolean, wcagLevel: WCAGLevel, cssPrefix: string, node: Node) {
         super(lm);
         this.wcagLevel = wcagLevel;
         this.cssPrefix = cssPrefix;
-        this.lightText = node.findProperty("lightText");
-        this.darkText = node.findProperty("darkText");
-        this.lightModeLightTextOpacity = node.findProperty("lightModeLightTextOpacity");
-        this.darkModeLightTextOpacity = node.findProperty("darkModeLightTextOpacity");
-        this.lightModeMaxChroma = node.findProperty("lightModeMaxChroma");
-        this.darkModeMaxChroma = node.findProperty("darkModeMaxChroma");
-        this.allProps = [this.lightText, this.darkText, this.lightModeLightTextOpacity, this.darkModeLightTextOpacity, this.lightModeMaxChroma, this.darkModeMaxChroma];
+        this.lightTextProps = node.getPropsByName("lightText");
+        this.darkTextProps = node.getPropsByName("darkText");
+        this.lightModeLightTextOpacityProps = node.getPropsByName("lightModeLightTextOpacity");
+        this.darkModeLightTextOpacityProps = node.getPropsByName("darkModeLightTextOpacity");
+        this.lightModeMaxChromaProps = node.getPropsByName("lightModeMaxChroma");
+        this.darkModeMaxChromaProps = node.getPropsByName("darkModeMaxChroma");
+        this.allProps = [...this.lightTextProps, ...this.darkTextProps, ...this.lightModeLightTextOpacityProps, ...this.darkModeLightTextOpacityProps, ...this.lightModeMaxChromaProps, ...this.darkModeMaxChromaProps];
     }
 
     public getWCAGLevel(): WCAGLevel {
@@ -463,27 +469,51 @@ export class ShadeBuilderViewCfg extends ShadeBuilderCfg {
     }
 
     public getLightText(): string {
-        return this.lightText.getValue() || super.getLightText();
+        for (const prop of this.lightTextProps) {
+            const val = prop.getValue();
+            if (val !== undefined) return val;
+        }
+        return super.getLightText();
     }
 
     public getDarkText(): string {
-        return this.darkText.getValue() || super.getDarkText();
+        for (const prop of this.darkTextProps) {
+            const val = prop.getValue();
+            if (val !== undefined) return val;
+        }
+        return super.getDarkText();
     }
 
     public getLightModeLightTextOpacity(): number {
-        return this.lightModeLightTextOpacity.getValue() || super.getLightModeLightTextOpacity();
+        for (const prop of this.lightModeLightTextOpacityProps) {
+            const val = prop.getValue();
+            if (val !== undefined) return val;
+        }
+        return super.getLightModeLightTextOpacity();
     }
 
     public getDarkModeLightTextOpacity(): number {
-        return this.darkModeLightTextOpacity.getValue() || super.getDarkModeLightTextOpacity();
+        for (const prop of this.darkModeLightTextOpacityProps) {
+            const val = prop.getValue();
+            if (val !== undefined) return val;
+        }
+        return super.getDarkModeLightTextOpacity();
     }
 
     public getLightModeMaxChroma(): number {
-        return this.lightModeMaxChroma.getValue() || super.getLightModeMaxChroma();
+        for (const prop of this.lightModeMaxChromaProps) {
+            const val = prop.getValue();
+            if (val !== undefined) return val;
+        }
+        return super.getLightModeMaxChroma();
     }
 
     public getDarkModeMaxChroma(): number {
-        return this.darkModeMaxChroma.getValue() || super.getDarkModeMaxChroma();
+        for (const prop of this.darkModeMaxChromaProps) {
+            const val = prop.getValue();
+            if (val !== undefined) return val;
+        }
+        return super.getDarkModeMaxChroma();
     }
 
     public getCSSPrefix(): string {

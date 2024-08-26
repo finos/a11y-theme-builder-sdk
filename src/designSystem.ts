@@ -33,7 +33,7 @@ export class DesignSystem extends Node implements IDesignSystem {
     /** All code generators for this design system. */
     public readonly code: Code;
     /** Config for shade building */
-    public wcagLevel: PropertyStringSelectable;
+    public wcagLevel: PropertyWCAGSelectable;
     public lightText: PropertyString;
     public darkText: PropertyString;
     public lightModeLightTextOpacity: PropertyNumber;
@@ -49,7 +49,7 @@ export class DesignSystem extends Node implements IDesignSystem {
         super(name);
         opts = opts || {};
         this.themeBuilder = themeBuilder;
-        this.wcagLevel = new PropertyStringSelectable("WCAG level", true, this, { selectables: ["AA", "AAA"], defaultValue: "AA" });
+        this.wcagLevel = new PropertyWCAGSelectable(this);
         this.lightText = new PropertyString("Light Text - Light Mode", true, this, { defaultValue: Shade.WHITE.hex });
         this.darkText = new PropertyString("Dark text - Light Mode", true, this, { defaultValue: Shade.DARK_TEXT.hex });
         this.lightModeLightTextOpacity = new PropertyNumberRange("Light Text Opacity in Light Mode", true, this, 0, 1, 1);

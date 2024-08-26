@@ -74,17 +74,29 @@ export class Node implements INode {
     }
 
     /** 
-     * Find a property by name by walking the tree upwards.
-     * As soon as the property is found at a node, we stop searching.
+     * Find one or more properties by name, walking up to the root of the tree.
      * This allows us to generically configure an arbitrary property at various levels and we always find the value closest to us in the tree.
      */
-    public findProperty<T>(propName: string): Property<T> {
-        // Walk up the node tree until we find a property named 'name'
+    public getPropsByName<T>(propName: string): Property<T>[] {
+        // Walk up the node tree until we find a property named 'name' with a value
+        const props: Property<T>[] = [];
         for (let node: Node | undefined = this; node !== undefined; node = (node as Node).parent) {
-            if (!node.hasOwnProperty(propName)) continue;
-            return (node as any)[propName];
+            if (node.hasOwnProperty(propName)) props.push((node as any)[propName]);
         }
-        throw new Error(`Property '${propName}' was not found at ${this.name} or above`);
+        if (props.length == 0) throw new Error(`Property '${propName}' was not found at ${this.name} or above`);
+        return props;
+    }
+
+    /** 
+     * Get property value by property name, walking up the tree until we find a value.
+     */
+    public getPropValueByName<T>(propName: string): T | undefined {
+        // Walk up the node tree until we find a property named 'name' with a value
+        const props = this.getPropsByName<T>(propName);
+        for (const prop of props) {
+            if (prop.hasValue()) return prop.getValue();
+        }
+        return undefined;
     }
 
     /** Add a dependency to another node in the tree */

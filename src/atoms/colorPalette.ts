@@ -6,9 +6,8 @@ import { Node } from "../common/node";
 import { Atom } from "./atom";
 import { MyMap } from "../util/myMap";
 import { Shade } from "../common/shade";
-import { WCAGLevel } from "../common/wcag";
 import { Logger } from "../util/logger";
-import { PropertyStringSelectable, PropertyString, PropertyNumberRange } from "../common/props";
+import { PropertyWCAGSelectable, PropertyStringSelectable, PropertyString, PropertyNumberRange } from "../common/props";
 import { IAtoms, IColorPalette, IColor, ColorListener, ShadeFilter, EventValueChange } from "../interfaces";
 import { ShadeBuilderView } from "../common/shadeBuilder";
 
@@ -195,6 +194,7 @@ export class Color extends Node implements IColor {
     /** The hex value for the color */
     public hex: PropertyString;
     /** Color specific Shade builder config */
+    public wcagLevel: PropertyWCAGSelectable;
     public lightModeMaxChroma: PropertyNumberRange;
     public darkModeMaxChroma: PropertyNumberRange;
     /** Shades */
@@ -209,6 +209,7 @@ export class Color extends Node implements IColor {
         super(name, palette);
         this.palette = palette;
         this.index = index;
+        this.wcagLevel = new PropertyWCAGSelectable(this);
         this.lightModeMaxChroma = new PropertyNumberRange("Max Chroma in Light Mode", true, this, 0, 100, 80);
         this.darkModeMaxChroma = new PropertyNumberRange("Max Chroma in Dark Mode", true, this, 0, 100, 60);
         const shade = Shade.fromHex(hex);

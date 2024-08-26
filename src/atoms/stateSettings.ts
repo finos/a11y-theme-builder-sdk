@@ -6,7 +6,7 @@ import { Atom } from "./atom";
 import { ColorTheme } from "./colorThemes";
 import { IDesignSystem, IAtoms, EventValueChange, IColor } from "../interfaces";
 import { Shade } from "../common/shade";
-import { PropertyString, PropertyBoolean, PropertyNumberRange, PropertyGroupListener } from "../common/props";
+import { PropertyString, PropertyWCAGSelectable, PropertyBoolean, PropertyNumberRange, PropertyGroupListener } from "../common/props";
 import { Logger } from "../util/logger";
 import { WCAGLevel } from "../common/wcag";
 import { Util } from "../util";
@@ -35,12 +35,14 @@ export class StateSettings extends Atom {
     /** Design system */
     public designSystem: IDesignSystem;
     /** Color specific Shade builder config */
+    public wcagLevel: PropertyWCAGSelectable;
     public lightModeMaxChroma: PropertyNumberRange;
     public darkModeMaxChroma: PropertyNumberRange;
 
     constructor(atoms: IAtoms) {
         super("State Settings", false, atoms);
         this.designSystem = this.getDesignSystem();
+        this.wcagLevel = new PropertyWCAGSelectable(this);
         this.lightModeMaxChroma = new PropertyNumberRange("Max Chroma in Light Mode", true, this, 0, 100, 80);
         this.darkModeMaxChroma = new PropertyNumberRange("Max Chroma in Dark Mode", true, this, 0, 100, 60);
         this.addDependency(atoms.colorThemes);
@@ -74,6 +76,14 @@ export class StateSettings extends Atom {
             self.ready.setValue(true);
         });
         log.debug("StateSettings.init exit");
+    }
+
+    public getWCAGLevel(): WCAGLevel {
+        const val = this.getPropValueByName<string>("wcagLevel");
+        if (!val) throw new Error("No WCAG level found");
+        const rtn = WCAGLevel.findByName(val);
+        if (!rtn) throw new Error(`Invalid WCAG level: '${val}'`);
+        return rtn;
     }
 
     public deserialize(obj: any) {
@@ -135,7 +145,8 @@ export class StateSetting implements IColor {
         log.debug(`StateSettings.setShades enter: name=${this.name}`);
         const hex = this.hex.getValue() || "";
         this.shades.updateColor(Shade.fromHex(hex));
-        const shades = this.shades.getShades(WCAGLevel.AA); // TODO: Where do we get the WCAG level?  Always AA for now
+        const wcagLevel = this.ss.wcagLevel.getValue() as WCAGLevel;
+        const shades = this.shades.getShades(wcagLevel);
         const lmShades = shades.light;
         const dmShades = shades.dark;
         // Find the lm shade for hex value & get corresponding dm shade
