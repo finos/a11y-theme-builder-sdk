@@ -11,6 +11,7 @@ import { Code } from "./code/code";
 import { Shade } from "./common/shade";
 import { IThemeBuilder, IDesignSystem, IDesignSystemMetadata, INode, IVarGroup, IProperty } from "./interfaces";
 import { Logger } from "./util/logger";
+import { PropertyNumber, PropertyWCAGSelectable, PropertyString, PropertyStringSelectable, PropertyNumberRange } from "./common/props";
 
 const log = new Logger("ds");
 
@@ -31,20 +32,38 @@ export class DesignSystem extends Node implements IDesignSystem {
     public readonly layers: Layers;
     /** All code generators for this design system. */
     public readonly code: Code;
-
+    /** Config for shade building */
+    public wcagLevel: PropertyWCAGSelectable;
+    public lightText: PropertyString;
+    public darkText: PropertyString;
+    public lightModeLightTextOpacity: PropertyNumber;
+    public darkModeLightTextOpacity: PropertyNumber;
+    public lightModeMaxChroma: PropertyNumber;
+    public darkModeMaxChroma: PropertyNumber;
+    /** Design system metadata */
     private metadata: IDesignSystemMetadata;
     private readonly dsShades: {[key: string]: Shade} = {};
+    private readonly registry: {[key: string]: any} = {};
 
     public constructor( name: string, themeBuilder: IThemeBuilder, opts?: { sample?: boolean} ) {
         super(name);
         opts = opts || {};
         this.themeBuilder = themeBuilder;
+        this.wcagLevel = new PropertyWCAGSelectable(this);
+        this.lightText = new PropertyString("Light Text - Light Mode", true, this, { defaultValue: Shade.WHITE.hex });
+        this.darkText = new PropertyString("Dark text - Light Mode", true, this, { defaultValue: Shade.DARK_TEXT.hex });
+        this.lightModeLightTextOpacity = new PropertyNumberRange("Light Text Opacity in Light Mode", true, this, 0, 1, 1);
+        this.darkModeLightTextOpacity = new PropertyNumberRange("Light Text Opacity in Dark Mode", true, this, 0, 1, 0.6);
+        this.lightModeMaxChroma = new PropertyNumberRange("Max Chroma in Light Mode", true, this, 0, 100, 80);
+        this.darkModeMaxChroma = new PropertyNumberRange("Max Chroma in Dark Mode", true, this, 0, 100, 60);
         this.atoms = new Atoms(this);
         this.molecules = new Molecules(this);
         this.organisms = new Organisms(this);
         this.layers = new Layers(this);
         this.code = new Code(this);
+        // timestamp
         const now = Date.now();
+        // Metadata
         this.metadata = {
             sample: opts.sample || false,
             time: {
@@ -70,6 +89,14 @@ export class DesignSystem extends Node implements IDesignSystem {
 
     public registerNode(node: Node) {
        this.dsNodes[node.key] = node;
+    }
+
+    public getByKey(key: string): any {
+       return this.registry[key];
+    }
+
+    public registerByKey(key: string, val: any): void {
+       this.registry[key] = val;
     }
 
     public getShade(key: string): Shade | undefined {

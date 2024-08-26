@@ -295,27 +295,28 @@ export class ColorTheme extends Node implements IColorTheme {
     private setPrimary(primary?: Shade) {
         log.debug(`ColorTheme.setPrimary: enter: name=${this.name}, value=${primary?primary.hex:"no primary"}`);
         if (!primary) return;
-        const mode = primary.getMode();
-        this.primary100 = mode.shades[1];
+        const sb = primary.getBuilder();
+        const shades = sb.build(primary);
+        this.primary100 = shades[1];
         // Get white/offWhite
         const whiteOffWhite: ColorPair = new ColorPair(
             ColorTheme.CP_WHITE_OFFWHITE,
-            Shade.WHITE.clone().setMode(mode), 
-            Shade.OFF_WHITE.clone().setMode(mode),
+            Shade.WHITE.clone().setBuilder(sb), 
+            Shade.OFF_WHITE.clone().setBuilder(sb),
             true,
         );
         // Get black/offBlack
         const blackOffBlack = new ColorPair(
             ColorTheme.CP_BLACK_OFFBLACK,
-            Shade.BLACK.clone().setMode(mode),
-            Shade.OFF_BLACK.clone().setMode(mode),
+            Shade.BLACK.clone().setBuilder(sb),
+            Shade.OFF_BLACK.clone().setBuilder(sb),
             false,
         );
         // Get primary half/quarter
-        const shade0 = mode.shades[0];
+        const shade0 = shades[0];
         const bgScale = chroma.scale(['#FFFFFF',shade0.hex]).correctLightness(true).colors(5);
-        const primaryHalf = Shade.fromHex(bgScale[1]).setMode(mode);
-        const primaryQuarter = Shade.fromHex(bgScale[2]).setMode(mode);
+        const primaryHalf = Shade.fromHex(bgScale[1]).setBuilder(sb);
+        const primaryQuarter = Shade.fromHex(bgScale[2]).setBuilder(sb);
         const primaryHalfQuarter = new ColorPair(ColorTheme.CP_HALF_QUARTER, primaryHalf, primaryQuarter, true);
         // Get primary-800/primary-900
         const darkBGShades = this.getDarkBGShades();
@@ -335,12 +336,13 @@ export class ColorTheme extends Node implements IColorTheme {
     public getDarkBGShades(): DarkBGShades | undefined {
         const primary = this.primary.getValue();
         if (!primary) return undefined;
-        const mode = primary.getMode();
-        const shade900 = mode.shades[9];
+        const sb = primary.getBuilder();
+        const shades = sb.build(primary);
+        const shade900 = shades[9];
         const bgScale = chroma.scale([shade900.hex,'#000000']).correctLightness(true).colors(5);
         return {
-            primary: Shade.fromHex(bgScale[2]).setMode(mode),
-            secondary: Shade.fromHex(bgScale[3]).setMode(mode),
+            primary: Shade.fromHex(bgScale[2]).setBuilder(sb),
+            secondary: Shade.fromHex(bgScale[3]).setBuilder(sb),
         };
     }
 
@@ -461,18 +463,18 @@ export class ColorTheme extends Node implements IColorTheme {
         const gradient2Shade = this.gradient2.from.getValue();
         if (!primaryShade) throw new Error(`No primary color has been set`);
         if (!gradient1Shade) throw new Error(`No gradient 1 color has been set`);
-        if (!gradient2Shade) throw new Error(`No gradient 1 color has been set`);
+        if (!gradient2Shade) throw new Error(`No gradient 2 color has been set`);
         const buttonShadeGroup = {
             shade: shade,
-            halfShade: Shade.fromHex(shade.hex).setOpacity(0.5).setMode(shade.getMode()),
-            onShade: shade.getOnShade2(lm),
+            halfShade: Shade.fromHex(shade.hex).setOpacity(0.5).setBuilder(shade.getBuilder()),
+            onShade: shade.getOnShade(),
         };
         const white = this.getShadeGroup(shade, Shade.WHITE, lm, lm? 1: 0.6);
         const black = this.getShadeGroup(shade, Shade.BLACK, lm, 1);
         const tertiary = lm ? 
             this.getShadeGroup(shade, primaryShade, lm, 1) : 
             // For dark mode, we get the 700 dark mode shade of the primary.
-            primaryShade.getMode().color.dark.shades[7].getShadeGroup(lm);
+            primaryShade.buildShades(false)[7].getShadeGroup(lm);
         const gradient1 = gradient1Shade.getOnShade().getShadeGroup(lm);
         const gradient2 = gradient2Shade.getOnShade().getShadeGroup(lm);
         let gradient3 = this.getShadeGroup(shade, lm ? Shade.fromHex("#CDCDCD") : Shade.fromRGB(18,18,18), lm, 1);
@@ -484,7 +486,7 @@ export class ColorTheme extends Node implements IColorTheme {
     }
 
     public getShadeGroup(shade: Shade, compShade: Shade, lm: boolean, multiplier: number): ShadeGroup {
-        return shade.getShadeOrOnShadeBasedOnContrast(compShade, lm, multiplier).getShadeGroup(lm);
+        return shade.getShadeOrOnShadeBasedOnContrast(compShade, lm).getShadeGroup(lm);
     }
 
     private findDMShade(shade: Shade): Shade {
@@ -496,7 +498,7 @@ export class ColorTheme extends Node implements IColorTheme {
         // Next, loop thru the dark mode shades, starting with the selected index and searching backwards until
         // we find the first shade with a contrast of >= 3.1 when compared with the primary of the selected
         // dark mode background.
-        const shades = shade.getMode().color.dark.shades;
+        const shades = shade.buildShades(false);
         let startIndex = shade.index < 0 ? 4 : Math.min(shade.index,4);
         for (let i = startIndex; i >= 0; i--) {
             const tmpShade = shades[i];
@@ -531,8 +533,8 @@ export class ColorTheme extends Node implements IColorTheme {
         for (const prop of [this.primary, this.secondary, this.tertiary]) {
             // For each shade associated with the selected shade
             const row: Shade[] = [];
-            const shades = prop.getValue()?.getMode().shades as Shade[];
-            if (processed.indexOf(shades) < 0) {
+            const shades = prop.getValue()?.buildShades();
+            if (shades && processed.indexOf(shades) < 0) {
                 shades.forEach((shade: Shade) => {
                     // If the contrast >= 3.1, add it to the selectable list
                     const contrast = shade.getContrastRatio(bgShade);

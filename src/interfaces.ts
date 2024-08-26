@@ -4,6 +4,7 @@
  */
 import { Storage } from "./storage/index";
 import { Shade } from "./common/shade";
+import { ShadeBuilderView } from "./common/shadeBuilder";
 import { PropertyTitledShade, PropertyStringSelectable, PropertyString } from "./common";
 
 /**
@@ -141,6 +142,8 @@ export interface IDesignSystem extends INode {
     atoms: IAtoms;
     molecules: IMolecules;
     organisms: IOrganisms;
+    registerByKey(key: string, val: any): void;
+    getByKey(key: string): any;
     registerNode(node: INode): void;
     getNode(key: string): INode | undefined;
     registerShade(key: string, shade: Shade): void;
@@ -162,16 +165,9 @@ export type ColorListener = (name: string, color?: IColor) => void;
 
 export interface IColor {
     name: string;
+    index: number;
     hex: IProperty;
-    light: IColorMode;
-    dark: IColorMode;
-}
-
-export interface IColorMode {
-    key: string;
-    name: string;
-    color: IColor;
-    shades: Shade[];
+    shades: ShadeBuilderView;
 }
 
 export interface IGeneratedVar {
