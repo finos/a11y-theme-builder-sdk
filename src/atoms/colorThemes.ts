@@ -3,7 +3,7 @@
  * Licensed under Apache-2.0 License. See License.txt in the project root for license information
  */
 /* eslint-disable */
-import * as chroma from "chroma-js";
+import chroma from "chroma-js";
 import { Atom } from "./atom";
 import { ColorPalette } from "./colorPalette";
 import { Node } from "../common/node";

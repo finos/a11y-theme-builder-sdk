@@ -1281,7 +1281,7 @@ class CSSTheme {
 
     private genCV1LM2(vk: CSSVariableKind) {
         this.genCV(vk, true, [
-            "1", "primary-050",
+            "1", "primary-0",
             "2", "primary-100",
             "3", "primary-300",
             "4", "primary-500",
@@ -1296,7 +1296,7 @@ class CSSTheme {
 
     private genCV1DM(vk: CSSVariableKind) {
         this.genCV(vk, false, [
-            "1", "primary-050",
+            "1", "primary-0",
             "2", "primary-100",
             "3", "primary-300",
             "4", "primary-500",
@@ -1326,7 +1326,7 @@ class CSSTheme {
 
     private genCV2LM2(vk: CSSVariableKind) {
         this.genCV(vk, true, [
-            "1", "primary-050",
+            "1", "primary-0",
             "2", "primary-100",
             "3", "primary-300",
             "4", "primary-500",
@@ -1341,7 +1341,7 @@ class CSSTheme {
 
     private genCV2DM(vk: CSSVariableKind) {
         this.genCV(vk, false, [
-            "1", "primary-050",
+            "1", "primary-0",
             "2", "primary-100",
             "3", "primary-300",
             "4", "primary-500",
@@ -1371,7 +1371,7 @@ class CSSTheme {
 
     private genCV3LM2(vk: CSSVariableKind) {
         this.genCV(vk, true, [
-            "1", "primary-050",
+            "1", "primary-0",
             "2", "primary-100",
             "3", "primary-300",
             "4", "primary-500",
@@ -1386,7 +1386,7 @@ class CSSTheme {
 
     private genCV3DM(vk: CSSVariableKind) {
         this.genCV(vk, false, [
-            "1", "primary-050",
+            "1", "primary-0",
             "2", "primary-100",
             "3", "primary-300",
             "4", "primary-500",

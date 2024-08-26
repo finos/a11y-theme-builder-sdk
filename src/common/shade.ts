@@ -2,7 +2,7 @@
  * Copyright (c) 2023 Discover Financial Services
  * Licensed under Apache-2.0 License. See License.txt in the project root for license information
  */
-import * as chroma from "chroma-js";
+import chroma from "chroma-js";
 import { Logger } from "../util/logger";
 import { ShadeBuilder, ShadeBuilderView } from "./shadeBuilder";
 import { ShadeUtil } from "./shadeUtil";
@@ -863,9 +863,9 @@ export class Shade {
     public buildComplimentaryShades(): Shade[] {
         const ra = this.rgbArray;
         const rgb = chroma.rgb(ra[0],ra[1],ra[2]);
-        const h = rgb.get('hsv.h');
+        const h = rgb.get('hsv.h') + 180;
         const s = rgb.get('hsv.s');
-        const v = rgb.get('hsv.v') + 180;
+        const v = rgb.get('hsv.v');
         const h0 = h + 30;
         const h1 = h - 30;
         const rgb1 = 'rgb(' + chroma.hsv(h0,s,v).rgb() + ')';

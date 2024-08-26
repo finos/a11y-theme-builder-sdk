@@ -2,7 +2,6 @@
  * Copyright (c) 2023 Discover Financial Services
  * Licensed under Apache-2.0 License. See License.txt in the project root for license information
  */
-import * as chroma from "chroma-js";
 import { TitledShade, PropertyTitledShade } from "../common/props";
 import { ColorTheme } from "./colorThemes";
 import { Atom } from "./atom";
