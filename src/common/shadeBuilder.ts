@@ -13,6 +13,27 @@ import { IColor } from "../interfaces";
 
 const log = new Logger("shb");
 
+/*
+ * This file contains all shade builder related classes.
+ *
+ * The ShadeBuilderCfg and ShadeBuilder classes are generic classes for building all shades, designed to make it possible
+ * to easily add input configuration properties which might be needed to build various types of shades in the future.
+ * 
+ * The ShadeBuilderViewCfg and ShadeBuilderView classes provide the current "view" of 4 different types of shades:
+ * 1) light mode AA
+ * 2) dark mode AA
+ * 3) light mode AAA
+ * 4) dark mode AAA
+ * Think of a "shade view" as the group of types of shades which we want to concurrently build, have readily accessible, and be 
+ * notified of when the shades of any of the views change.  If there is any other type of "shade views" desirable in the future,
+ * adding new variables to ShadeBuilderView should be easy.
+ */
+
+/**
+ * ShadeBuilderCfg contains all input configuration required by ShadeBuilder to build the shades.
+ * This class is extended by ShadeBuilderViewCfg (later in this file) which gets the configuration from the design system tree.
+ * The design system tree is the tree that rooted in designSystem.ts and is formed by nodes (see node.ts) and properties (see props.ts).
+ */
 export class ShadeBuilderCfg {
 
     private lightMode;
@@ -58,6 +79,9 @@ export class ShadeBuilderCfg {
     }
 }
 
+/**
+ * ShadeBuilder contains the core logic for building all shades.
+ */
 export class ShadeBuilder {
 
     public static lmDefault = new ShadeBuilder("lmDefault", new ShadeBuilderCfg(true));
@@ -181,7 +205,7 @@ export class ShadeBuilder {
 
     // Smooth the transition between the last shade with dark text background and the first shade with light text background
     private smoothTransition(shades: Shade[]): Shade[] {
-        // Divide the list of shades into two groups: those with dark text and those with light text backgrounds
+        // Divide the list of shades into two groups: those with dark text backgrounds and those with light text backgrounds
         log.debug(`sb: smoothing transition for ${this.name}`);
         const firstLight = this.findFirstShadeWithLightText(shades);
         const lastDark = shades[firstLight.index - 1] as Shade;
@@ -189,9 +213,10 @@ export class ShadeBuilder {
         const last = shades[shades.length - 1] as Shade;
         const darkCount = lastDark.index + 1;
         const lightCount = shades.length - darkCount;
-        // Scale the dark ones
+        // Scale the ones with dark text backgrounds and light text backgrounds respectively.
+        // Scaling them separately minimizes the transition between the last one with dark text background and
+        // the first one with light text background.
         const darkScale = chroma.scale([first.hex, lastDark.hex]).correctLightness(true).colors(darkCount);
-        // Scale the light ones
         const lightScale = chroma.scale([firstLight.hex, last.hex]).correctLightness(true).colors(lightCount);
         // Merge
         const scale = [...darkScale, ...lightScale];
@@ -223,6 +248,11 @@ export class ShadeBuilder {
         return this.getContrastShade(shade);
     }
 
+    /**
+     * Find the background contrast shade which has the greatest contrast with this shade.
+     * @param shade The shade whose contrast shade we are to find
+     * @returns The background contrast shade 
+     */
     public getContrastShade(shade: Shade): Shade {
         const lm = this.isLightMode();
         log.debug(`getContrastShade - enter shade=${JSON.stringify(shade)}, lm=${lm}`);
@@ -245,7 +275,7 @@ export class ShadeBuilder {
         }
     }
 
-    // Increases the chroma or saturation of a color until about 700 and then comes back down.
+    // Increases the chroma of a color until about 700 and then comes back down.
     // This is most significant for the way it looks in light mode.
     // See https://colorspace.r-forge.r-project.org/articles/hcl_palettes.html for more info.
     // 'input' is the input shade added by the user
@@ -253,7 +283,7 @@ export class ShadeBuilder {
     private triangularize(input: Shade, gen: Shade): Shade {
         const inputHCL = input.hcl();
         log.debug(`triangulatize: inputShade=${JSON.stringify(input)}, inputHCL=${JSON.stringify(inputHCL)}`);
-        const maxSaturation = Math.min(inputHCL.C, this.getMaxChroma());
+        const maxChroma = Math.min(inputHCL.C, this.getMaxChroma());
         const prime = input.getLabelIndex();
         const i = gen.getLabelIndex();
         let newChroma: number;
@@ -283,7 +313,7 @@ export class ShadeBuilder {
             }
             newChroma = seven * change;
         }
-        newChroma = Math.max(Math.min(newChroma, maxSaturation),4);
+        newChroma = Math.max(Math.min(newChroma, maxChroma),4);
         return gen.setChroma(newChroma);
     }
 
@@ -294,16 +324,19 @@ export class ShadeBuilder {
      */
     private adjustShadeToMeetRequirements(shade: Shade): Shade {
         // Determine the contrast of "color" to both a light text background and dark text background
+        log.debug(`shb: enter adjustShadeToMeetRequirements name=${this.name}, shade=${shade.toString()}`);
         const lightContrastRatio = shade.getContrastRatio(this.getLightTextShade());
         const darkContrastRatio = shade.getContrastRatio(this.getDarkTextShade());
+        log.debug(`shb: adjustShadeToMeetRequirements lightContrastRatio=${lightContrastRatio}, darkContrastRatio=${darkContrastRatio}`);
         if (lightContrastRatio > darkContrastRatio) {
             // The contrast ratio is larger on a light text background
             if (this.isDarkMode()) {
-                //shade = this.darkenToMeetWCAG(shade);
+                shade = this.darkenToMeetWCAG(shade);
             }
         } else {
             shade = this.adjustShadeByContrastRatio(shade);
         }
+        log.debug(`shb: exit adjustShadeToMeetRequirements name=${this.name}, shade=${shade.toString()}`);
         return shade;
     }
 
@@ -338,39 +371,23 @@ export class ShadeBuilder {
         throw new Error(`Unable to find a shade for ${shade.hex} with a ratio of ${minContrastRatio} or greater`)
     }
 
-    /*
     private darkenToMeetWCAG(shade: Shade): Shade {
-        const lightenedShade = shade.lighten(this.getDarkModeLightTextOpacity());
-        let contrastRatio = shade.getContrastRatio(lightenedShade)
-        let background: Shade = shade;
-        let amount = 0.01;
-        const minContrastRatio = this.getMinContrastRatioForSmallText();
-        while (contrastRatio < minContrastRatio) {
-            // hex = background, textHex is text color
-            background = Shade.fromHex(ShadeUtil.darken(background.hex, amount));
-            const text = Shade.fromHex(ShadeUtil.mixColors(background.hex, "#FFFFFF", this.getMixer()));
-            contrastRatio = background.getContrastRatio(text);
-        }
-        return background;
-    }
-    */
-    private darkenToMeetWCAG(shade: Shade): Shade {
-        log.debug(`shb: enter darkenToMeetWCAG shade=${shade.toString()}`);
+        log.debug(`shb: enter darkenToMeetWCAG name=${this.name}, shade=${shade.toString()}`);
         const lightenedShade = shade.lighten(this.getDarkModeLightTextOpacity());
         let contrastRatio = shade.getContrastRatio(lightenedShade)
         let background: Shade = shade;
         let amount = 0.01;
         const minContrastRatio = this.getMinContrastRatioForSmallText();
         const mixer = this.getMixer();
-        log.debug(`shb: minContrastRatio=${minContrastRatio}, mixer=${mixer}`);
+        log.debug(`shb: darkenToMeetWCAG contrastRatio=${contrastRatio}, minContrastRatio=${minContrastRatio}, mixer=${mixer}`);
         for (let i = 0; contrastRatio < minContrastRatio; i++) {
             if (i > 100) throw new Error(`too many iterations`);
-            background = Shade.fromHex(ShadeUtil.darken(background.hex, amount));
-            const text = Shade.fromHex(ShadeUtil.mixColors(background.hex, "#FFFFFF", this.getMixer()));
+            background = Shade.fromHex(ShadeUtil.darken(background.hex, amount)).setContext(background);
+            const text = Shade.fromHex(ShadeUtil.mixColors(background.hex, "#FFFFFF", this.getMixer())).setContext(background);
             contrastRatio = background.getContrastRatio(text);
-            log.debug(`shb: contrastRatio=${contrastRatio}, text=${text.hex}, background=${background.hex}`);
+            log.debug(`shb: darkenToMeetWCAG i=${i}, contrastRatio=${contrastRatio}, text=${text.hex}, background=${background.hex}`);
         }
-        log.debug(`shb: exit darkenToMeetWCAG shade=${background.toString()}`);
+        log.debug(`shb: exit darkenToMeetWCAG name=${this.name}, shade=${background.toString()}`);
         return background;
     }
 

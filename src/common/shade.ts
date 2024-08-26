@@ -870,7 +870,6 @@ export class Shade {
         const h1 = h - 30;
         const rgb1 = 'rgb(' + chroma.hsv(h0,s,v).rgb() + ')';
         const rgb2 = 'rgb(' + chroma.hsv(h1,s,v).rgb() + ')';
-        const sb = this.getBuilder();
         const shade1 = Shade.fromRGBString(rgb1).setContext(this);
         const shade2 = Shade.fromRGBString(rgb2).setContext(this);
         return [shade1, shade2]
