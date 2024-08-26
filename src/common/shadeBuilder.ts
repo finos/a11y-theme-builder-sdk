@@ -328,12 +328,7 @@ export class ShadeBuilder {
         const lightContrastRatio = shade.getContrastRatio(this.getLightTextShade());
         const darkContrastRatio = shade.getContrastRatio(this.getDarkTextShade());
         log.debug(`shb: adjustShadeToMeetRequirements lightContrastRatio=${lightContrastRatio}, darkContrastRatio=${darkContrastRatio}`);
-        if (lightContrastRatio > darkContrastRatio) {
-            // The contrast ratio is larger on a light text background
-            if (this.isDarkMode()) {
-                shade = this.darkenToMeetWCAG(shade);
-            }
-        } else {
+        if (lightContrastRatio <= darkContrastRatio) {
             shade = this.adjustShadeByContrastRatio(shade);
         }
         log.debug(`shb: exit adjustShadeToMeetRequirements name=${this.name}, shade=${shade.toString()}`);
@@ -369,26 +364,6 @@ export class ShadeBuilder {
             lighterShade = lighterShade.adjust(Shade.LIGHTEN_MULTIPLIER);
         }
         throw new Error(`Unable to find a shade for ${shade.hex} with a ratio of ${minContrastRatio} or greater`)
-    }
-
-    private darkenToMeetWCAG(shade: Shade): Shade {
-        log.debug(`shb: enter darkenToMeetWCAG name=${this.name}, shade=${shade.toString()}`);
-        const lightenedShade = shade.lighten(this.getDarkModeLightTextOpacity());
-        let contrastRatio = shade.getContrastRatio(lightenedShade)
-        let background: Shade = shade;
-        let amount = 0.01;
-        const minContrastRatio = this.getMinContrastRatioForSmallText();
-        const mixer = this.getMixer();
-        log.debug(`shb: darkenToMeetWCAG contrastRatio=${contrastRatio}, minContrastRatio=${minContrastRatio}, mixer=${mixer}`);
-        for (let i = 0; contrastRatio < minContrastRatio; i++) {
-            if (i > 100) throw new Error(`too many iterations`);
-            background = Shade.fromHex(ShadeUtil.darken(background.hex, amount)).setContext(background);
-            const text = Shade.fromHex(ShadeUtil.mixColors(background.hex, "#FFFFFF", this.getMixer())).setContext(background);
-            contrastRatio = background.getContrastRatio(text);
-            log.debug(`shb: darkenToMeetWCAG i=${i}, contrastRatio=${contrastRatio}, text=${text.hex}, background=${background.hex}`);
-        }
-        log.debug(`shb: exit darkenToMeetWCAG name=${this.name}, shade=${background.toString()}`);
-        return background;
     }
 
     public isLightMode(): boolean {
