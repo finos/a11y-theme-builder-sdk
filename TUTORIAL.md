@@ -85,7 +85,7 @@ The following is a tutorial of how to use this SDK in order to generate code whi
    // The 1st parameter is the name of the color (e.g. "blue")
    // The 2nd parameter is the hex value for the color (e.g. "#E2F3FF")
    const blue = myDesignSystem.atoms.colorPalette.addColor("blue", "#E2F3FF");
-   const red = myDesignSystem.atoms.colorPalette.addColor("red", "#DC143C);
+   const red = myDesignSystem.atoms.colorPalette.addColor("red", "#DC143C");
    const green = myDesignSystem.atoms.colorPalette.addColor("green", "#32CD32");
    ```
 
@@ -157,10 +157,10 @@ The following is a tutorial of how to use this SDK in order to generate code whi
 
    Now that the default color theme has been initialized, everything else should now be enabled including:
 
-   * All other atoms (e.g. `myTheme.atoms.gridSettings.isEnabled() is true`)
-   * All molecules (i.e. `myTheme.molecules.isEnabled() is true`)
-   * All organisms (i.e. `myTheme.organisms.isEnabled() is true`)
-   * Code generation (i.e. `myTheme.code.isEnabled() is true`)
+   * All other atoms (e.g. `myDesignSystem.atoms.gridSettings.isEnabled() is true`)
+   * All molecules (i.e. `myDesignSystem.molecules.isEnabled() is true`)
+   * All organisms (i.e. `myDesignSystem.organisms.isEnabled() is true`)
+   * Code generation (i.e. `myDesignSystem.code.isEnabled() is true`)
 
    All of these remaining properties are either optional (i.e. are not required to have a value) or have a default value.  The `listProperties` method of a design system may be used as shown below to list all properties of a design system, along with it's key, whether or not it is required, and the default value (or undefined if it has no default value).
 

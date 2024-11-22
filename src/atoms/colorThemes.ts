@@ -246,8 +246,6 @@ export class ColorTheme extends Node implements IColorTheme {
         this.gradientHeaderText = new GradientColors2(this, "Gradient Header Text", selOpts);
         // Accent color
         this.accent = new PropertyColorShade("Accent", true, this, opts);
-        this.addTheme = new PropertyBoolean("Add Theme", false, this);
-        this.addTheme.addDependency(this);
         this.accent.addDependency(this.primary);
         this.addTheme = new PropertyBoolean("Add Theme", false, this);
         this.addTheme.addDependency(this);

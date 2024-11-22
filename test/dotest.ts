@@ -126,6 +126,10 @@ async function test() {
     console.log("TEST: Adding new color after primary was selected");
     colorPalette.addColor("newColor","#0047AB");
     assert(ct.primary.getValue() !== undefined, `Adding a color to the theme should not change the primary color`);
+    const defaultColorName = colorPalette.getDefaultColorName();
+    assert(!!defaultColorName, `Retrieving default color name from populated palette should be non-empty`);
+    const colors = colorPalette.getColorNames();
+    assert((colors && colors.length > 0), `Retrieving color names from populated palette should be non-empty`);
     console.log("TEST: Added new color after primary was selected");
 
     // list all properties
