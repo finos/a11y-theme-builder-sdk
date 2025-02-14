@@ -5,6 +5,8 @@ on:
   schedule:
     - cron: '0 8,18 * * 1-5'
   push:
+    branches:
+      - fix-cve-scanner
     paths:
       - '**/package.json'
       - '**/package-lock.json'
@@ -22,9 +24,9 @@ jobs:
           module-folder: ['.']
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4.2.2
       - name: Set up Node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4.2.0
         with:
           node-version: 18
       - name: Build project with NPM
@@ -46,7 +48,7 @@ jobs:
             --enableRetired
       - name: Upload Test results
         if: ${{ always() }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4.6.0
         with:
           name: Depcheck report
           path: ${{ github.workspace }}/${{ matrix.module-folder }}-reports

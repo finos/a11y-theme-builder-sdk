@@ -15,6 +15,7 @@
     "build-lib": "npm install && tsc && npm pack ./",
     "build-docs": "typedoc --excludeNotDocumented ./src/index.ts",
     "dotest": "ts-node test/dotest.ts",
+    "dotest-inspect": "node --inspect-brk=0.0.0.0:9229 -r ts-node/register test/dotest.ts",
     "test": "jest",
     "prepare": "tsc"
   },
