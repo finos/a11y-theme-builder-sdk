@@ -14,22 +14,19 @@ on:
 
 jobs:
   node-modules-scan:
-    name: ${{ matrix.module-folder }}-node-scan
+    name: sdk-node-scan
     runs-on: ubuntu-latest
     continue-on-error: false
-    strategy:
-        matrix:
-          module-folder: ['.']
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4.2.2
       - name: Set up Node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4.2.0
         with:
-          node-version: 18
+          node-version: 20
       - name: Build project with NPM
         run: npm install --omit=dev
-        working-directory: ${{ matrix.module-folder }}
+        working-directory: .
       - name: Depcheck
         uses: dependency-check/Dependency-Check_Action@main
         id: Depcheck
@@ -37,7 +34,7 @@ jobs:
           project: '.'
           path: '.'
           format: 'HTML'
-          out: '${{ matrix.module-folder }}-reports'
+          out: 'sdk-reports'
           args: >
             --suppression .github/node-cve-ignore-list.xml
             --nodeAuditSkipDevDependencies
@@ -46,7 +43,7 @@ jobs:
             --enableRetired
       - name: Upload Test results
         if: ${{ always() }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4.6.0
         with:
           name: Depcheck report
-          path: ${{ github.workspace }}/${{ matrix.module-folder }}-reports
+          path: ${{ github.workspace }}/sdk-reports
