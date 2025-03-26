@@ -4,6 +4,7 @@
  */
 import { Logger } from "../util/logger";
 import { IDesignSystem, INode, Event, EventType, EventCallback, EventListener, IProperty, IListenerSubscription } from "../interfaces";
+import { Property } from "./props";
 
 const log = new Logger("node");
 
@@ -51,12 +52,16 @@ export class Node implements INode {
     constructor(name: string, parent?: INode) {
         this.name = name;
         const p = parent as Node;
-        this.key = (!p || !p.parent ? name: `${p.key}/${name}`).replace(/\s/g, '');
+        this.key = (!p || !p.parent) ? name.replace(/\s/g,'') : p.getChildKey(name);
         this.parent = p;
         if (p) {
             p.children.push(this);
         }
         this.getDesignSystem().registerNode(this);
+    }
+
+    public getChildKey(name: string): string {
+        return `${this.key}/${name}`.replace(/\s/g, '');
     }
 
     /** Get the design system */
@@ -66,6 +71,32 @@ export class Node implements INode {
             node = node.parent;
         }
         return node as any;
+    }
+
+    /** 
+     * Find one or more properties by name, walking up to the root of the tree.
+     * This allows us to generically configure an arbitrary property at various levels and we always find the value closest to us in the tree.
+     */
+    public getPropsByName<T>(propName: string): Property<T>[] {
+        // Walk up the node tree until we find a property named 'name' with a value
+        const props: Property<T>[] = [];
+        for (let node: Node | undefined = this; node !== undefined; node = (node as Node).parent) {
+            if (node.hasOwnProperty(propName)) props.push((node as any)[propName]);
+        }
+        if (props.length == 0) throw new Error(`Property '${propName}' was not found at ${this.name} or above`);
+        return props;
+    }
+
+    /** 
+     * Get property value by property name, walking up the tree until we find a value.
+     */
+    public getPropValueByName<T>(propName: string): T | undefined {
+        // Walk up the node tree until we find a property named 'name' with a value
+        const props = this.getPropsByName<T>(propName);
+        for (const prop of props) {
+            if (prop.hasValue()) return prop.getValue();
+        }
+        return undefined;
     }
 
     /** Add a dependency to another node in the tree */
