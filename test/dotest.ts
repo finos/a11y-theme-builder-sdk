@@ -126,6 +126,10 @@ async function test() {
     console.log("TEST: Adding new color after primary was selected");
     colorPalette.addColor("newColor","#0047AB");
     assert(ct.primary.getValue() !== undefined, `Adding a color to the theme should not change the primary color`);
+    const defaultColorName = colorPalette.getDefaultColorName();
+    assert(!!defaultColorName, `Retrieving default color name from populated palette should be non-empty`);
+    const colors = colorPalette.getColorNames();
+    assert((colors && colors.length > 0), `Retrieving color names from populated palette should be non-empty`);
     console.log("TEST: Added new color after primary was selected");
 
     // list all properties
@@ -181,7 +185,7 @@ async function test() {
     const sels = ct.button.getSelectableValues();
     for (let i = 0; i < sels.length; i++) {
         console.log(`TEST: BUTTON SELECTION ${i}`);
-        selectColorShade(ct.button, 0);
+        selectColorShade(ct.button, 0, i);
     }
     console.log("TEST: END BUTTON SELECTIONS");
 
@@ -704,7 +708,7 @@ const expectedCssVars = [
     "--hotlinkOnGradient3-visited",
     "--hotlinkOnGradient3",
     "--min-target",
-    "--mobile-target",
+    "--mobile-min-target",
     "--animation-speed",
     "--animation-distance",
     "--animation-focus-distance",
@@ -913,7 +917,7 @@ const expectedCssVars = [
     "--on-dropdown-focus-bg",
     "--dm-dropdown-focus-bg",
     "--dm-on-dropdown-focus-bg",
-    "--dropdown-elevation",
+    "--dropdown-shadow",
     "--dropdown-hover-style",
     "--dm-dropdown-hover-bg",
     "--dm-on-dropdown-hover-bg",
@@ -937,8 +941,6 @@ const expectedCssVars = [
     "--buttonTextDecoration",
     "--buttonTextTransform",
     "--buttonLetterSpacing",
-    "--button-elevation",
-    "--button-bevel",
     "--button-shadow",
     "--sm-button-padding",
     "--sm-button-height",
@@ -962,12 +964,7 @@ const expectedCssVars = [
     "--chipTypography",
     "--chipTextTransform",
     "--chipLetterSpacing",
-    "--chip-bevel",
-    "--chip-elevation",
-    "--switch-height",
-    "--switch-radius",
-    "--switch-bar-height",
-    "--switch-bar-radius",
+    "--chip-shadow",
     "--leftNav",
     "--on-leftNav",
     "--leftNavPadding",
@@ -988,13 +985,11 @@ const expectedCssVars = [
     "--card-border",
     "--card-border-color",
     "--card-radius",
-    "--card-elevation",
-    "--card-bevel",
+    "--card-shadow",
     "--card-shadow",
     "--modal-padding",
     "--modal-border",
     "--modal-radius",
-    "--modal-elevation",
     "--modal-shadow",
     "--modal-overlay",
     "--tooltip-padding",
@@ -1002,23 +997,18 @@ const expectedCssVars = [
     "--tooltip-elevation",
     "--toast-padding",
     "--toast-radius",
-    "--toast-bevel",
-    "--toast-elevation",
-    "--toast-boxshadow",
-    "--image-elevation",
+    "--toast-shadow",
     "--image-radius",
     "--image-shadow",
     "--inline-image-height",
     "--inline-image-radius",
     "--avatar-border",
     "--avatar-border-lg",
-    "--avatar-elevation",
     "--avatar-shadow",
     "--sliderhandleHeight",
     "--sliderhandleRadius",
-    "--barInBevel",
-    "--popoverBevel",
-    "--popoverShadow",
+    "--sliderbar-shadow",
+    "--popover-shadow",
     "--popoverRadius",
     "--navbarPrimary-padding",
     "--navbarSecondary-padding",
@@ -1322,8 +1312,7 @@ const expectedCssVars = [
     "--statLetterSpacing",
     "--buttonLetterSpacing",
     "--sm-buttonLetterSpacing",
-    "--sliderhandleElevation",
-    "--popoverElevation",
+    "--sliderhandle-shadow",
 ];
 
 const expectedCssVarsPostMVP = [

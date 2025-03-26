@@ -86,7 +86,7 @@ export class ColorPalette extends Atom implements IColorPalette {
      * @returns Return a list of string names for the colors.
      */
     public getColorNames(): string[] {
-        return Object.keys(this.colors);
+        return this.colors.keys() ? Array.from(this.colors.keys()) : [];
     }
 
     /**

@@ -246,8 +246,6 @@ export class ColorTheme extends Node implements IColorTheme {
         this.gradientHeaderText = new GradientColors2(this, "Gradient Header Text", selOpts);
         // Accent color
         this.accent = new PropertyColorShade("Accent", true, this, opts);
-        this.addTheme = new PropertyBoolean("Add Theme", false, this);
-        this.addTheme.addDependency(this);
         this.accent.addDependency(this.primary);
         this.addTheme = new PropertyBoolean("Add Theme", false, this);
         this.addTheme.addDependency(this);
@@ -461,7 +459,7 @@ export class ColorTheme extends Node implements IColorTheme {
         const gradient2Shade = this.gradient2.from.getValue();
         if (!primaryShade) throw new Error(`No primary color has been set`);
         if (!gradient1Shade) throw new Error(`No gradient 1 color has been set`);
-        if (!gradient2Shade) throw new Error(`No gradient 1 color has been set`);
+        if (!gradient2Shade) throw new Error(`No gradient 2 color has been set`);
         const buttonShadeGroup = {
             shade: shade,
             halfShade: Shade.fromHex(shade.hex).setOpacity(0.5).setMode(shade.getMode()),
