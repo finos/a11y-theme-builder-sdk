@@ -4,7 +4,10 @@
  */
 import chroma from "chroma-js";
 import { Logger } from "../util/logger";
+import { ShadeBuilder, ShadeBuilderView } from "./shadeBuilder";
+import { ShadeUtil } from "./shadeUtil";
 import { Util } from "../util/util";
+import { IColor } from "../interfaces";
 
 const log = new Logger("shd");
 
@@ -12,6 +15,24 @@ export interface ShadeGroup {
     shade: Shade;
     halfShade: Shade;
     onShade: Shade;
+}
+
+export interface HSL {
+    H: number;   // hue
+    S: number;   // saturation
+    L: number;   // lightness
+}
+
+export interface HCL {
+    H: number;   // hue
+    C: number;   // chroma
+    L: number;   // lightness
+}
+
+export interface HSLOpts {
+    H?: number;
+    S?: number;
+    L?: number;
 }
 
 interface IV {
@@ -23,19 +44,6 @@ interface LMH {
     low: IV;
     mid: IV;
     high: IV;
-}
-
-interface Color {
-    name: string;
-    light: ColorMode;
-    dark: ColorMode;
-}
-
-interface ColorMode {
-    key: string;
-    name: string;
-    shades: Shade[];
-    color: Color;
 }
 
 export interface SearchShadesArgs {
@@ -54,6 +62,8 @@ export class Shade {
     private static coreShadeMap: {[coreShadeName:string]: Shade} = {};
 
     /** The black shade */
+    public static FULL_BLACK = Shade.fromHex("#000000", "Full-Black");
+    /** The black shade */
     public static BLACK = Shade.fromHex("#121212", "Black");
     /** The near black shade */
     public static NEAR_BLACK = Shade.fromHex("#181818", "Near-Black");
@@ -69,6 +79,8 @@ export class Shade {
     public static OFF_WHITE = Shade.fromHex("#FAF9F6", "Off-White");
     /** The gray shade */
     public static GRAY = Shade.fromHex("#FAFAFA", "Gray");
+    /** The dark text shade */
+    public static DARK_TEXT = Shade.fromHex("#23233F", "Dark-Text");
     /** The white dark mode shade */
     public static WHITE_DM = Shade.fromHex("#FFFFFF", "DM-White").setOpacity(0.6);
     /** The half-white dark mode shade */
@@ -77,6 +89,11 @@ export class Shade {
     public static DARK_BLUE = Shade.fromHex("#1D1D1F", "Dark-Blue");
     public static DARKEN_MULTIPLIER = 0.99;
     public static LIGHTEN_MULTIPLIER = 1.01;
+    /** Lists of light and dark shades */
+    public static LIGHT_SHADES = [this.WHITE, this.HALF_WHITE, this.OFF_WHITE, this.WHITE_DM, this.HALF_WHITE_DM];
+    public static DARK_SHADES = [this.FULL_BLACK, this.BLACK, this.HALF_BLACK, this.NEAR_BLACK, this.OFF_BLACK, this.GRAY, this.DARK_TEXT, this.DARK_BLUE];
+    /** default shade builder */
+    public static defaultBuilder: ShadeBuilder;
     
     /**
      * Get a core shade given the core shade name.
@@ -125,6 +142,22 @@ export class Shade {
     }
 
     /**
+     * Create a shade object from it's HSL values.
+     * @returns The shade object
+     */
+    public static fromHSL(hsl:HSL): Shade {
+        return Shade.fromHex(chroma.hsl(hsl.H, hsl.S, hsl.L).hex());
+    }
+
+    /**
+     * Create a shade object from it's R, G, and B values.
+     * @returns The shade object
+     */
+    public static fromHCL(hcl:HCL): Shade {
+        return Shade.fromHex(chroma.hcl(hcl.H, hcl.C, hcl.L).hex());
+    }
+
+    /**
      * Create a shade object from an [R,G,B] array.
      * @param rgbArray The [R,G,B] array.
      * @returns The shade object.
@@ -152,6 +185,10 @@ export class Shade {
         return Shade.fromRGB(R,G,B).setOpacity(opacity);
     }
 
+    public static setDefaultBuilder(builder: ShadeBuilder) {
+        Shade.defaultBuilder = builder;
+    }
+
     /** The shade's hex value */
     public hex!: string;
     /** The shade's RGB array */
@@ -170,14 +207,24 @@ export class Shade {
     public opacity: number = 1;
     /** The onHex value for this shade */
     public onHex: string = "";
+    /** If this is a shade built from the color palette, it is the unique key to the shade node in the tree */
     public key?: string;
+    /** If this is a core shade such as "Black" or "White", it is set to the core shade name. */
     public coreShadeName?: string;
+    /** The cached computed luminance value for this shade */
     private luminance?: number;
+    /** The cached computed lightness value for this shade */
     private lightness?: number;
+    /** The cached computed perceived lightness value for this shade */
     private perceivedLightness?: number;
+    /** The cached computed saturation value for this shade */
     private saturation?: number;
+    /** The cached computed label (e.g. 100, 200, etc) for this shade based upon it's lightness value */
     private label?: number;
-    private mode?: ColorMode;
+    /** The parent color node for this shade if it was generated from the color palette */
+    private color?: IColor;
+    /** For automatically built shades,  */
+    private builder?: ShadeBuilder;
 
     constructor(opts: { hex?: string; rgbArray?: number[]} ) {
         if (!opts.hex && !opts.rgbArray) {
@@ -190,17 +237,64 @@ export class Shade {
         this.setHex(hex);
     }
 
+    public hasBuilder(): boolean {
+        return this.builder !== undefined;
+    }
+
+    public getBuilder(lm?: boolean): ShadeBuilder {
+        const sb = this.builder || ShadeBuilder.lmDefault;
+        if (lm == undefined || lm == sb.isLightMode()) return sb;
+        return sb.getOther();
+    }
+
+    public setBuilder(builder: ShadeBuilder): Shade {
+        this.builder = builder;
+        return this;
+    }
+
+    public buildShades(lm?: boolean): Shade[] {
+        return this.getBuilder(lm).build(this);
+    }
+
+    public buildLMShades(): Shade[] {
+        return this.buildShades(true);
+    }
+
+    public buildDMShades(): Shade[] {
+        return this.buildShades(false);
+    }
+
+    public hasColor(): boolean {
+        return this.color !== undefined;
+    }
+
+    public getColor(): IColor {
+        const color = this.color;
+        if (!color) throw new Error(`No color found for shade ${this.toString()}`);
+        return color;
+    }
+
+    public setColor(color: IColor) {
+        this.color = color;
+    }
+
+    public setContext(shade: Shade): Shade {
+        if (shade.hasColor()) this.setColor(shade.getColor());
+        this.setBuilder(shade.getBuilder());
+        return this;
+    }
+
     public fromHex(): Shade {
         const rtn = Shade.fromHex(this.hex);
         rtn.index = this.index;
-        rtn.mode = this.mode;
+        rtn.color = this.color;
         return rtn;
     }
 
     public fromRGB(): Shade {
         const rtn = Shade.fromRGB(this.R, this.G, this.B);
         rtn.index = this.index;
-        rtn.mode = this.mode;
+        rtn.color = this.color;
         return rtn;
     }
 
@@ -217,33 +311,45 @@ export class Shade {
         return this;
     }
 
-    /**
-     * Determine if the shade has a mode.
-     * @returns True if it has a mode
-     */
-    public hasMode(): boolean {
-        return this.mode !== undefined;
-    }
-
-    /**
-     * Get the shade's mode
-     * @returns The mode, or throws exception if node.
-     */
-    public getMode(): ColorMode {
-        if (!this.mode) {
-            throw new Error(`Shade ${this.hex} does not have a mode setting`);
-        }
-        return this.mode;
-    }
-
-    /**
-     * Set the mode of the shade
-     * @param mode The mode of the shade
-     * @returns The shade
-     */
-    public setMode(mode?: ColorMode): Shade {
-        this.mode = mode;
+    public setIndex(index: number): Shade {
+        this.index = index;
         return this;
+    }
+
+    public hsl(): HSL {
+       const hsl = chroma.hex(this.hex).hsl();
+       return { H: hsl[0], S: hsl[1], L: hsl[2] };
+    }
+
+    public hcl(): HCL {
+       const hcl = chroma.hex(this.hex).hcl();
+       return { H: hcl[0], C: hcl[1], L: hcl[2] };
+    }
+
+    public adjustHSL(opts: HSLOpts): Shade {
+        const hsl = this.hsl();
+        if ('H' in opts) hsl.H = opts.H as number;
+        if ('S' in opts) hsl.S = opts.S as number;
+        if ('L' in opts) hsl.L = opts.L as number;
+        return Shade.fromHSL(hsl);
+    }
+
+    public setH(h: number): Shade {
+        return this.adjustHSL({H: h});
+    }
+
+    public setS(s: number): Shade {
+        return this.adjustHSL({S: s});
+    }
+
+    public setL(l: number): Shade {
+        return this.adjustHSL({L: l});
+    }
+
+    public setChroma(c: number): Shade {
+        const hcl = this.hcl();
+        hcl.C = c;
+        return Shade.fromHCL(hcl);
     }
 
     /**
@@ -289,24 +395,12 @@ export class Shade {
         return this.clone().setOpacity(opacity);
     }
 
-    /**
-     * Get the light mode shade for this shade.
-     * @returns The corresponding light mode shade for this shade
-     */
-    public getLightModeShade(): Shade {
-        return this.getMode().color.light.shades[this.index];
-    }
-
     public getOnShade(): Shade {
         return this.getOnShade2(true);
     }
 
-    /**
-     * Get the on shade for this shade.
-     * @returns The on shade
-     */
     public getOnShade2(lm: boolean): Shade {
-        return this.getContrastShade(lm);
+        return this.getBuilder(lm).getOnShade(this);
     }
 
     public getShadeGroup(lm: boolean): ShadeGroup {
@@ -329,6 +423,10 @@ export class Shade {
         return this.label as number;
     }
 
+    public getLabelIndex(): number {
+        return this.getLabel() / 100;
+    }
+
     /**
      * Get the luminance of this shade.
      * @returns The luminance
@@ -340,48 +438,23 @@ export class Shade {
         return this.luminance;
     }
 
-    public getContrastShade(lm: boolean): Shade {
-        if (this.onHex) {
-            const shade = Shade.fromHex(this.onHex);
-            if (!lm && this.onHex === "#FFFFFF") {
-                shade.setOpacity(0.6);
-            }
-            return shade;
-        }
-
-        // Get contrast with black and white & return best ratio
-        const blackRatio = this.getContrastRatio(Shade.BLACK);
-        let whiteRatio = this.getContrastRatio(Shade.WHITE);
-        if (!lm) whiteRatio = whiteRatio * 0.6;
-        if (blackRatio > whiteRatio) {
-            return Shade.BLACK;
-        } else {
-            if (lm) {
-                return Shade.WHITE;
-            }
-            else {
-                return Shade.WHITE_DM;
-            }
-        }
-    }
-
     /**
      * Return either this shade or the onShade based on contrast requirements to 'shade'.
      * @param shade The shade to compare to this one
      * @param multiplier Optional multiplier
      * @returns This shade or the onShade
      */
-    public getShadeOrOnShadeBasedOnContrast(shade: Shade, lm: boolean, multiplier?: number): Shade {
-        multiplier = multiplier || 1;
+    public getShadeOrOnShadeBasedOnContrast(shade: Shade, lm: boolean): Shade {
+        const sb = this.getBuilder(lm);
+        const multiplier = lm ? 1 : 0.6;
         const contrast = this.getContrastRatio(shade) * multiplier;
-        if (contrast >= 3.1) {
+        if (contrast >= sb.getMinContrastRatioForNonText()) {
             log.debug(`getShadeOrOnShadeBasedOnContrast: return shade, shade=${this.getRGBA()}, other=${shade.getRGBA()}, contrast=${contrast}`);
             return this;
-        } else {
-            const onShade = this.getOnShade2(lm);
-            log.debug(`getShadeOrOnShadeBasedOnContrast: return onShade, onShade=${onShade.hex}, shade=${this.getRGBA()}, other=${shade.getRGBA()}, contrast=${contrast}`);
-            return onShade;
         }
+        const onShade = this.getOnShade2(lm);
+        log.debug(`getShadeOrOnShadeBasedOnContrast: return onShade, onShade=${onShade.hex}, shade=${this.getRGBA()}, other=${shade.getRGBA()}, contrast=${contrast}`);
+        return onShade;
     }
 
     /**
@@ -417,38 +490,12 @@ export class Shade {
         return this.saturation;
     }
 
-    /**
-     * Build light or dark mode shades for this shade.
-     * @param lm True for light mode or false for dark mode
-     * @returns Shades for this shade
-     */
-    public buildShades(lm: boolean): Shade[] {
-        if (lm) return this.buildLMShades();
-        return this.buildDMShades();
+    public lighten(opacity: number): Shade {
+        return Shade.fromHex(ShadeUtil.lighten(this.hex, opacity));
     }
 
-    /**
-     * Find a shade which meets the contrast ratio requirements on this background shade.
-     * @param lm true for light mode and false for dark mode.
-     * @param bgShade The background shade
-     * @param ratio The contrast ratio requirement
-     * @returns 
-     */
-    public getShade(lm: boolean, bgShades: Shade[], ratio: number): Shade | undefined {
-        if (lm) return this.getLMShade(bgShades, ratio);
-        else return this.getDMShade(bgShades, ratio);
-    }
-
-    /**
-     * Find a light mode shade which meets the contrast ratio on this background shade
-     * @param bgShade The background shade
-     * @param ratio The required contrast ratio
-     * @returns A light mode shade meeting the contrast ratio requirement, or throws an exception if not found.
-     */
-    public findLMShade(bgShades: Shade[], ratio: number): Shade {
-        const lmShade = this.getLMShade(bgShades, ratio);
-        if (!lmShade) throw new Error(`No lightmode shade found for ${JSON.stringify(this)}`)
-        return lmShade;
+    public darken(opacity: number): Shade {
+        return Shade.fromHex(ShadeUtil.darken(this.hex, opacity));
     }
 
     /**
@@ -481,36 +528,6 @@ export class Shade {
     }
 
     /**
-     * Build light mode shades for this shade.
-     * @returns Light mode shades for this shade
-     */
-    public buildLMShades(): Shade[] {
-        log.debug(`buildLMShades: enter shade=${JSON.stringify(this)}`);
-        const shades = this.getLighterAndDarkerShades(true);
-        for (let i = 0; i < shades.length; i++) {
-            let shade = shades[i];
-            const id = (i * 100).toString();
-            log.debug(`buildLMShades: adjusted i=${i} to ${shade.hex}`);
-            shade.id = id;
-            shade.index = i;
-        }
-        log.debug(`buildLMShades: exit shade=${JSON.stringify(this)}`);
-        return shades;
-    }
-
-    /**
-     * Find a dark mode shade which meets the contrast ratio on these background shades
-     * @param bgShades The background shades
-     * @param ratio The required contrast ratio
-     * @returns A dark mode shade meeting the contrast ratio requirement, or throws an exception if not found.
-     */
-    public findDMShade(bgShades: Shade[], ratio: number): Shade {
-        const dmShade = this.getDMShade(bgShades, ratio);
-        if (!dmShade) throw new Error(`No darkmode shade found for lm ${JSON.stringify(this)}`)
-        return dmShade;
-    }
-
-    /**
      * Get a dark mode shade which meets the contrast ratio on these background shades
      * @param bgShades The background shades
      * @param ratio The required contrast ratio
@@ -538,14 +555,6 @@ export class Shade {
     }
 
     /**
-     * Get the corresponding dark mode shade (i.e. at the same index) for a light mode shade.
-     * @returns The corresponding dark mode shade
-     */
-    public getCorrespondingDarkModeShade(): Shade {
-        return this.getMode().color.dark.shades[this.index];
-    }
-
-    /**
      * Return true if the contrast ratio of this shade to all 'bgShades' meets or exceeds 'ratio';
      * otherwise, return false.
      * @param bgShades 
@@ -564,49 +573,6 @@ export class Shade {
         return true;
     }
 
-    public searchShades(args: SearchShadesArgs): Shade | undefined {
-        log.debug(`Begin search shades: ${JSON.stringify(args)}`);
-        this.getShadesOrderedByNearness2(args.add1, args.add2).forEach(shade => {
-            if (args.condition(shade)) {
-                log.debug(`Found shade: ${shade.hex}`);
-                return shade;
-            }
-        });
-        return undefined;
-    }
-
-    /**
-     * Build dark mode shades for this shade.
-     * @returns Dark mode shades for this shade
-     */
-    public buildDMShades(): Shade[] {
-        log.debug(`buildDMShades: enter shade=${JSON.stringify(this)}`);
-        const shades = this.getLighterAndDarkerShades(false);
-        for (let i = 0; i < shades.length; i++) {
-            let shade = shades[i];
-            log.debug(`buildDMShades: adjusted i=${i} to ${shade.hex}`);
-            const id = (i * 100).toString();
-            shade.id = id;
-            shade.index = i;
-        }
-        log.debug(`buildDMShades: exit shade=${JSON.stringify(this)}`);
-        return shades;
-    }
-
-    /**
-     * Build 10 shades from this shade, some of which may be lighter and some of which may be darker.
-     * The number of lighter and darker depends on where in the spectrum this shade falls.
-     * @param lm True if this is for light mode; else false if for dark mode.
-     * @returns 
-     */
-    private getLighterAndDarkerShades(lm: boolean): Shade[] {
-        const lighterShades = this.getLighterShades(lm);
-        const darkerShades = this.getDarkerShades(lm);
-        const shades = [...lighterShades,...darkerShades];
-        log.debug(`Got lighter and darker shades: ${JSON.stringify(shades)}`);
-        return shades;
-    }
-
     /**
      * Build 10 shades from this shade, some of which may be lighter and some of which may be darker.
      * The number of lighter and darker depends on where in the spectrum this shade falls.
@@ -614,121 +580,23 @@ export class Shade {
      * @returns 
      */
     private getLighterShades(lm: boolean): Shade[] {
-        // Build the lighter shades
-        const shades: Shade[] = [];
-        const numLighterShades = this.numLighterShades();
-        if (numLighterShades > 0) {
-            const startScale  = chroma.scale(['#FFFFFF',this.hex]).correctLightness(true).colors(lm ? numLighterShades + 2 : numLighterShades);
-            /// since padding is not working I will create a scale and get the first 2nd value and then create another scale
-            if (startScale.length > (lm ? 1 : 2)) {
-                const scale  = chroma.scale([(startScale[lm ? 1 : 2]),this.hex]).correctLightness(true).colors(numLighterShades)
-                if (scale) {
-                    scale.forEach((hex: string) => shades.push(this.fromHex().setHex(hex)));
-                    if (shades.length > 0) shades.splice(-1);
-                }
-            }
-        }
-        for (let i = 0; i < shades.length; i++) {
-            shades[i] = shades[i].buildShade(lm);
-        }
+        let shades = this.buildShades(lm);
+        const idx = this.index;
+        if (idx < 0) throw new Error(`Shade has no index`);
+        if (idx == 0) return [];
+        shades = shades.slice(0,this.index);
         log.debug(`lighter shades: ${JSON.stringify(shades)}`);
         return shades;
     }
 
     private getDarkerShades(lm: boolean): Shade[] {
-        // Build the darker shades
-        const shades: Shade[] = [];
-        const numDarkerShades = this.numDarkerShades();
-        if (numDarkerShades > 0) {
-            const rgbArray = this.rgbArray;
-            const endlch  = chroma.rgb(rgbArray[0], rgbArray[1],rgbArray[2]).lch();
-            // since chroma padding didn't work we will set the color by getting the lch and setting the darkness to 3
-            const endColor = chroma.lch( 3, endlch[1], endlch[2] ).rgb();
-            const scale = chroma.scale([this.hex as any,endColor]).correctLightness(true).colors(numDarkerShades);
-            if (scale) {
-                scale.forEach((hex: string) => shades.push(this.fromHex().setHex(hex)));
-            }
-        } else {
-            shades.push(this);
-        }
-        for (let i = 0; i < shades.length; i++) {
-            shades[i] = shades[i].buildShade(lm);
-        }
+        let shades = this.buildShades(lm);
+        const idx = this.index;
+        if (idx < 0) throw new Error(`Shade has no index`);
+        if (idx >= shades.length) return [];
+        shades = shades.slice(this.index+1);
         log.debug(`darker shades: ${JSON.stringify(shades)}`);
         return shades;
-    }
-
-    /**
-     * Build a dark mode shade for this shade
-     * @param minRatio The minimum contrast ratio to white or black
-     * @returns The new dark mode shade
-     */
-    public buildDMShade(minRatio?: number): Shade {
-        let shade: Shade = this;
-        let saturation = shade.getSaturation();
-        // Step 1: Darken it until the saturation is < 1
-        while (saturation >= 1) {
-           shade = this.darken();
-           saturation = shade.getSaturation();
-        }
-        // Step 2: Desaturate the shade until the saturation is <= .60
-        while (saturation > .60) {
-           shade = shade.getDesaturatedShade();
-           saturation = shade.getSaturation();
-        }
-        // Step 3: Adjust the shade by contrast ratio
-        return shade.getAdjustedShadeByContrastRatio(false, minRatio);
-    }
- 
-    /**
-     * Build a shade
-     * @param lm True for light mode; false for dark mode
-     * @param minRatio Optional minRatio for the contrast ratio comparison for the on text
-     */
-    public buildShade(lm: boolean, minRatio?: number): Shade {
-        if (lm) return this.buildLMShade(minRatio);
-        return this.buildDMShade(minRatio);
-    }
-
-    /**
-     * Build a light mode shade for this shade which meets the min contrast ratio requirements
-     * @param minRatio The minimum contrast ratio
-     * @returns The adjusted shade meeting the contrast ratio requirements
-     */
-    public buildLMShade(minRatio?: number): Shade {
-        return this.getAdjustedShadeByContrastRatio(true, minRatio);
-    }
-
-    // Color to background is always 4.5 but onColor to text ratio is 3.1
-    public getAdjustedShadeByContrastRatio(lm: boolean, minRatio?: number): Shade {
-        minRatio = minRatio || 4.5;
-        let darkerShade: Shade = this;
-        let lighterShade: Shade = this;
-        const baseColor = lm ? Shade.WHITE : darkerShade.getElevationShade(0.6);
-        for (let count = 0; count <= 200; count++) {
-            const darkerRatio = darkerShade.getContrastRatio(baseColor);
-            const lighterRatio = lighterShade.getContrastRatio(Shade.BLACK);
-            if (darkerRatio > lighterRatio) {
-                if (darkerRatio >= minRatio) {
-                    if (lm) {
-                        darkerShade.onHex = Shade.WHITE.hex;
-                    } else {
-                        darkerShade.onHex = Shade.WHITE_DM.hex;
-                    }
-                    log.debug(`Found shade after ${count} darken adjustments (ratio=${darkerRatio})`);
-                    return darkerShade;
-                }
-            } else {
-                if (lighterRatio >= minRatio) {
-                    lighterShade.onHex = Shade.BLACK.hex;
-                    log.debug(`Found shade after ${count} lighten adjustments (ratio=${lighterRatio})`);
-                    return lighterShade;
-                }
-            }
-            darkerShade = darkerShade.adjust(Shade.DARKEN_MULTIPLIER);
-            lighterShade = lighterShade.adjust(Shade.LIGHTEN_MULTIPLIER);
-        }
-        throw new Error(`Unable to find a shade for ${this.hex} with a ratio of ${minRatio} or greater`)
     }
 
     public getDesaturatedShade(): Shade {
@@ -748,7 +616,7 @@ export class Shade {
         rgbArray[lmh.high.idx]= Math.round(lmh.high.val+changeAmount);
         rgbArray[lmh.low.idx]= Math.round(lmh.low.val-changeAmount);
         rgbArray[lmh.mid.idx]= Math.round(grayVal+(rgbArray[lmh.high.idx]-grayVal)*middleValueRatio);
-        return Shade.fromRGBArray(rgbArray).setMode(this.mode);
+        return Shade.fromRGBArray(rgbArray).setContext(this);
     }
 
     public getElevationShades(): Shade[] {
@@ -766,8 +634,7 @@ export class Shade {
         const R = Math.floor(this.R * A + 0xff * opacity);
         const G = Math.floor(this.G * A + 0xff * opacity);
         const B = Math.floor(this.B * A + 0xff * opacity);
-        const shade = Shade.fromRGB(R,G,B).setMode(this.mode);
-        return shade;
+        return Shade.fromRGB(R,G,B).setContext(this);
     }
 
     public mixShade(shade: Shade, opacity: number): Shade {
@@ -775,8 +642,11 @@ export class Shade {
         const R = Math.floor(this.R * A + shade.R * opacity);
         const G = Math.floor(this.G * A + shade.G * opacity);
         const B = Math.floor(this.B * A + shade.B * opacity);
-        const rtnShade = Shade.fromRGB(R,G,B).setMode(this.mode ? this.mode : shade.mode);
-        return rtnShade;
+        return Shade.fromRGB(R,G,B).setContext(this);
+    }
+
+    public mixShade2(shade: Shade, opacity: number): Shade {
+        return Shade.fromHex(ShadeUtil.mixColors(this.hex, shade.hex, opacity));
     }
 
     public numLighterShades(): number {
@@ -810,16 +680,8 @@ export class Shade {
         }
     }
 
-    public darken(): Shade {
-        return this.adjust(Shade.DARKEN_MULTIPLIER);
-    }
-
-    public lighten(): Shade {
-        return this.adjust(Shade.LIGHTEN_MULTIPLIER);
-    }
-
     public adjust(multiplier: number): Shade {
-        return Shade.fromRGB(this.R * multiplier, this.G * multiplier, this.B * multiplier).setMode(this.mode);
+        return Shade.fromRGB(this.R * multiplier, this.G * multiplier, this.B * multiplier).setContext(this);
     }
 
     private calculateLightness(): number {
@@ -911,6 +773,15 @@ export class Shade {
     }
 
     /**
+     * Get the shade which contrasts most to this shade, white or black.
+     * @param lm 
+     * @returns 
+     */
+    public getContrastShade(lm: boolean): Shade {
+        return this.getBuilder(lm).getContrastShade(this);
+    }
+
+    /**
      * Mix this shade with another shade to produce a third shade.
      * @param shade The other shade to mix with this shade
      * @param ratio The ratio; a value between 0 and 1 denoting how much of this shade verses the other shade in the resulting shade.
@@ -918,9 +789,11 @@ export class Shade {
      */
     public mix(shade: Shade, ratio: number): Shade {
         if (ratio < 0 || ratio > 1) throw new Error(`Expecting a ratio between [0,1] but found ${ratio}`);
-        const hex: any = chroma.mix(this.hex, shade.hex, ratio, "rgb");
-        const rtn = Shade.fromHex(hex).setMode(this.mode ? this.mode : shade.mode);
-        return rtn;
+        const color = chroma.mix(this.hex, shade.hex, ratio);
+        const rtn = Shade.fromHex(color.hex());
+        const bs = this.hasBuilder() ? this : rtn;
+        rtn.setContext(bs);
+        return shade;
     }
 
     /**
@@ -948,7 +821,7 @@ export class Shade {
      * @returns A new shade object.
      */
     public clone(): Shade {
-        return this.fromHex().setOpacity(this.opacity);
+        return this.fromHex().setOpacity(this.opacity).setContext(this);
     }
 
     public equals(shade: Shade): boolean {
@@ -956,7 +829,7 @@ export class Shade {
     }
 
     public isSameColor(shade: Shade): boolean {
-        return this.getMode().color.name === shade.getMode().color.name;
+        return this.getColor().name === shade.getColor().name;
     }
 
     /**
@@ -971,7 +844,7 @@ export class Shade {
         rtn.push(this);
         let idx1 = this.index;
         let idx2 = this.index;
-        const shades = this.getMode().shades;
+        const shades = this.buildShades();
         while (add1 || add2) {
             if (add1) {
                idx1 += add1;
@@ -997,8 +870,8 @@ export class Shade {
         const h1 = h - 30;
         const rgb1 = 'rgb(' + chroma.hsv(h0,s,v).rgb() + ')';
         const rgb2 = 'rgb(' + chroma.hsv(h1,s,v).rgb() + ')';
-        const shade1 = Shade.fromRGBString(rgb1);
-        const shade2 = Shade.fromRGBString(rgb2);
+        const shade1 = Shade.fromRGBString(rgb1).setContext(this);
+        const shade2 = Shade.fromRGBString(rgb2).setContext(this);
         return [shade1, shade2]
     }
 
@@ -1007,7 +880,7 @@ export class Shade {
     }
 
     public toString() {
-        let str = `index=${this.index}, hex=${this.hex}, opacity=${this.opacity}, onHex=${this.onHex}, id=${this.id}`;
+        let str = `index=${this.index}, hex=${this.hex}, opacity=${this.opacity}, onHex=${this.onHex}, id=${this.id}, builder=${this.getBuilder().name}`;
         if (this.isCore()) str = `core=${this.coreShadeName}, ${str}`;
         return str;
     }

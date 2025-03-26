@@ -42,7 +42,7 @@ export class InputBackground extends Atom implements IInputBackground {
         const primary = ct.primary.getValue();
         if (!primary) throw new Error(`The primary of the default theme has not been set`);
         // Use the 100 value (i.e. index 1 below) for the primary overlay
-        const primaryBackground = new TitledShade("Primary Background", primary.getMode().shades[1]);
+        const primaryBackground = new TitledShade("Primary Background", primary.buildShades()[1]);
         return [this.whiteBackground, primaryBackground];
     }
 
@@ -67,7 +67,7 @@ export class InputBackground extends Atom implements IInputBackground {
             log.debug(`InputBackground.getVariables: no darkmode background`);
             return undefined;
         }
-        const primaryDarkShade = dmbg.primary.getMode().shades[4];
+        const primaryDarkShade = dmbg.primary.buildShades()[4];
         // Set light mode variables
         let inputDefault: Shade;
         let onInputDefault: Shade;

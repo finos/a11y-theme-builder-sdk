@@ -124,7 +124,7 @@ export class Hotlinks extends Atom {
         log.debug("getHotlinkModeVariables (onTertiary)");
         if (!lm) {
             // Use the dark primary 700 shade in dark mode
-            primary = primary.getMode()?.color.dark.shades[7];
+            primary = primary.buildShades(false)[7];
         }
         const onTertiary = this.getHotlinkModeVariables("onTertiary", shade, primary, underline, lm);
         if (!def) {
