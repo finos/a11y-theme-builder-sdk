@@ -4,8 +4,8 @@ This file lists the maintainers of this repository.
 
 ## Current maintainers
 
-| GitHub Username | Name | Organization | Email |
-|----------------|------|--------------|-------|
+| GitHub Username | Name | Organization | Email (optional) |
+|----------------|------|--------------|------------------|
 | @aaronreed708 | *please add name* | *please add organization* |  |
 | @brycecurtis | Bryce Curtis | Discover Financial Services | drbac@hotmail.com |
 | @codyzu | Cody Zuschlag | @nearform  |  |
